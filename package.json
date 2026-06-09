@@ -3,7 +3,8 @@
   "main": "index.js",
   "version": "1.0.0",
   "scripts": {
-    "start": "expo start --clear",
+    "start": "node ./scripts/stop-expo.js && expo start --clear",
+    "stop": "node ./scripts/stop-expo.js",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo start --android --clear",
     "ios": "expo start --ios --clear",
