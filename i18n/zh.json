@@ -106,6 +106,8 @@
     "invalidDateBody": "使用 YYYY-MM-DD，例如 2025-10-01",
     "webReminderTitle": "网页端不可用",
     "webReminderBody": "请使用移动应用设置通知。",
+    "expoGoNotificationsTitle": "请使用预览构建测试提醒",
+    "expoGoNotificationsBody": "Expo Go 在此 SDK 中不完全支持提醒通知。发布到应用商店的正式版本将支持提醒。",
     "noDateTitle": "没有日期",
     "noDateBody": "请先计算邮寄日期。",
     "pastDateTitle": "过去的日期",

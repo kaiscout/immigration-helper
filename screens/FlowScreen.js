@@ -1,7 +1,6 @@
-import * as Notifications from "expo-notifications";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, Linking, Modal, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Linking, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
 import {
@@ -11,6 +10,7 @@ import {
   pickLocalized,
   saveFlowState
 } from "../data/flowState";
+import { loadNotificationsAsync } from "../data/notificationService";
 
 const pad2 = (value) => String(value).padStart(2, "0");
 
@@ -144,26 +144,33 @@ export default function FlowScreen({ route, navigation }) {
   };
 
   const ensureNotificationPermission = async () => {
+    const { environment, Notifications } = await loadNotificationsAsync();
+
+    if (environment === "web") {
+      Alert.alert(t("alerts.webReminderTitle"), t("alerts.webReminderBody"));
+      return null;
+    }
+
+    if (environment === "expoGo") {
+      Alert.alert(t("alerts.expoGoNotificationsTitle"), t("alerts.expoGoNotificationsBody"));
+      return null;
+    }
+
     const current = await Notifications.getPermissionsAsync();
-    if (current.granted) return true;
+    if (current.granted) return Notifications;
 
     const requested = await Notifications.requestPermissionsAsync();
     if (!requested.granted) {
       Alert.alert(t("reminders.permissionTitle"), t("reminders.permissionBody"));
-      return false;
+      return null;
     }
 
-    return true;
+    return Notifications;
   };
 
   const setReminder = async (daysBefore = 0) => {
-    if (Platform.OS === "web") {
-      Alert.alert(t("alerts.webReminderTitle"), t("alerts.webReminderBody"));
-      return;
-    }
-
-    const allowed = await ensureNotificationPermission();
-    if (!allowed) return;
+    const Notifications = await ensureNotificationPermission();
+    if (!Notifications) return;
 
     if (!dueDate) {
       Alert.alert(t("alerts.noDateTitle"), t("alerts.noDateBody"));
@@ -191,6 +198,18 @@ export default function FlowScreen({ route, navigation }) {
   };
 
   const clearReminder = async () => {
+    const { environment, Notifications } = await loadNotificationsAsync();
+
+    if (environment === "web") {
+      Alert.alert(t("alerts.webReminderTitle"), t("alerts.webReminderBody"));
+      return;
+    }
+
+    if (environment === "expoGo") {
+      Alert.alert(t("alerts.expoGoNotificationsTitle"), t("alerts.expoGoNotificationsBody"));
+      return;
+    }
+
     await Notifications.cancelAllScheduledNotificationsAsync();
     Alert.alert(t("notifications.clearedTitle"), t("notifications.clearedBody"));
   };

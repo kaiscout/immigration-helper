@@ -28,6 +28,7 @@ const i18n = createInstance();
 if (!i18n.isInitialized) {
   i18n.use(initReactI18next).init({
     compatibilityJSON: "v4",
+    showSupportNotice: false,
     resources,
     lng: "en",
     fallbackLng: "en",

@@ -1,9 +1,9 @@
-import * as Notifications from "expo-notifications";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
+import { getNotificationEnvironment, loadNotificationsAsync } from "../data/notificationService";
 
 export default function RemindersScreen() {
   const { t } = useTranslation();
@@ -11,25 +11,36 @@ export default function RemindersScreen() {
 
   useEffect(() => {
     (async () => {
-      if (Platform.OS === "web") {
-        setPermission("web");
+      const environment = getNotificationEnvironment();
+      if (environment !== "native") {
+        setPermission(environment);
         return;
       }
+
+      const { Notifications } = await loadNotificationsAsync();
       const current = await Notifications.getPermissionsAsync();
       setPermission(current.granted ? "granted" : "undetermined");
     })();
   }, []);
 
   const ensurePermission = async () => {
-    if (Platform.OS === "web") {
+    const { environment, Notifications } = await loadNotificationsAsync();
+
+    if (environment === "web") {
       Alert.alert(t("alerts.webReminderTitle"), t("alerts.webReminderBody"));
-      return false;
+      return null;
+    }
+
+    if (environment === "expoGo") {
+      Alert.alert(t("alerts.expoGoNotificationsTitle"), t("alerts.expoGoNotificationsBody"));
+      setPermission("expoGo");
+      return null;
     }
 
     const current = await Notifications.getPermissionsAsync();
     if (current.granted) {
       setPermission("granted");
-      return true;
+      return Notifications;
     }
 
     const requested = await Notifications.requestPermissionsAsync();
@@ -37,15 +48,15 @@ export default function RemindersScreen() {
 
     if (!requested.granted) {
       Alert.alert(t("reminders.permissionTitle"), t("reminders.permissionBody"));
-      return false;
+      return null;
     }
 
-    return true;
+    return Notifications;
   };
 
   const testNotif = async () => {
-    const ok = await ensurePermission();
-    if (!ok) return;
+    const Notifications = await ensurePermission();
+    if (!Notifications) return;
 
     await Notifications.scheduleNotificationAsync({
       content: { title: t("reminders.testTitle"), body: t("reminders.testBody") },
@@ -56,8 +67,8 @@ export default function RemindersScreen() {
   };
 
   const scheduleQuick = async (type, seconds) => {
-    const ok = await ensurePermission();
-    if (!ok) return;
+    const Notifications = await ensurePermission();
+    if (!Notifications) return;
 
     await Notifications.scheduleNotificationAsync({
       content: {
@@ -71,6 +82,19 @@ export default function RemindersScreen() {
   };
 
   const clearAll = async () => {
+    const { environment, Notifications } = await loadNotificationsAsync();
+
+    if (environment === "web") {
+      Alert.alert(t("alerts.webReminderTitle"), t("alerts.webReminderBody"));
+      return;
+    }
+
+    if (environment === "expoGo") {
+      Alert.alert(t("alerts.expoGoNotificationsTitle"), t("alerts.expoGoNotificationsBody"));
+      setPermission("expoGo");
+      return;
+    }
+
     await Notifications.cancelAllScheduledNotificationsAsync();
     Alert.alert(t("notifications.clearedTitle"), t("notifications.clearedBody"));
   };

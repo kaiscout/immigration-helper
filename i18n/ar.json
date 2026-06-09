@@ -106,6 +106,8 @@
     "invalidDateBody": "استخدم YYYY-MM-DD، مثال 2025-10-01",
     "webReminderTitle": "غير متاح على الويب",
     "webReminderBody": "استخدم تطبيق الهاتف لضبط الإشعارات.",
+    "expoGoNotificationsTitle": "استخدم نسخة معاينة للتذكيرات",
+    "expoGoNotificationsBody": "لا يدعم Expo Go إشعارات التذكير بالكامل في هذا الإصدار من SDK. سيدعم التطبيق المنشور التذكيرات بعد بنائه للمتاجر.",
     "noDateTitle": "لا يوجد تاريخ",
     "noDateBody": "احسب تاريخ الإرسال أولاً.",
     "pastDateTitle": "تاريخ سابق",

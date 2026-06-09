@@ -1,4 +1,3 @@
-import * as Notifications from "expo-notifications";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Alert, KeyboardAvoidingView, Linking, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -17,6 +16,7 @@ import {
   saveFlowState,
   scoreTextMatch
 } from "../data/flowState";
+import { loadNotificationsAsync } from "../data/notificationService";
 
 const SYSTEM_PROMPT = `
 You are Immigration Helper's in-app assistant. You help with USCIS and U.S. immigration questions, checklist organization, forms, dates, reminders, and official-resource navigation.
@@ -528,28 +528,35 @@ export default function AIAdvisorScreen({ navigation }) {
   };
 
   const ensureNotificationPermission = async () => {
-    if (Platform.OS === "web") {
+    const { environment, Notifications } = await loadNotificationsAsync();
+
+    if (environment === "web") {
       Alert.alert(t("alerts.webReminderTitle"), t("alerts.webReminderBody"));
-      return false;
+      return null;
+    }
+
+    if (environment === "expoGo") {
+      Alert.alert(t("alerts.expoGoNotificationsTitle"), t("alerts.expoGoNotificationsBody"));
+      return null;
     }
 
     const current = await Notifications.getPermissionsAsync();
-    if (current.granted) return true;
+    if (current.granted) return Notifications;
 
     const requested = await Notifications.requestPermissionsAsync();
     if (!requested.granted) {
       Alert.alert(t("reminders.permissionTitle"), t("reminders.permissionBody"));
-      return false;
+      return null;
     }
 
-    return true;
+    return Notifications;
   };
 
   const scheduleFlowReminder = async (flow, state, daysBefore) => {
     if (!state?.dueDate) return t("ai.taskNeedComputedDate", { flow: titleForFlow(flow, t) });
 
-    const allowed = await ensureNotificationPermission();
-    if (!allowed) return t("reminders.permissionBody");
+    const Notifications = await ensureNotificationPermission();
+    if (!Notifications) return t("reminders.permissionBody");
 
     const [y, m, d] = state.dueDate.split("-").map((n) => parseInt(n, 10));
     const fire = new Date(y, m - 1, d, 9, 0, 0);

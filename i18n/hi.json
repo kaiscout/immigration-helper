@@ -106,6 +106,8 @@
     "invalidDateBody": "YYYY-MM-DD इस्तेमाल करें, जैसे 2025-10-01",
     "webReminderTitle": "वेब पर उपलब्ध नहीं",
     "webReminderBody": "नोटिफिकेशन सेट करने के लिए मोबाइल ऐप इस्तेमाल करें।",
+    "expoGoNotificationsTitle": "रिमाइंडर के लिए प्रीव्यू बिल्ड इस्तेमाल करें",
+    "expoGoNotificationsBody": "Expo Go इस SDK में रिमाइंडर नोटिफिकेशन को पूरी तरह सपोर्ट नहीं करता। स्टोर के लिए बनी प्रकाशित ऐप में रिमाइंडर सपोर्ट होगा।",
     "noDateTitle": "कोई तारीख नहीं",
     "noDateBody": "पहले मेलिंग तारीख निकालें।",
     "pastDateTitle": "पुरानी तारीख",

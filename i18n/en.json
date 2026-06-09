@@ -106,6 +106,8 @@
     "invalidDateBody": "Use YYYY-MM-DD, e.g. 2025-10-01",
     "webReminderTitle": "Not available on web",
     "webReminderBody": "Use the mobile app to set notifications.",
+    "expoGoNotificationsTitle": "Use a preview build for reminders",
+    "expoGoNotificationsBody": "Expo Go does not fully support reminder notifications in this SDK. The published app will support reminders after it is built for the stores.",
     "noDateTitle": "No date",
     "noDateBody": "Compute a mailing date first.",
     "pastDateTitle": "Past date",

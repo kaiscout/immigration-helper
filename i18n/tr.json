@@ -106,6 +106,8 @@
     "invalidDateBody": "YYYY-MM-DD kullanın, örn. 2025-10-01",
     "webReminderTitle": "Webde mevcut değil",
     "webReminderBody": "Bildirimler için mobil uygulamayı kullanın.",
+    "expoGoNotificationsTitle": "Hatırlatıcılar için önizleme derlemesi kullanın",
+    "expoGoNotificationsBody": "Expo Go bu SDK'da hatırlatıcı bildirimlerini tam desteklemez. Mağazalar için oluşturulan yayın sürümü hatırlatıcıları destekleyecek.",
     "noDateTitle": "Tarih yok",
     "noDateBody": "Önce gönderim tarihini hesaplayın.",
     "pastDateTitle": "Tarih geçmiş",

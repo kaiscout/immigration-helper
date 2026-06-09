@@ -106,6 +106,8 @@
     "invalidDateBody": "Utilisez YYYY-MM-DD, par ex. 2025-10-01",
     "webReminderTitle": "Non disponible sur le web",
     "webReminderBody": "Utilisez l’app mobile pour définir des notifications.",
+    "expoGoNotificationsTitle": "Utilisez une build d’aperçu pour les rappels",
+    "expoGoNotificationsBody": "Expo Go ne prend pas entièrement en charge les notifications de rappel avec ce SDK. L’app publiée les prendra en charge après sa compilation pour les stores.",
     "noDateTitle": "Aucune date",
     "noDateBody": "Calculez d’abord une date d’envoi.",
     "pastDateTitle": "Date passée",

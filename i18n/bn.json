@@ -106,6 +106,8 @@
     "invalidDateBody": "YYYY-MM-DD ব্যবহার করুন, যেমন 2025-10-01",
     "webReminderTitle": "ওয়েবে নেই",
     "webReminderBody": "নোটিফিকেশন সেট করতে মোবাইল অ্যাপ ব্যবহার করুন।",
+    "expoGoNotificationsTitle": "রিমাইন্ডারের জন্য প্রিভিউ বিল্ড ব্যবহার করুন",
+    "expoGoNotificationsBody": "এই SDK-তে Expo Go রিমাইন্ডার নোটিফিকেশন পুরোপুরি সমর্থন করে না। স্টোরের জন্য তৈরি প্রকাশিত অ্যাপে রিমাইন্ডার কাজ করবে।",
     "noDateTitle": "তারিখ নেই",
     "noDateBody": "প্রথমে মেইলিং তারিখ হিসাব করুন।",
     "pastDateTitle": "পুরোনো তারিখ",
