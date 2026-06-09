@@ -268,7 +268,12 @@ export default function FlowScreen({ route, navigation }) {
         </View>
       )}
 
-      <Text style={styles.h2}>{t("flow.stepsTitle")}</Text>
+      <View style={styles.stepsHeader}>
+        <Text style={styles.stepsHeading}>{t("flow.stepsTitle")}</Text>
+        <Text style={styles.stepsMeta}>
+          {completedCount}/{steps.length} {t("flow.completed")}
+        </Text>
+      </View>
 
       {steps.map((step, idx) => {
         const title = pick(step, "title");
@@ -440,6 +445,26 @@ const styles = StyleSheet.create({
     gap: SPACING.sm
   },
   linkText: { color: COLORS.text, fontWeight: "900" },
+  stepsHeader: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: SPACING.xl,
+    marginBottom: SPACING.xs,
+    paddingHorizontal: SPACING.md
+  },
+  stepsHeading: {
+    color: COLORS.text,
+    fontSize: 21,
+    fontWeight: "900",
+    textAlign: "center"
+  },
+  stepsMeta: {
+    color: COLORS.subtext,
+    fontSize: 13,
+    fontWeight: "800",
+    marginTop: 4,
+    textAlign: "center"
+  },
   step: {
     marginTop: SPACING.md,
     borderWidth: 1,
