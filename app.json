@@ -9,7 +9,7 @@
     "scheme": "immigrationhelper",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.denizizci.immigrationhelper",
       "config": {
         "usesNonExemptEncryption": false
