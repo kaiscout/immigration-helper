@@ -53,6 +53,12 @@
   },
   "flow": {
     "anchorDateLabel": "输入您的通知日期",
+    "datePickerHint": "从下面的列表选择月、日和年。",
+    "month": "月份",
+    "day": "日期",
+    "year": "年份",
+    "selectedDate": "已选日期",
+    "suggestedDates": "建议",
     "computedDue": "建议邮寄日期",
     "formsTitle": "表格",
     "stepsTitle": "您的步骤",

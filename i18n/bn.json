@@ -53,6 +53,12 @@
   },
   "flow": {
     "anchorDateLabel": "আপনার নোটিশ তারিখ লিখুন",
+    "datePickerHint": "নিচের তালিকা থেকে মাস, দিন ও বছর বেছে নিন।",
+    "month": "মাস",
+    "day": "দিন",
+    "year": "বছর",
+    "selectedDate": "নির্বাচিত তারিখ",
+    "suggestedDates": "প্রস্তাবিত",
     "computedDue": "প্রস্তাবিত মেইলিং তারিখ",
     "formsTitle": "ফর্ম",
     "stepsTitle": "আপনার ধাপ",

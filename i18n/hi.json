@@ -53,6 +53,12 @@
   },
   "flow": {
     "anchorDateLabel": "अपनी नोटिस तारीख दर्ज करें",
+    "datePickerHint": "नीचे की सूचियों से महीना, दिन और साल चुनें।",
+    "month": "महीना",
+    "day": "दिन",
+    "year": "साल",
+    "selectedDate": "चुनी गई तारीख",
+    "suggestedDates": "सुझाया गया",
     "computedDue": "सुझाई गई मेलिंग तारीख",
     "formsTitle": "फॉर्म",
     "stepsTitle": "आपके कदम",

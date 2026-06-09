@@ -53,6 +53,12 @@
   },
   "flow": {
     "anchorDateLabel": "Entrez la date de votre avis",
+    "datePickerHint": "Choisissez le mois, le jour et l’année dans les listes ci-dessous.",
+    "month": "Mois",
+    "day": "Jour",
+    "year": "Année",
+    "selectedDate": "Date sélectionnée",
+    "suggestedDates": "Suggéré",
     "computedDue": "Date d’envoi suggérée",
     "formsTitle": "Formulaires",
     "stepsTitle": "Vos étapes",

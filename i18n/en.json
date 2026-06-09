@@ -53,6 +53,12 @@
   },
   "flow": {
     "anchorDateLabel": "Enter your notice date",
+    "datePickerHint": "Choose the month, day, and year from the lists below.",
+    "month": "Month",
+    "day": "Day",
+    "year": "Year",
+    "selectedDate": "Selected date",
+    "suggestedDates": "Suggested",
     "computedDue": "Suggested mailing date",
     "formsTitle": "Forms",
     "stepsTitle": "Your steps",

@@ -53,6 +53,12 @@
   },
   "flow": {
     "anchorDateLabel": "Bildirim tarihinizi girin",
+    "datePickerHint": "Aşağıdaki listelerden ay, gün ve yılı seçin.",
+    "month": "Ay",
+    "day": "Gün",
+    "year": "Yıl",
+    "selectedDate": "Seçilen tarih",
+    "suggestedDates": "Önerilen",
     "computedDue": "Önerilen gönderim tarihi",
     "formsTitle": "Formlar",
     "stepsTitle": "Adımlarınız",

@@ -1,7 +1,7 @@
 import * as Notifications from "expo-notifications";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, Linking, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Linking, Modal, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
 import {
@@ -12,23 +12,105 @@ import {
   saveFlowState
 } from "../data/flowState";
 
+const pad2 = (value) => String(value).padStart(2, "0");
+
+const datePartsFromIso = (iso) => {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || "");
+  return {
+    year: match?.[1] || "",
+    month: match?.[2] || "",
+    day: match?.[3] || ""
+  };
+};
+
+const daysInMonth = (year, month) => {
+  const y = Number(year || new Date().getFullYear());
+  const m = Number(month || 1);
+  return new Date(y, m, 0).getDate();
+};
+
+const yearOptions = () => {
+  const current = new Date().getFullYear();
+  return Array.from({ length: 14 }, (_, idx) => String(current + 2 - idx));
+};
+
 export default function FlowScreen({ route, navigation }) {
   const { t, i18n } = useTranslation();
   const flow = route.params?.flow;
   const [noticeDate, setNoticeDate] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [done, setDone] = useState({});
+  const [picker, setPicker] = useState(null);
+  const [noticeDraft, setNoticeDraft] = useState({ year: "", month: "", day: "" });
 
   const lang = (i18n?.language || "en").toLowerCase();
+  const noticeParts = noticeDraft;
+  const selectedDateComplete = Boolean(noticeParts.year && noticeParts.month && noticeParts.day);
+  const selectedDateText = selectedDateComplete ? noticeDate : "YYYY-MM-DD";
 
   const pick = useCallback((obj, base) => {
     return pickLocalized(obj, base, lang);
   }, [lang]);
 
+  const monthOptions = useMemo(() => {
+    const formatter = new Intl.DateTimeFormat(lang || "en", { month: "short" });
+    return Array.from({ length: 12 }, (_, idx) => {
+      const value = pad2(idx + 1);
+      return {
+        value,
+        label: formatter.format(new Date(2026, idx, 1))
+      };
+    });
+  }, [lang]);
+
+  const dayOptions = useMemo(() => {
+    const count = daysInMonth(noticeParts.year, noticeParts.month);
+    return Array.from({ length: count }, (_, idx) => {
+      const value = pad2(idx + 1);
+      return { value, label: value };
+    });
+  }, [noticeParts.year, noticeParts.month]);
+
+  const years = useMemo(() => {
+    const values = yearOptions();
+    return noticeParts.year && !values.includes(noticeParts.year) ? [noticeParts.year, ...values] : values;
+  }, [noticeParts.year]);
+
+  const updateNoticePart = (part, value) => {
+    const next = { ...noticeParts, [part]: value };
+
+    if (part === "month" || part === "year") {
+      const maxDay = daysInMonth(next.year, next.month);
+      if (next.day && Number(next.day) > maxDay) {
+        next.day = pad2(maxDay);
+      }
+    }
+
+    if (next.year && next.month && next.day) {
+      setNoticeDraft(next);
+      setNoticeDate(`${next.year}-${next.month}-${next.day}`);
+      return;
+    }
+
+    setNoticeDraft(next);
+    setNoticeDate("");
+  };
+
+  const openPicker = (type, title, options) => {
+    setPicker({ type, title, options });
+  };
+
+  const selectPickerValue = (value) => {
+    if (!picker) return;
+    updateNoticePart(picker.type, value);
+    setPicker(null);
+  };
+
   useEffect(() => {
     (async () => {
       const parsed = await loadFlowState(flow);
       setNoticeDate(parsed.noticeDate || "");
+      setNoticeDraft(datePartsFromIso(parsed.noticeDate || ""));
       setDueDate(parsed.dueDate || "");
       setDone(parsed.done || {});
     })();
@@ -164,19 +246,68 @@ export default function FlowScreen({ route, navigation }) {
         </TouchableOpacity>
       </View>
 
-      <Text style={styles.label}>{t("flow.anchorDateLabel")} (YYYY-MM-DD)</Text>
-      <TextInput
-        placeholder="2025-10-01"
-        placeholderTextColor={COLORS.subtext}
-        value={noticeDate}
-        onChangeText={setNoticeDate}
-        style={styles.input}
-      />
+      <View style={styles.datePlanner}>
+        <View style={styles.datePlannerHeader}>
+          <View style={styles.dateIcon}>
+            <Ionicons name="calendar-outline" size={22} color={COLORS.primary} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.datePlannerTitle}>{t("flow.anchorDateLabel")}</Text>
+            <Text style={styles.datePlannerHelp}>{t("flow.datePickerHint")}</Text>
+          </View>
+        </View>
 
-      <TouchableOpacity style={styles.btn} onPress={computeDue}>
-        <Ionicons name="calculator-outline" size={19} color={COLORS.primaryTextOn} />
-        <Text style={styles.btnText}>{t("common.save")}</Text>
-      </TouchableOpacity>
+        <View style={styles.dateSelectRow}>
+          <TouchableOpacity
+            style={styles.dateSelect}
+            onPress={() => openPicker("month", t("flow.month"), monthOptions)}
+          >
+            <Text style={styles.dateSelectLabel}>{t("flow.month")}</Text>
+            <View style={styles.dateSelectValueRow}>
+              <Text style={[styles.dateSelectValue, !noticeParts.month && styles.dateSelectPlaceholder]}>
+                {monthOptions.find((item) => item.value === noticeParts.month)?.label || t("flow.month")}
+              </Text>
+              <Ionicons name="chevron-down" size={16} color={COLORS.subtext} />
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.dateSelect}
+            onPress={() => openPicker("day", t("flow.day"), dayOptions)}
+          >
+            <Text style={styles.dateSelectLabel}>{t("flow.day")}</Text>
+            <View style={styles.dateSelectValueRow}>
+              <Text style={[styles.dateSelectValue, !noticeParts.day && styles.dateSelectPlaceholder]}>
+                {noticeParts.day || t("flow.day")}
+              </Text>
+              <Ionicons name="chevron-down" size={16} color={COLORS.subtext} />
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.dateSelect}
+            onPress={() => openPicker("year", t("flow.year"), years.map((value) => ({ value, label: value })))}
+          >
+            <Text style={styles.dateSelectLabel}>{t("flow.year")}</Text>
+            <View style={styles.dateSelectValueRow}>
+              <Text style={[styles.dateSelectValue, !noticeParts.year && styles.dateSelectPlaceholder]}>
+                {noticeParts.year || t("flow.year")}
+              </Text>
+              <Ionicons name="chevron-down" size={16} color={COLORS.subtext} />
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.selectedDatePill}>
+          <Text style={styles.selectedDateLabel}>{t("flow.selectedDate")}</Text>
+          <Text style={styles.selectedDateValue}>{selectedDateText}</Text>
+        </View>
+
+        <TouchableOpacity style={styles.btn} onPress={computeDue}>
+          <Ionicons name="calculator-outline" size={19} color={COLORS.primaryTextOn} />
+          <Text style={styles.btnText}>{t("common.save")}</Text>
+        </TouchableOpacity>
+      </View>
 
       {dueDate ? (
         <View style={styles.resultCard}>
@@ -211,8 +342,14 @@ export default function FlowScreen({ route, navigation }) {
       </View>
 
       {(noticeDate || dueDate) && (
-        <View style={styles.box}>
-          <Text style={styles.h2}>{t("flow.keyDatesTitle")}</Text>
+        <View style={styles.timelineBox}>
+          <View style={styles.timelineHeader}>
+            <Text style={styles.timelineTitle}>{t("flow.keyDatesTitle")}</Text>
+            <View style={styles.timelineBadge}>
+              <Ionicons name="sparkles-outline" size={14} color={COLORS.primary} />
+              <Text style={styles.timelineBadgeText}>{t("flow.suggestedDates")}</Text>
+            </View>
+          </View>
 
           {noticeDate ? (
             <View style={styles.dateLine}>
@@ -305,6 +442,36 @@ export default function FlowScreen({ route, navigation }) {
         <Ionicons name="warning-outline" size={18} color={COLORS.warning} />
         <Text style={styles.disclaimer}>{t("common.disclaimer")}</Text>
       </View>
+
+      <Modal
+        visible={Boolean(picker)}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setPicker(null)}
+      >
+        <View style={styles.modalBackdrop}>
+          <TouchableOpacity style={styles.modalDismiss} activeOpacity={1} onPress={() => setPicker(null)} />
+          <View style={styles.pickerSheet}>
+            <View style={styles.pickerHeader}>
+              <Text style={styles.pickerTitle}>{picker?.title}</Text>
+              <TouchableOpacity style={styles.pickerClose} onPress={() => setPicker(null)}>
+                <Ionicons name="close" size={20} color={COLORS.text} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.pickerList} contentContainerStyle={styles.pickerListContent}>
+              {picker?.options.map((item) => (
+                <TouchableOpacity
+                  key={`${picker.type}-${item.value}`}
+                  style={styles.pickerOption}
+                  onPress={() => selectPickerValue(item.value)}
+                >
+                  <Text style={styles.pickerOptionText}>{item.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -367,6 +534,77 @@ const styles = StyleSheet.create({
     fontSize: 16,
     ...SHADOW.soft
   },
+  datePlanner: {
+    backgroundColor: COLORS.card,
+    borderRadius: RADII.xl,
+    padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOW.card
+  },
+  datePlannerHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.md,
+    marginBottom: SPACING.md
+  },
+  dateIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: RADII.lg,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: COLORS.primaryLight
+  },
+  datePlannerTitle: { color: COLORS.text, fontSize: 18, fontWeight: "900" },
+  datePlannerHelp: { color: COLORS.subtext, lineHeight: 19, marginTop: 3 },
+  dateSelectRow: {
+    flexDirection: "row",
+    gap: SPACING.sm
+  },
+  dateSelect: {
+    flex: 1,
+    minHeight: 78,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: RADII.lg,
+    backgroundColor: COLORS.cardSoft,
+    padding: SPACING.sm,
+    justifyContent: "space-between"
+  },
+  dateSelectLabel: {
+    color: COLORS.subtext,
+    fontSize: 11,
+    fontWeight: "900",
+    textTransform: "uppercase",
+    letterSpacing: 0.3
+  },
+  dateSelectValueRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 4
+  },
+  dateSelectValue: {
+    color: COLORS.text,
+    fontSize: 16,
+    fontWeight: "900",
+    flexShrink: 1
+  },
+  dateSelectPlaceholder: { color: COLORS.subtext, fontSize: 14 },
+  selectedDatePill: {
+    marginTop: SPACING.md,
+    borderRadius: RADII.pill,
+    backgroundColor: COLORS.muted,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: SPACING.sm
+  },
+  selectedDateLabel: { color: COLORS.subtext, fontSize: 12, fontWeight: "900" },
+  selectedDateValue: { color: COLORS.text, fontWeight: "900" },
   btn: {
     marginTop: SPACING.md,
     backgroundColor: COLORS.primary,
@@ -412,6 +650,33 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     ...SHADOW.card
   },
+  timelineBox: {
+    backgroundColor: COLORS.card,
+    padding: SPACING.lg,
+    borderRadius: RADII.xl,
+    marginTop: SPACING.lg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOW.card
+  },
+  timelineHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: SPACING.sm,
+    marginBottom: SPACING.xs
+  },
+  timelineTitle: { color: COLORS.text, fontSize: 20, fontWeight: "900", flex: 1 },
+  timelineBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    borderRadius: RADII.pill,
+    backgroundColor: COLORS.primaryLight,
+    paddingVertical: 6,
+    paddingHorizontal: 9
+  },
+  timelineBadgeText: { color: COLORS.primary, fontSize: 11, fontWeight: "900" },
   dateLine: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -489,5 +754,45 @@ const styles = StyleSheet.create({
   stepTitle: { fontWeight: "900", color: COLORS.text, flex: 1 },
   stepDetails: { marginTop: 6, color: COLORS.subtext, lineHeight: 20 },
   disclaimerBox: { flexDirection: "row", gap: 8, alignItems: "flex-start", marginTop: SPACING.xl },
-  disclaimer: { fontSize: 12, color: COLORS.subtext, lineHeight: 18, flex: 1 }
+  disclaimer: { fontSize: 12, color: COLORS.subtext, lineHeight: 18, flex: 1 },
+  modalBackdrop: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(8,17,31,0.36)"
+  },
+  modalDismiss: {
+    ...StyleSheet.absoluteFillObject
+  },
+  pickerSheet: {
+    maxHeight: "62%",
+    backgroundColor: COLORS.card,
+    borderTopLeftRadius: RADII.xl,
+    borderTopRightRadius: RADII.xl,
+    paddingTop: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: SPACING.lg
+  },
+  pickerHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: SPACING.sm
+  },
+  pickerTitle: { color: COLORS.text, fontSize: 20, fontWeight: "900" },
+  pickerClose: {
+    width: 36,
+    height: 36,
+    borderRadius: RADII.pill,
+    backgroundColor: COLORS.muted,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  pickerList: { maxHeight: 360 },
+  pickerListContent: { paddingBottom: SPACING.md },
+  pickerOption: {
+    paddingVertical: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border
+  },
+  pickerOptionText: { color: COLORS.text, fontSize: 17, fontWeight: "800" }
 });

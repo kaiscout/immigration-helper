@@ -53,6 +53,12 @@
   },
   "flow": {
     "anchorDateLabel": "Ingresa tu fecha de aviso",
+    "datePickerHint": "Elige el mes, día y año en las listas de abajo.",
+    "month": "Mes",
+    "day": "Día",
+    "year": "Año",
+    "selectedDate": "Fecha seleccionada",
+    "suggestedDates": "Sugerido",
     "computedDue": "Fecha sugerida de envío",
     "formsTitle": "Formularios",
     "stepsTitle": "Tus pasos",

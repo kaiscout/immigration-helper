@@ -53,6 +53,12 @@
   },
   "flow": {
     "anchorDateLabel": "Введите дату уведомления",
+    "datePickerHint": "Выберите месяц, день и год из списков ниже.",
+    "month": "Месяц",
+    "day": "День",
+    "year": "Год",
+    "selectedDate": "Выбранная дата",
+    "suggestedDates": "Предложено",
     "computedDue": "Предлагаемая дата отправки",
     "formsTitle": "Формы",
     "stepsTitle": "Ваши шаги",

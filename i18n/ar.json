@@ -53,6 +53,12 @@
   },
   "flow": {
     "anchorDateLabel": "أدخل تاريخ الإشعار",
+    "datePickerHint": "اختر الشهر واليوم والسنة من القوائم أدناه.",
+    "month": "الشهر",
+    "day": "اليوم",
+    "year": "السنة",
+    "selectedDate": "التاريخ المحدد",
+    "suggestedDates": "مقترح",
     "computedDue": "تاريخ الإرسال المقترح",
     "formsTitle": "النماذج",
     "stepsTitle": "خطواتك",
