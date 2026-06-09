@@ -1,0 +1,45 @@
+# Google Play Listing Draft
+
+## App Name
+
+Immigration Helper
+
+## Short Description
+
+Private immigration checklists, reminders, and official USCIS resources.
+
+## Full Description
+
+Immigration Helper helps you organize common immigration-related tasks with private checklists, key-date helpers, reminders, and official resources.
+
+Plan your next steps for TPS renewal, EAD/work authorization, and travel authorization with a calm, easy-to-use checklist experience.
+
+Features:
+
+- Guided checklists for common immigration processes
+- Key-date helper for suggested mailing and follow-up timing
+- Local notification reminders
+- Official USCIS links for forms, fees, case status, legal help, and scam prevention
+- Privacy-first design with checklist progress stored on your device
+- General AI helper prompts with legal-safety guardrails
+- English, Turkish, Spanish, Mandarin Chinese, Hindi, French, Modern Standard Arabic, Bengali, and Russian support
+
+Important: Immigration Helper is independent and is not affiliated with USCIS, DHS, or any government agency. The app provides general information and organization tools only. It does not provide legal advice, does not determine eligibility, and does not replace official USCIS instructions or help from a qualified attorney or DOJ-accredited representative.
+
+## Category
+
+Productivity
+
+Alternative category: Tools
+
+## Tags
+
+Productivity, Reference, Checklist, Reminders
+
+## Contact Details
+
+Support email: admin@immigrationhelper.org
+
+Privacy policy: https://kaiscout.github.io/immigration-helper/privacy-policy.html
+
+Website: https://kaiscout.github.io/immigration-helper/support.html

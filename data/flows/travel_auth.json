@@ -1,0 +1,131 @@
+{
+  "id": "travel",
+  "titleKey": "home.travelDoc",
+  "anchorDateLabelKey": "flow.anchorDateLabel",
+  "deadlineLogic": {
+    "offsetDays": 45
+  },
+  "calculators": [
+    {
+      "id": "mail_by",
+      "label_en": "Suggested mailing date",
+      "label_tr": "Önerilen posta tarihi",
+      "label_es": "Fecha sugerida para enviar",
+      "label_zh": "建议邮寄日期",
+      "label_hi": "सुझाई गई मेलिंग तारीख",
+      "label_fr": "Date d’envoi suggérée",
+      "label_ar": "تاريخ الإرسال المقترح",
+      "label_bn": "প্রস্তাবিত মেইলিং তারিখ",
+      "label_ru": "Предлагаемая дата отправки",
+      "anchor": "notice_date",
+      "offsetDays": 45
+    }
+  ],
+  "stepsTitleKey": "flow.stepsTitle",
+  "forms": [
+    {
+      "id": "i131",
+      "title_en": "Form I-131 (Travel)",
+      "title_tr": "Form I-131 (Seyahat)",
+      "title_es": "Formulario I-131 (Viaje)",
+      "title_zh": "Form I-131（旅行）",
+      "title_hi": "Form I-131 (यात्रा)",
+      "title_fr": "Formulaire I-131 (Voyage)",
+      "title_ar": "نموذج I-131 (السفر)",
+      "title_bn": "Form I-131 (ভ্রমণ)",
+      "title_ru": "Форма I-131 (поездка)",
+      "url": "https://www.uscis.gov/i-131"
+    }
+  ],
+  "resources": [
+    {
+      "label_en": "Form I-131 official page",
+      "label_tr": "Form I-131 resmi sayfasi",
+      "label_es": "Pagina oficial del Formulario I-131",
+      "label_zh": "Form I-131 官方页面",
+      "label_hi": "Form I-131 आधिकारिक पेज",
+      "label_fr": "Page officielle du Formulaire I-131",
+      "label_ar": "الصفحة الرسمية لنموذج I-131",
+      "label_bn": "Form I-131 অফিসিয়াল পেজ",
+      "label_ru": "Официальная страница Form I-131",
+      "url": "https://www.uscis.gov/i-131"
+    },
+    {
+      "label_en": "Find legal help before travel",
+      "label_tr": "Seyahatten once hukuki yardim bulun",
+      "label_es": "Busca ayuda legal antes de viajar",
+      "label_zh": "旅行前寻找法律帮助",
+      "label_hi": "यात्रा से पहले कानूनी मदद खोजें",
+      "label_fr": "Trouver une aide juridique avant de voyager",
+      "label_ar": "ابحث عن مساعدة قانونية قبل السفر",
+      "label_bn": "ভ্রমণের আগে আইনি সাহায্য খুঁজুন",
+      "label_ru": "Найти юридическую помощь перед поездкой",
+      "url": "https://www.uscis.gov/scams-fraud-and-misconduct/avoid-scams/find-legal-services"
+    }
+  ],
+  "steps": [
+    {
+      "id": "travel_1",
+      "title_en": "Check travel risk",
+      "title_tr": "Seyahat riskini kontrol edin",
+      "title_es": "Revisa el riesgo de viajar",
+      "title_zh": "检查旅行风险",
+      "title_hi": "यात्रा जोखिम जांचें",
+      "title_fr": "Vérifier le risque de voyage",
+      "title_ar": "تحقق من مخاطر السفر",
+      "title_bn": "ভ্রমণের ঝুঁকি দেখুন",
+      "title_ru": "Проверьте риск поездки",
+      "details_en": "Travel can affect immigration status. Consider speaking with a qualified attorney before leaving the U.S.",
+      "details_tr": "Seyahat gocmenlik durumunu etkileyebilir. ABD'den cikmadan once yetkili bir avukatla gorusmeyi dusunun.",
+      "details_es": "Viajar puede afectar tu estatus migratorio. Considera hablar con un abogado calificado antes de salir de EE.UU.",
+      "details_zh": "旅行可能影响移民身份。离开美国前请考虑咨询合格律师。",
+      "details_hi": "यात्रा इमिग्रेशन स्थिति को प्रभावित कर सकती है। अमेरिका छोड़ने से पहले योग्य वकील से बात करने पर विचार करें।",
+      "details_fr": "Voyager peut affecter le statut d’immigration. Envisagez de parler à un avocat qualifié avant de quitter les États-Unis.",
+      "details_ar": "قد يؤثر السفر على وضع الهجرة. فكر في التحدث مع محامٍ مؤهل قبل مغادرة الولايات المتحدة.",
+      "details_bn": "ভ্রমণ ইমিগ্রেশন স্ট্যাটাসে প্রভাব ফেলতে পারে। যুক্তরাষ্ট্র ছাড়ার আগে যোগ্য আইনজীবীর সঙ্গে কথা বলার কথা ভাবুন।",
+      "details_ru": "Поездка может повлиять на иммиграционный статус. Перед выездом из США рассмотрите консультацию с квалифицированным адвокатом."
+    },
+    {
+      "id": "travel_2",
+      "title_en": "Complete the official form",
+      "title_tr": "Resmi formu tamamlayin",
+      "title_es": "Completa el formulario oficial",
+      "title_zh": "填写官方表格",
+      "title_hi": "आधिकारिक फॉर्म पूरा करें",
+      "title_fr": "Remplir le formulaire officiel",
+      "title_ar": "أكمل النموذج الرسمي",
+      "title_bn": "অফিসিয়াল ফর্ম পূরণ করুন",
+      "title_ru": "Заполните официальную форму",
+      "details_en": "Use the current USCIS I-131 page and instructions.",
+      "details_tr": "Guncel USCIS I-131 sayfasini ve talimatlarini kullanin.",
+      "details_es": "Usa la pagina e instrucciones actuales de USCIS I-131.",
+      "details_zh": "使用当前 USCIS I-131 页面和说明。",
+      "details_hi": "वर्तमान USCIS I-131 पेज और निर्देश इस्तेमाल करें।",
+      "details_fr": "Utilisez la page et les instructions USCIS I-131 actuelles.",
+      "details_ar": "استخدم صفحة وتعليمات USCIS I-131 الحالية.",
+      "details_bn": "বর্তমান USCIS I-131 পেজ ও নির্দেশনা ব্যবহার করুন।",
+      "details_ru": "Используйте текущую страницу и инструкции USCIS I-131."
+    },
+    {
+      "id": "travel_3",
+      "title_en": "Keep proof and copies",
+      "title_tr": "Kaniti ve kopyalari saklayin",
+      "title_es": "Guarda pruebas y copias",
+      "title_zh": "保留证明和副本",
+      "title_hi": "प्रमाण और कॉपी रखें",
+      "title_fr": "Garder les preuves et copies",
+      "title_ar": "احتفظ بالإثباتات والنسخ",
+      "title_bn": "প্রমাণ ও কপি রাখুন",
+      "title_ru": "Храните доказательства и копии",
+      "details_en": "Save copies of your packet, mailing receipt, and any approval notice.",
+      "details_tr": "Dosyanizin, posta makbuzunun ve onay bildirimlerinin kopyalarini saklayin.",
+      "details_es": "Guarda copias del paquete, recibo de envio y cualquier aviso de aprobacion.",
+      "details_zh": "保存材料包、邮寄收据和任何批准通知的副本。",
+      "details_hi": "अपने पैकेट, मेलिंग रसीद और किसी भी स्वीकृति नोटिस की कॉपी रखें।",
+      "details_fr": "Conservez des copies du dossier, du reçu d’envoi et de tout avis d’approbation.",
+      "details_ar": "احفظ نسخاً من ملفك وإيصال البريد وأي إشعار موافقة.",
+      "details_bn": "আপনার প্যাকেট, মেইলিং রসিদ এবং অনুমোদন নোটিশের কপি রাখুন।",
+      "details_ru": "Сохраните копии пакета, почтовой квитанции и любых уведомлений об одобрении."
+    }
+  ]
+}

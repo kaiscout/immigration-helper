@@ -1,0 +1,159 @@
+{
+  "id": "ead",
+  "titleKey": "home.workPermit",
+  "anchorDateLabelKey": "flow.anchorDateLabel",
+  "deadlineLogic": {
+    "offsetDays": 60
+  },
+  "calculators": [
+    {
+      "id": "mail_by",
+      "label_en": "Suggested mailing date",
+      "label_tr": "Önerilen posta tarihi",
+      "label_es": "Fecha sugerida para enviar",
+      "label_zh": "建议邮寄日期",
+      "label_hi": "सुझाई गई मेलिंग तारीख",
+      "label_fr": "Date d’envoi suggérée",
+      "label_ar": "تاريخ الإرسال المقترح",
+      "label_bn": "প্রস্তাবিত মেইলিং তারিখ",
+      "label_ru": "Предлагаемая дата отправки",
+      "anchor": "notice_date",
+      "offsetDays": 60
+    },
+    {
+      "id": "auto_ext_end",
+      "label_en": "EAD auto-extension ends",
+      "label_tr": "EAD otomatik uzatma bitişi",
+      "label_es": "Fin de la extensión automática del EAD",
+      "label_zh": "EAD 自动延期结束",
+      "label_hi": "EAD ऑटो-एक्सटेंशन समाप्त",
+      "label_fr": "Fin de l’extension automatique EAD",
+      "label_ar": "انتهاء التمديد التلقائي لـ EAD",
+      "label_bn": "EAD স্বয়ংক্রিয় এক্সটেনশন শেষ",
+      "label_ru": "Автопродление EAD заканчивается",
+      "anchor": "notice_date",
+      "offsetDays": 540
+    },
+    {
+      "id": "follow_up",
+      "label_en": "Follow up if no receipt",
+      "label_tr": "Makbuz gelmediyse takip edin",
+      "label_es": "Dar seguimiento si no hay recibo",
+      "label_zh": "如果没有收据请跟进",
+      "label_hi": "रसीद न मिले तो फॉलो-अप करें",
+      "label_fr": "Suivre si aucun reçu",
+      "label_ar": "تابع إذا لم يصل الإيصال",
+      "label_bn": "রসিদ না এলে ফলো-আপ করুন",
+      "label_ru": "Проверить, если нет квитанции",
+      "anchor": "notice_date",
+      "offsetDays": 90
+    }
+  ],
+  "stepsTitleKey": "flow.stepsTitle",
+  "forms": [
+    {
+      "id": "i765",
+      "title_en": "Form I-765 (EAD)",
+      "title_tr": "Form I-765 (Çalışma İzni)",
+      "title_es": "Formulario I-765 (EAD)",
+      "title_zh": "Form I-765 (EAD)",
+      "title_hi": "Form I-765 (EAD)",
+      "title_fr": "Formulaire I-765 (EAD)",
+      "title_ar": "نموذج I-765 (EAD)",
+      "title_bn": "Form I-765 (EAD)",
+      "title_ru": "Форма I-765 (EAD)",
+      "url": "https://www.uscis.gov/i-765"
+    }
+  ],
+  "resources": [
+    {
+      "label_en": "Form I-765 official page",
+      "label_tr": "Form I-765 resmi sayfasi",
+      "label_es": "Pagina oficial del Formulario I-765",
+      "label_zh": "Form I-765 官方页面",
+      "label_hi": "Form I-765 आधिकारिक पेज",
+      "label_fr": "Page officielle du Formulaire I-765",
+      "label_ar": "الصفحة الرسمية لنموذج I-765",
+      "label_bn": "Form I-765 অফিসিয়াল পেজ",
+      "label_ru": "Официальная страница Form I-765",
+      "url": "https://www.uscis.gov/i-765"
+    },
+    {
+      "label_en": "Current filing fees",
+      "label_tr": "Guncel basvuru ucretleri",
+      "label_es": "Tarifas actuales",
+      "label_zh": "当前提交费用",
+      "label_hi": "वर्तमान फाइलिंग फीस",
+      "label_fr": "Frais actuels",
+      "label_ar": "رسوم التقديم الحالية",
+      "label_bn": "বর্তমান ফাইলিং ফি",
+      "label_ru": "Текущие сборы",
+      "url": "https://www.uscis.gov/g-1055"
+    }
+  ],
+  "steps": [
+    {
+      "id": "ead_1",
+      "title_en": "Check eligibility category",
+      "title_tr": "Uygunluk kategorisini kontrol edin",
+      "title_es": "Revisa tu categoria de elegibilidad",
+      "title_zh": "检查资格类别",
+      "title_hi": "योग्यता श्रेणी जांचें",
+      "title_fr": "Vérifier la catégorie d’éligibilité",
+      "title_ar": "تحقق من فئة الأهلية",
+      "title_bn": "যোগ্যতা ক্যাটেগরি দেখুন",
+      "title_ru": "Проверьте категорию права",
+      "details_en": "Confirm your I-765 category in official USCIS instructions.",
+      "details_tr": "I-765 kategorinizi resmi USCIS talimatlarinda dogrulayin.",
+      "details_es": "Confirma tu categoria I-765 en las instrucciones oficiales de USCIS.",
+      "details_zh": "在官方 USCIS 说明中确认您的 I-765 类别。",
+      "details_hi": "आधिकारिक USCIS निर्देशों में अपनी I-765 श्रेणी पुष्टि करें।",
+      "details_fr": "Confirmez votre catégorie I-765 dans les instructions USCIS officielles.",
+      "details_ar": "أكد فئة I-765 الخاصة بك في تعليمات USCIS الرسمية.",
+      "details_bn": "অফিসিয়াল USCIS নির্দেশনায় আপনার I-765 ক্যাটেগরি নিশ্চিত করুন।",
+      "details_ru": "Подтвердите вашу категорию I-765 в официальных инструкциях USCIS."
+    },
+    {
+      "id": "ead_2",
+      "title_en": "Gather documents",
+      "title_tr": "Belgeleri toplayin",
+      "title_es": "Reune documentos",
+      "title_zh": "收集文件",
+      "title_hi": "दस्तावेज जुटाएं",
+      "title_fr": "Rassembler les documents",
+      "title_ar": "اجمع المستندات",
+      "title_bn": "নথি জোগাড় করুন",
+      "title_ru": "Соберите документы",
+      "details_en": "Prepare ID, photos, prior EADs, notices, and supporting documents.",
+      "details_tr": "Kimlik, foto, onceki EAD, bildirim ve destek belgelerini hazirlayin.",
+      "details_es": "Prepara ID, fotos, EAD anteriores, avisos y documentos de apoyo.",
+      "details_zh": "准备身份证件、照片、以前的 EAD、通知和支持文件。",
+      "details_hi": "ID, फोटो, पिछले EAD, नोटिस और सहायक दस्तावेज तैयार करें।",
+      "details_fr": "Préparez ID, photos, anciens EAD, avis et documents justificatifs.",
+      "details_ar": "حضّر الهوية والصور وبطاقات EAD السابقة والإشعارات والمستندات الداعمة.",
+      "details_bn": "ID, ছবি, আগের EAD, নোটিশ ও সহায়ক নথি প্রস্তুত করুন।",
+      "details_ru": "Подготовьте ID, фото, предыдущие EAD, уведомления и подтверждающие документы."
+    },
+    {
+      "id": "ead_3",
+      "title_en": "Review fees and copies",
+      "title_tr": "Ucretleri ve kopyalari gozden gecirin",
+      "title_es": "Revisa tarifas y copias",
+      "title_zh": "查看费用和副本",
+      "title_hi": "फीस और कॉपी समीक्षा करें",
+      "title_fr": "Vérifier les frais et copies",
+      "title_ar": "راجع الرسوم والنسخ",
+      "title_bn": "ফি ও কপি পর্যালোচনা করুন",
+      "title_ru": "Проверьте сборы и копии",
+      "details_en": "Check current fees and keep a copy of the packet before sending.",
+      "details_tr": "Guncel ucretleri kontrol edin ve gondermeden once dosyanin kopyasini saklayin.",
+      "details_es": "Verifica tarifas actuales y guarda una copia del paquete antes de enviar.",
+      "details_zh": "检查当前费用，并在寄出前保留材料包副本。",
+      "details_hi": "वर्तमान फीस देखें और भेजने से पहले पैकेट की कॉपी रखें।",
+      "details_fr": "Vérifiez les frais actuels et gardez une copie du dossier avant l’envoi.",
+      "details_ar": "تحقق من الرسوم الحالية واحتفظ بنسخة من الملف قبل الإرسال.",
+      "details_bn": "বর্তমান ফি দেখুন এবং পাঠানোর আগে প্যাকেটের কপি রাখুন।",
+      "details_ru": "Проверьте текущие сборы и сохраните копию пакета перед отправкой."
+    }
+  ]
+}

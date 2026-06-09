@@ -1,0 +1,294 @@
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Alert, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
+import LanguageDropdown from "../components/LanguageDropdown";
+
+export default function HomeScreen({ navigation }) {
+  const { t } = useTranslation();
+  const [flows, setFlows] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const tps = require("../data/flows/tps_renewal.json");
+        const ead = require("../data/flows/ead.json");
+        const travel = require("../data/flows/travel_auth.json");
+        setFlows({ tps, ead, travel });
+      } catch (e) {
+        Alert.alert("Error", String(e));
+      }
+    })();
+  }, []);
+
+  const processCards = [
+    {
+      key: "tps",
+      title: t("home.tpsRenewal"),
+      subtitle: t("home.tpsSubtitle"),
+      icon: "shield-checkmark-outline",
+      badge: t("home.guided"),
+      flow: flows?.tps
+    },
+    {
+      key: "ead",
+      title: t("home.workPermit"),
+      subtitle: t("home.eadSubtitle"),
+      icon: "briefcase-outline",
+      badge: t("home.documents"),
+      flow: flows?.ead
+    },
+    {
+      key: "travel",
+      title: t("home.travelDoc"),
+      subtitle: t("home.travelSubtitle"),
+      icon: "airplane-outline",
+      badge: t("home.caution"),
+      flow: flows?.travel
+    }
+  ];
+
+  return (
+    <ScrollView style={styles.screen} contentContainerStyle={styles.wrap}>
+      <View style={styles.hero}>
+        <View style={styles.heroTop}>
+          <View style={styles.heroIcon}>
+            <Ionicons name="sparkles-outline" size={26} color={COLORS.primary} />
+          </View>
+          <TouchableOpacity style={styles.safePill} onPress={() => navigation.navigate("Privacy")}>
+            <Ionicons name="lock-closed-outline" size={14} color={COLORS.success} />
+            <Text style={styles.safePillText}>{t("home.privacyFirst")}</Text>
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.appTitle}>{t("appTitle")}</Text>
+        <Text style={styles.heroSubtitle}>{t("home.heroSubtitle")}</Text>
+        <View style={styles.heroActions}>
+          <TouchableOpacity style={styles.heroBtn} onPress={() => navigation.navigate("Resources")}>
+            <Ionicons name="shield-checkmark-outline" size={18} color={COLORS.primaryTextOn} />
+            <Text style={styles.heroBtnText}>{t("resources.title")}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.heroBtnSecondary} onPress={() => Linking.openURL("https://www.uscis.gov/")}>
+            <Ionicons name="open-outline" size={18} color={COLORS.primary} />
+            <Text style={styles.heroBtnSecondaryText}>USCIS</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <LanguageDropdown />
+
+      <TouchableOpacity style={styles.aiCard} onPress={() => navigation.navigate("AIAdvisor")}>
+        <View style={styles.aiLeft}>
+          <View style={styles.aiIcon}>
+            <Ionicons name="chatbubble-ellipses-outline" size={22} color={COLORS.primaryTextOn} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.aiTitle}>{t("ai.title")}</Text>
+            <Text style={styles.aiSubtitle}>{t("ai.homeSubtitle")}</Text>
+          </View>
+        </View>
+        <Ionicons name="chevron-forward" size={22} color={COLORS.primaryTextOn} />
+      </TouchableOpacity>
+
+      <View style={styles.quickGrid}>
+        <TouchableOpacity style={styles.quickCard} onPress={() => navigation.navigate("Reminders")}>
+          <Ionicons name="alarm-outline" size={22} color={COLORS.primary} />
+          <Text style={styles.quickTitle}>{t("home.quickReminders")}</Text>
+          <Text style={styles.quickSub}>{t("home.quickRemindersSub")}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.quickCard} onPress={() => navigation.navigate("Resources")}>
+          <Ionicons name="library-outline" size={22} color={COLORS.primary} />
+          <Text style={styles.quickTitle}>{t("home.quickResources")}</Text>
+          <Text style={styles.quickSub}>{t("home.quickResourcesSub")}</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.sectionHeader}>
+        <Text style={styles.title}>{t("home.title")}</Text>
+      </View>
+
+      {processCards.map((card) => (
+        <TouchableOpacity
+          key={card.key}
+          style={[styles.card, !flows && styles.disabled]}
+          disabled={!flows}
+          onPress={() => navigation.navigate("Flow", { flow: card.flow })}
+        >
+          <View style={styles.cardIcon}>
+            <Ionicons name={card.icon} size={24} color={COLORS.primary} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.badge}>{card.badge}</Text>
+            <Text style={styles.cardTitle}>{card.title}</Text>
+            <Text style={styles.cardSub}>{card.subtitle}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={22} color={COLORS.subtext} />
+        </TouchableOpacity>
+      ))}
+
+      <TouchableOpacity style={styles.remBtn} onPress={() => navigation.navigate("Reminders")}>
+        <Ionicons name="notifications-outline" size={20} color={COLORS.text} />
+        <Text style={styles.remText}>{t("reminders.title")}</Text>
+      </TouchableOpacity>
+
+      <View style={styles.disclaimerBox}>
+        <Ionicons name="warning-outline" size={18} color={COLORS.warning} />
+        <Text style={styles.disclaimer}>{t("common.disclaimer")}</Text>
+      </View>
+
+      <View style={styles.bottomLinks}>
+        <TouchableOpacity style={styles.bottomLink} onPress={() => navigation.navigate("Privacy")}>
+          <Ionicons name="lock-closed-outline" size={16} color={COLORS.subtext} />
+          <Text style={styles.bottomLinkText}>{t("privacy.title")}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.bottomLink} onPress={() => Linking.openURL("https://www.uscis.gov/scams-fraud-and-misconduct/avoid-scams")}>
+          <Ionicons name="alert-circle-outline" size={16} color={COLORS.subtext} />
+          <Text style={styles.bottomLinkText}>{t("resources.scamsTitle")}</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: COLORS.bg },
+  wrap: { padding: SPACING.lg, gap: SPACING.md, flexGrow: 1 },
+  hero: {
+    backgroundColor: COLORS.card,
+    padding: SPACING.xl,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOW.card
+  },
+  heroTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", gap: SPACING.md },
+  heroIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: RADII.pill,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: COLORS.primaryLight,
+    marginBottom: SPACING.md
+  },
+  safePill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: RADII.pill,
+    backgroundColor: "#ECFDF3",
+    borderWidth: 1,
+    borderColor: "#BBF7D0"
+  },
+  safePillText: { color: COLORS.success, fontWeight: "900", fontSize: 12 },
+  appTitle: { fontSize: 30, fontWeight: "900", color: COLORS.text, letterSpacing: -0.8 },
+  heroSubtitle: { marginTop: SPACING.sm, color: COLORS.subtext, fontSize: 15, lineHeight: 22 },
+  heroActions: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: SPACING.lg },
+  heroBtn: {
+    flexDirection: "row",
+    gap: 7,
+    alignItems: "center",
+    backgroundColor: COLORS.primary,
+    paddingVertical: 11,
+    paddingHorizontal: 14,
+    borderRadius: RADII.pill
+  },
+  heroBtnText: { color: COLORS.primaryTextOn, fontWeight: "900" },
+  heroBtnSecondary: {
+    flexDirection: "row",
+    gap: 7,
+    alignItems: "center",
+    backgroundColor: COLORS.primaryLight,
+    paddingVertical: 11,
+    paddingHorizontal: 14,
+    borderRadius: RADII.pill
+  },
+  heroBtnSecondaryText: { color: COLORS.primary, fontWeight: "900" },
+  sectionHeader: { marginTop: SPACING.sm },
+  sectionTitle: { fontSize: 14, fontWeight: "800", color: COLORS.subtext, textTransform: "uppercase", letterSpacing: 0.8 },
+  title: { fontSize: 26, fontWeight: "900", color: COLORS.text, letterSpacing: -0.5 },
+  aiCard: {
+    backgroundColor: COLORS.ai,
+    padding: SPACING.lg,
+    borderRadius: RADII.xl,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    ...SHADOW.card
+  },
+  aiLeft: { flexDirection: "row", alignItems: "center", gap: SPACING.md, flex: 1 },
+  aiIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: RADII.pill,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.18)"
+  },
+  aiTitle: { color: COLORS.primaryTextOn, fontWeight: "900", fontSize: 18 },
+  aiSubtitle: { color: "rgba(255,255,255,0.82)", marginTop: 3, fontSize: 13, lineHeight: 18 },
+  quickGrid: { flexDirection: "row", gap: SPACING.md },
+  quickCard: {
+    flex: 1,
+    backgroundColor: COLORS.card,
+    borderRadius: RADII.xl,
+    padding: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOW.soft
+  },
+  quickTitle: { marginTop: SPACING.sm, color: COLORS.text, fontWeight: "900" },
+  quickSub: { marginTop: 4, color: COLORS.subtext, fontSize: 12, lineHeight: 17 },
+  card: {
+    backgroundColor: COLORS.card,
+    padding: SPACING.lg,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.md,
+    ...SHADOW.card
+  },
+  badge: {
+    alignSelf: "flex-start",
+    marginBottom: 6,
+    color: COLORS.primary,
+    fontWeight: "900",
+    fontSize: 11,
+    textTransform: "uppercase"
+  },
+  cardIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: RADII.lg,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: COLORS.primaryLight
+  },
+  cardTitle: { fontSize: 18, fontWeight: "900", color: COLORS.text },
+  cardSub: { marginTop: 4, color: COLORS.subtext, fontSize: 13, lineHeight: 18 },
+  disabled: { opacity: 0.45 },
+  remBtn: {
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: SPACING.md,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xl,
+    borderRadius: RADII.pill,
+    backgroundColor: COLORS.card,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOW.soft
+  },
+  remText: { fontWeight: "900", color: COLORS.text },
+  disclaimerBox: { flexDirection: "row", gap: 8, alignItems: "flex-start", marginTop: SPACING.md },
+  disclaimer: { color: COLORS.subtext, fontSize: 12, lineHeight: 18, flex: 1 },
+  bottomLinks: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 10, marginTop: SPACING.sm },
+  bottomLink: { flexDirection: "row", alignItems: "center", gap: 6, padding: 8 },
+  bottomLinkText: { color: COLORS.subtext, fontWeight: "800", fontSize: 12 }
+});
