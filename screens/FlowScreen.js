@@ -583,20 +583,21 @@ const styles = StyleSheet.create({
   },
   dateSelect: {
     flex: 1,
-    minHeight: 78,
+    minHeight: 68,
     borderWidth: 1,
     borderColor: COLORS.border,
     borderRadius: RADII.lg,
     backgroundColor: COLORS.cardSoft,
     padding: SPACING.sm,
-    justifyContent: "space-between"
+    justifyContent: "center"
   },
   dateSelectLabel: {
     color: COLORS.subtext,
     fontSize: 11,
     fontWeight: "900",
     textTransform: "uppercase",
-    letterSpacing: 0.3
+    letterSpacing: 0.3,
+    marginBottom: 7
   },
   dateSelectValueRow: {
     flexDirection: "row",
