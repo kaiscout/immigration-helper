@@ -19,6 +19,8 @@
     "quickResourcesSub": "Abre formularios, tarifas y ayuda legal de USCIS."
   },
   "onboarding": {
+    "languageTitle": "Elige tu idioma",
+    "languageBody": "Puedes cambiarlo después desde el botón superior izquierdo en Inicio.",
     "kicker": "Lista privada",
     "title": "Organizate sin adivinar.",
     "subtitle": "Un lugar tranquilo para seguir formularios, fechas, recordatorios y recursos oficiales.",

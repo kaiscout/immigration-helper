@@ -1,5 +1,5 @@
 import "react-native-gesture-handler";
-import "./i18n";
+import i18n from "./i18n";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -16,6 +16,7 @@ import AIAdvisorScreen from "./screens/AIAdvisorScreen";
 import ResourcesScreen from "./screens/ResourcesScreen";
 import PrivacyScreen from "./screens/PrivacyScreen";
 import { COLORS } from "./constants/theme";
+import { loadPreferredLanguage } from "./data/languagePreference";
 
 const Stack = createNativeStackNavigator();
 
@@ -25,6 +26,11 @@ export default function App() {
 
   useEffect(() => {
     (async () => {
+      const savedLanguage = await loadPreferredLanguage();
+      if (savedLanguage) {
+        await i18n.changeLanguage(savedLanguage);
+      }
+
       const seen = await AsyncStorage.getItem(ONBOARDING_KEY);
       setInitialRoute(seen === "true" ? "Home" : "Onboarding");
     })();

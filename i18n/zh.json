@@ -19,6 +19,8 @@
     "quickResourcesSub": "打开 USCIS 表格、费用和法律帮助。"
   },
   "onboarding": {
+    "languageTitle": "选择您的语言",
+    "languageBody": "之后可在主页左上角按钮中更改。",
     "kicker": "私人清单",
     "title": "保持有条理，不用猜。",
     "subtitle": "一个安静的地方，用来跟踪移民表格、日期、提醒和官方资源。",

@@ -23,6 +23,19 @@ export default function OnboardingScreen({ navigation }) {
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.wrap}>
+      <View style={styles.langBox}>
+        <View style={styles.langHeader}>
+          <View style={styles.langIcon}>
+            <Ionicons name="language-outline" size={22} color={COLORS.primary} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.langTitle}>{t("onboarding.languageTitle")}</Text>
+            <Text style={styles.langBody}>{t("onboarding.languageBody")}</Text>
+          </View>
+        </View>
+        <LanguageDropdown compact />
+      </View>
+
       <View style={styles.hero}>
         <View style={styles.heroIcon}>
           <Ionicons name="compass-outline" size={30} color={COLORS.primaryTextOn} />
@@ -30,10 +43,6 @@ export default function OnboardingScreen({ navigation }) {
         <Text style={styles.kicker}>{t("onboarding.kicker")}</Text>
         <Text style={styles.title}>{t("onboarding.title")}</Text>
         <Text style={styles.subtitle}>{t("onboarding.subtitle")}</Text>
-      </View>
-
-      <View style={styles.langBox}>
-        <LanguageDropdown compact />
       </View>
 
       {points.map((item) => (
@@ -92,6 +101,22 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     ...SHADOW.soft
   },
+  langHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.md,
+    marginBottom: SPACING.md
+  },
+  langIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: RADII.lg,
+    backgroundColor: COLORS.primaryLight,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  langTitle: { color: COLORS.text, fontSize: 18, fontWeight: "900" },
+  langBody: { color: COLORS.subtext, lineHeight: 19, marginTop: 3 },
   point: {
     flexDirection: "row",
     gap: SPACING.md,

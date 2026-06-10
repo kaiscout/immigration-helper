@@ -19,6 +19,8 @@
     "quickResourcesSub": "Open USCIS forms, fees, and legal help."
   },
   "onboarding": {
+    "languageTitle": "Choose your language",
+    "languageBody": "You can change this later from the top-left button on Home.",
     "kicker": "Private checklist",
     "title": "Stay organized without guessing.",
     "subtitle": "A calm place to track immigration forms, dates, reminders, and official resources.",

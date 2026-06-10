@@ -51,6 +51,10 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.wrap}>
+      <View style={styles.topBar}>
+        <LanguageDropdown buttonOnly />
+      </View>
+
       <View style={styles.hero}>
         <View style={styles.heroTop}>
           <View style={styles.heroIcon}>
@@ -74,8 +78,6 @@ export default function HomeScreen({ navigation }) {
           </TouchableOpacity>
         </View>
       </View>
-
-      <LanguageDropdown />
 
       <TouchableOpacity style={styles.aiCard} onPress={() => navigation.navigate("AIAdvisor")}>
         <View style={styles.aiLeft}>
@@ -153,6 +155,10 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: COLORS.bg },
   wrap: { padding: SPACING.lg, gap: SPACING.md, flexGrow: 1 },
+  topBar: {
+    alignItems: "flex-start",
+    marginBottom: -SPACING.xs
+  },
   hero: {
     backgroundColor: COLORS.card,
     padding: SPACING.xl,

@@ -19,6 +19,8 @@
     "quickResourcesSub": "USCIS formlari, ucretleri ve hukuki yardimi acin."
   },
   "onboarding": {
+    "languageTitle": "Dilinizi seçin",
+    "languageBody": "Bunu daha sonra Ana ekrandaki sol üst düğmeden değiştirebilirsiniz.",
     "kicker": "Ozel kontrol listesi",
     "title": "Tahmin etmeden duzenli kalin.",
     "subtitle": "Formlari, tarihleri, hatirlaticilari ve resmi kaynaklari takip etmek icin sakin bir yer.",
