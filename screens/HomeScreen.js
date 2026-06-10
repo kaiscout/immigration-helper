@@ -113,11 +113,6 @@ export default function HomeScreen({ navigation }) {
         </TouchableOpacity>
       ))}
 
-      <TouchableOpacity style={styles.remBtn} onPress={() => navigation.navigate("Reminders")}>
-        <Ionicons name="notifications-outline" size={20} color={COLORS.text} />
-        <Text style={styles.remText}>{t("reminders.title")}</Text>
-      </TouchableOpacity>
-
       <View style={styles.disclaimerBox}>
         <Ionicons name="warning-outline" size={18} color={COLORS.warning} />
         <Text style={styles.disclaimer}>{t("common.disclaimer")}</Text>
@@ -237,21 +232,6 @@ const styles = StyleSheet.create({
   cardTitle: { fontSize: 18, fontWeight: "900", color: COLORS.text },
   cardSub: { marginTop: 4, color: COLORS.subtext, fontSize: 13, lineHeight: 18 },
   disabled: { opacity: 0.45 },
-  remBtn: {
-    alignSelf: "center",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginTop: SPACING.md,
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.xl,
-    borderRadius: RADII.pill,
-    backgroundColor: COLORS.card,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    ...SHADOW.soft
-  },
-  remText: { fontWeight: "900", color: COLORS.text },
   disclaimerBox: { flexDirection: "row", gap: 8, alignItems: "flex-start", marginTop: SPACING.md },
   disclaimer: { color: COLORS.subtext, fontSize: 12, lineHeight: 18, flex: 1 },
   bottomLinks: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 10, marginTop: SPACING.sm },
