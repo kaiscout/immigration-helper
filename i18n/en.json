@@ -1,6 +1,7 @@
 {
   "appTitle": "Immigration Helper",
   "home": {
+    "welcome": "Welcome!",
     "title": "Choose a process",
     "tpsRenewal": "TPS Renewal",
     "workPermit": "Work Permit (EAD)",

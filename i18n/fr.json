@@ -1,6 +1,7 @@
 {
   "appTitle": "Assistant Immigration",
   "home": {
+    "welcome": "Bienvenue !",
     "title": "Choisir une démarche",
     "tpsRenewal": "Renouvellement TPS",
     "workPermit": "Permis de travail (EAD)",

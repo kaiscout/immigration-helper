@@ -1,6 +1,7 @@
 {
   "appTitle": "Göçmenlik Yardımcısı",
   "home": {
+    "welcome": "Hoş geldiniz!",
     "title": "Bir süreç seçin",
     "tpsRenewal": "TPS Yenileme",
     "workPermit": "Çalışma İzni (EAD)",

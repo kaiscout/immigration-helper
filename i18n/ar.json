@@ -1,6 +1,7 @@
 {
   "appTitle": "مساعد الهجرة",
   "home": {
+    "welcome": "مرحباً!",
     "title": "اختر إجراءً",
     "tpsRenewal": "تجديد TPS",
     "workPermit": "تصريح العمل (EAD)",

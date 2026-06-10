@@ -1,6 +1,7 @@
 {
   "appTitle": "移民助手",
   "home": {
+    "welcome": "欢迎！",
     "title": "选择一个流程",
     "tpsRenewal": "TPS 续期",
     "workPermit": "工作许可 (EAD)",

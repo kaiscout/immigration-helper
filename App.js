@@ -67,7 +67,7 @@ export default function App() {
           name="Home"
           component={HomeScreen}
           options={{
-            title: t("appTitle"),
+            title: t("home.welcome"),
             headerRight: () => <LanguageDropdown buttonOnly header />
           }}
         />
