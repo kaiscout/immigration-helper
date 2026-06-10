@@ -34,6 +34,11 @@ yarn-error.*
 .env
 .env*.local
 
+# generated USCIS knowledge files
+server/data/*.json
+server/data/*.jsonl
+server/data/*.tmp
+
 # typescript
 *.tsbuildinfo
 

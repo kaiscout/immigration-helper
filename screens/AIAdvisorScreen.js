@@ -19,11 +19,13 @@ import {
 import { loadNotificationsAsync } from "../data/notificationService";
 
 const SYSTEM_PROMPT = `
-You are Immigration Helper's in-app assistant. You help with USCIS and U.S. immigration questions, checklist organization, forms, dates, reminders, and official-resource navigation.
-You may explain general USCIS topics, suggest organization steps, summarize the user's checklist progress, and help the user decide what to verify next.
-You must not claim to be a lawyer, provide legal advice, determine eligibility, guarantee outcomes, or tell the user what they legally should do.
-For high-stakes questions, recommend verifying current USCIS instructions and speaking with a qualified immigration attorney or DOJ-accredited representative.
-When the user asks about their app data, use the provided checklist context. Keep answers concise, practical, and checklist-style.
+You are Immigration Helper's USCIS information assistant.
+Answer U.S. immigration questions using current official USCIS sources only, and cite the USCIS pages supporting the answer.
+If USCIS does not govern an issue, say so and identify the appropriate official agency without relying on unofficial sources.
+Do not provide legal advice, determine eligibility, predict approval, guarantee outcomes, or ask for sensitive identifiers.
+For case-specific or high-stakes decisions, recommend a licensed immigration attorney or DOJ-accredited representative.
+Use the provided checklist context only for organization and clearly treat it as user-provided information.
+Answer in the requested language. Keep answers concise, practical, and clear about dates, forms, fees, exceptions, and next steps.
 `;
 
 const OFFICIAL_LINKS = {
@@ -468,6 +470,38 @@ function aiErrorMessage(status, data, t) {
   return data?.error?.message || t("ai.requestFailed");
 }
 
+function responseSources(data) {
+  const candidates = Array.isArray(data?.sources) ? [...data.sources] : [];
+
+  (data?.output || []).forEach((item) => {
+    (item?.content || []).forEach((content) => {
+      (content?.annotations || []).forEach((annotation) => {
+        const citation = annotation?.url_citation || annotation;
+        if (citation?.url) {
+          candidates.push({ title: citation.title || "USCIS", url: citation.url });
+        }
+      });
+    });
+
+    (item?.action?.sources || []).forEach((source) => {
+      if (source?.url) candidates.push({ title: source.title || "USCIS", url: source.url });
+    });
+  });
+
+  const seen = new Set();
+  return candidates.filter((source) => {
+    try {
+      const url = new URL(source.url);
+      const official = url.hostname === "uscis.gov" || url.hostname.endsWith(".uscis.gov");
+      if (!official || seen.has(url.href)) return false;
+      seen.add(url.href);
+      return true;
+    } catch {
+      return false;
+    }
+  }).slice(0, 6);
+}
+
 export default function AIAdvisorScreen({ navigation }) {
   const { t, i18n } = useTranslation();
   const lang = (i18n.language || "en").toLowerCase();
@@ -505,8 +539,8 @@ export default function AIAdvisorScreen({ navigation }) {
 
   const contextText = useMemo(() => buildAssistantContext(flowStates, lang, t), [flowStates, lang, t]);
 
-  const appendAssistant = (text) => {
-    setMessages((current) => [...current, { role: "assistant", text }]);
+  const appendAssistant = (text, sources = []) => {
+    setMessages((current) => [...current, { role: "assistant", text, sources }]);
   };
 
   const refreshAndSetStates = async () => {
@@ -759,9 +793,29 @@ export default function AIAdvisorScreen({ navigation }) {
         .map((msg) => `${msg.role === "user" ? "User" : "Assistant"}: ${msg.text}`)
         .join("\n");
 
-      const instructions = `${SYSTEM_PROMPT}\nAnswer in this language code: ${i18n.language}.`;
+      const instructions = `${SYSTEM_PROMPT}\nRequested language code: ${i18n.language}.`;
       const requestInput = `Recent conversation:\n${recentConversation}\n\nCurrent user question:\n${question}\n\nCurrent in-app checklist context:\n${contextText}`;
       const useProxy = Boolean(AI_PROXY_URL);
+      const requestBody = useProxy
+        ? {
+          model: AI_MODEL,
+          question,
+          conversation: recentConversation,
+          checklistContext: contextText,
+          language: i18n.language
+        }
+        : {
+          model: AI_MODEL,
+          instructions,
+          input: requestInput,
+          tools: [{
+            type: "web_search",
+            filters: { allowed_domains: ["uscis.gov"] }
+          }],
+          tool_choice: "required",
+          include: ["web_search_call.action.sources"],
+          store: false
+        };
 
       const response = await fetch(useProxy ? AI_PROXY_URL : OPENAI_RESPONSES_URL, {
         method: "POST",
@@ -769,12 +823,7 @@ export default function AIAdvisorScreen({ navigation }) {
           "Content-Type": "application/json",
           ...(useProxy ? {} : { Authorization: `Bearer ${OPENAI_API_KEY}` })
         },
-        body: JSON.stringify({
-          model: AI_MODEL,
-          instructions,
-          input: requestInput,
-          language: i18n.language
-        })
+        body: JSON.stringify(requestBody)
       });
 
       const data = await response.json();
@@ -788,7 +837,7 @@ export default function AIAdvisorScreen({ navigation }) {
         data?.output?.[0]?.content?.[0]?.text ||
         t("ai.noAnswer");
 
-      appendAssistant(answer);
+      appendAssistant(answer, responseSources(data));
     } catch (e) {
       Alert.alert(t("ai.errorTitle"), String(e.message || e));
       appendAssistant(`${broadFallback(question, t)}\n\n${t("ai.requestFallback")}`);
@@ -876,6 +925,22 @@ export default function AIAdvisorScreen({ navigation }) {
             >
               {msg.text}
             </Text>
+            {msg.role === "assistant" && msg.sources?.length ? (
+              <View style={styles.answerSources}>
+                {msg.sources.map((source, sourceIndex) => (
+                  <TouchableOpacity
+                    key={`${source.url}-${sourceIndex}`}
+                    style={styles.answerSource}
+                    onPress={() => Linking.openURL(source.url)}
+                  >
+                    <Ionicons name="open-outline" size={14} color={COLORS.primary} />
+                    <Text style={styles.answerSourceText} numberOfLines={2}>
+                      {source.title || "USCIS"}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            ) : null}
           </View>
         ))}
 
@@ -937,7 +1002,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: SPACING.md
   },
-  title: { color: COLORS.primaryTextOn, fontSize: 26, fontWeight: "900", letterSpacing: -0.5 },
+  title: { color: COLORS.primaryTextOn, fontSize: 26, fontWeight: "900", letterSpacing: 0 },
   subtitle: { color: "rgba(255,255,255,0.84)", marginTop: SPACING.sm, lineHeight: 20 },
   guardCard: {
     flexDirection: "row",
@@ -999,6 +1064,25 @@ const styles = StyleSheet.create({
   bubbleText: { fontSize: 15, lineHeight: 22 },
   assistantText: { color: COLORS.text },
   userText: { color: COLORS.primaryTextOn },
+  answerSources: {
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+    marginTop: SPACING.sm,
+    paddingTop: SPACING.sm,
+    gap: 8
+  },
+  answerSource: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6
+  },
+  answerSourceText: {
+    color: COLORS.primary,
+    flex: 1,
+    fontSize: 12,
+    fontWeight: "800",
+    lineHeight: 17
+  },
   sourceRow: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: SPACING.md },
   sourceBtn: {
     flexDirection: "row",
