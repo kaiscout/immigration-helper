@@ -6,7 +6,7 @@ import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
 import { LANGUAGES } from "../i18n/languages";
 import { savePreferredLanguage } from "../data/languagePreference";
 
-export default function LanguageDropdown({ compact = false, buttonOnly = false }) {
+export default function LanguageDropdown({ compact = false, buttonOnly = false, header = false }) {
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const currentCode = (i18n.language || "en").toLowerCase().split("-")[0];
@@ -31,12 +31,14 @@ export default function LanguageDropdown({ compact = false, buttonOnly = false }
           activeOpacity={0.85}
           accessibilityRole="button"
           accessibilityLabel={t("common.language")}
-          style={styles.languageButton}
+          style={[styles.languageButton, header && styles.headerLanguageButton]}
           onPress={() => setOpen(true)}
         >
-          <Ionicons name="language-outline" size={18} color={COLORS.primary} />
-          <Text style={styles.languageButtonText}>{currentLanguage.shortLabel}</Text>
-          <Ionicons name="chevron-down" size={16} color={COLORS.subtext} />
+          <Ionicons name="language-outline" size={header ? 16 : 18} color={COLORS.primary} />
+          <Text style={[styles.languageButtonText, header && styles.headerLanguageButtonText]}>
+            {currentLanguage.shortLabel}
+          </Text>
+          <Ionicons name="chevron-down" size={header ? 14 : 16} color={COLORS.subtext} />
         </TouchableOpacity>
       ) : (
         <TouchableOpacity
@@ -154,6 +156,15 @@ const styles = StyleSheet.create({
     ...SHADOW.soft
   },
   languageButtonText: { color: COLORS.text, fontWeight: "900", fontSize: 13 },
+  headerLanguageButton: {
+    minHeight: 34,
+    paddingHorizontal: 10,
+    gap: 5,
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0
+  },
+  headerLanguageButtonText: { fontSize: 12 },
   backdrop: {
     flex: 1,
     backgroundColor: "rgba(8,17,31,0.38)",

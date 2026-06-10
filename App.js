@@ -17,6 +17,7 @@ import ResourcesScreen from "./screens/ResourcesScreen";
 import PrivacyScreen from "./screens/PrivacyScreen";
 import { COLORS } from "./constants/theme";
 import { loadPreferredLanguage } from "./data/languagePreference";
+import LanguageDropdown from "./components/LanguageDropdown";
 
 const Stack = createNativeStackNavigator();
 
@@ -65,7 +66,10 @@ export default function App() {
         <Stack.Screen
           name="Home"
           component={HomeScreen}
-          options={{ title: t("appTitle") }}
+          options={{
+            title: t("appTitle"),
+            headerRight: () => <LanguageDropdown buttonOnly header />
+          }}
         />
         <Stack.Screen
           name="Flow"
