@@ -62,16 +62,6 @@ export default function HomeScreen({ navigation }) {
         </View>
         <Text style={styles.appTitle}>{t("appTitle")}</Text>
         <Text style={styles.heroSubtitle}>{t("home.heroSubtitle")}</Text>
-        <View style={styles.heroActions}>
-          <TouchableOpacity style={styles.heroBtn} onPress={() => navigation.navigate("Resources")}>
-            <Ionicons name="shield-checkmark-outline" size={18} color={COLORS.primaryTextOn} />
-            <Text style={styles.heroBtnText}>{t("resources.title")}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.heroBtnSecondary} onPress={() => Linking.openURL("https://www.uscis.gov/")}>
-            <Ionicons name="open-outline" size={18} color={COLORS.primary} />
-            <Text style={styles.heroBtnSecondaryText}>USCIS</Text>
-          </TouchableOpacity>
-        </View>
       </View>
 
       <TouchableOpacity style={styles.aiCard} onPress={() => navigation.navigate("AIAdvisor")}>
@@ -182,27 +172,6 @@ const styles = StyleSheet.create({
   safePillText: { color: COLORS.success, fontWeight: "900", fontSize: 12 },
   appTitle: { fontSize: 30, fontWeight: "900", color: COLORS.text, letterSpacing: -0.8 },
   heroSubtitle: { marginTop: SPACING.sm, color: COLORS.subtext, fontSize: 15, lineHeight: 22 },
-  heroActions: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: SPACING.lg },
-  heroBtn: {
-    flexDirection: "row",
-    gap: 7,
-    alignItems: "center",
-    backgroundColor: COLORS.primary,
-    paddingVertical: 11,
-    paddingHorizontal: 14,
-    borderRadius: RADII.pill
-  },
-  heroBtnText: { color: COLORS.primaryTextOn, fontWeight: "900" },
-  heroBtnSecondary: {
-    flexDirection: "row",
-    gap: 7,
-    alignItems: "center",
-    backgroundColor: COLORS.primaryLight,
-    paddingVertical: 11,
-    paddingHorizontal: 14,
-    borderRadius: RADII.pill
-  },
-  heroBtnSecondaryText: { color: COLORS.primary, fontWeight: "900" },
   sectionHeader: { marginTop: SPACING.sm },
   sectionTitle: { fontSize: 14, fontWeight: "800", color: COLORS.subtext, textTransform: "uppercase", letterSpacing: 0.8 },
   title: { fontSize: 26, fontWeight: "900", color: COLORS.text, letterSpacing: -0.5 },
