@@ -5,8 +5,9 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import { Ionicons } from "@expo/vector-icons";
 
 import OnboardingScreen, { ONBOARDING_KEY } from "./screens/OnboardingScreen";
 import HomeScreen from "./screens/HomeScreen";
@@ -20,6 +21,20 @@ import { loadPreferredLanguage } from "./data/languagePreference";
 import LanguageDropdown from "./components/LanguageDropdown";
 
 const Stack = createNativeStackNavigator();
+
+function HeaderResourcesButton({ label, onPress }) {
+  return (
+    <TouchableOpacity
+      activeOpacity={0.85}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={styles.headerResourceButton}
+      onPress={onPress}
+    >
+      <Ionicons name="shield-checkmark-outline" size={18} color={COLORS.primary} />
+    </TouchableOpacity>
+  );
+}
 
 export default function App() {
   const { t } = useTranslation();
@@ -66,10 +81,16 @@ export default function App() {
         <Stack.Screen
           name="Home"
           component={HomeScreen}
-          options={{
+          options={({ navigation }) => ({
             title: t("home.welcome"),
+            headerLeft: () => (
+              <HeaderResourcesButton
+                label={t("resources.title")}
+                onPress={() => navigation.navigate("Resources")}
+              />
+            ),
             headerRight: () => <LanguageDropdown buttonOnly header />
-          }}
+          })}
         />
         <Stack.Screen
           name="Flow"
@@ -102,3 +123,16 @@ export default function App() {
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  headerResourceButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.card,
+    alignItems: "center",
+    justifyContent: "center"
+  }
+});
