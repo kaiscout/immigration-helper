@@ -17,25 +17,43 @@ function readHidden(prompt) {
     process.stdin.resume();
     process.stdin.setEncoding("utf8");
     let value = "";
+    let finished = false;
 
-    const onData = (character) => {
-      if (character === "\u0003") {
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      process.stdin.setRawMode(false);
+      process.stdin.pause();
+      process.stdin.removeListener("data", onData);
+      process.stdout.write("\n");
+      resolve(
+        value
+          .replace(/\u001b\[[0-9;]*[A-Za-z~]/g, "")
+          .replace(/\s+/g, "")
+          .trim()
+      );
+    };
+
+    const onData = (chunk) => {
+      if (chunk.includes("\u0003")) {
         process.stdout.write("\n");
         process.exit(130);
       }
-      if (character === "\r" || character === "\n") {
-        process.stdin.setRawMode(false);
-        process.stdin.pause();
-        process.stdin.removeListener("data", onData);
-        process.stdout.write("\n");
-        resolve(value.trim());
+
+      const newlineIndex = chunk.search(/[\r\n]/);
+      if (newlineIndex >= 0) {
+        value += chunk.slice(0, newlineIndex);
+        finish();
         return;
       }
-      if (character === "\u007f") {
-        value = value.slice(0, -1);
-        return;
+
+      for (const character of chunk) {
+        if (character === "\u007f") {
+          value = value.slice(0, -1);
+        } else {
+          value += character;
+        }
       }
-      value += character;
     };
 
     process.stdin.on("data", onData);
@@ -75,21 +93,42 @@ async function validateKey(apiKey) {
   });
 
   if (response.ok) return;
+  if (response.status === 401) {
+    throw new Error(
+      "OpenAI rejected that key. Create a fresh key and copy it from the one-time creation window."
+    );
+  }
   const body = await response.json().catch(() => ({}));
   throw new Error(body?.error?.message || `OpenAI returned HTTP ${response.status}.`);
 }
 
 async function main() {
   console.log("The key will be stored only in .env and will not be displayed.");
-  const apiKey = await readHidden("Paste your OpenAI API key, then press Enter: ");
+  let apiKey = "";
 
-  if (!/^sk-[A-Za-z0-9_-]{20,}$/.test(apiKey)) {
-    throw new Error("That does not look like a complete OpenAI API key.");
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    apiKey = await readHidden("Paste your newly created OpenAI API key, then press Enter: ");
+
+    if (!/^sk-[A-Za-z0-9_-]{20,}$/.test(apiKey) || apiKey.length > 500) {
+      console.error("That paste was not one complete OpenAI API key. Please try again.");
+      continue;
+    }
+
+    process.stdout.write(`Captured ${apiKey.length} characters securely. Checking with OpenAI...`);
+    try {
+      await validateKey(apiKey);
+      process.stdout.write(" valid.\n");
+      break;
+    } catch (error) {
+      process.stdout.write(" rejected.\n");
+      console.error(error.message);
+      apiKey = "";
+    }
   }
 
-  process.stdout.write("Checking the key with OpenAI...");
-  await validateKey(apiKey);
-  process.stdout.write(" valid.\n");
+  if (!apiKey) {
+    throw new Error("No valid key was saved after three attempts.");
+  }
 
   const existing = fs.existsSync(envPath) ? parseEnv(fs.readFileSync(envPath, "utf8")) : {};
   fs.writeFileSync(
