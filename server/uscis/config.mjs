@@ -34,6 +34,15 @@ const RELEVANT_EXACT_PATHS = new Set([
   "/employment-authorization"
 ]);
 
+const EXCLUDED_EXACT_PATHS = new Set([
+  "/administrative-appeals/aao-practice-manual/search",
+  "/citizenship-resource-center/resources-for-educational-programs/citizenship-teacher-training-registration",
+  "/forms/filing-guidance/forms-by-mail-confirmation",
+  "/forms/myaccount-redirect",
+  "/tools/a-z-index/site-map",
+  "/tools/top-ten-ways-uscis-is-improving-the-integrity-of-the-immigration-system"
+]);
+
 const RELEVANT_ABOUT_PREFIXES = [
   "/about-us/contact-us",
   "/about-us/find-a-uscis-office"
@@ -77,6 +86,7 @@ export function isRelevantUscisUrl(rawUrl, robotsDisallows = []) {
 
   const { pathname } = new URL(normalized);
   if (EXCLUDED_EXTENSIONS.test(pathname)) return false;
+  if (EXCLUDED_EXACT_PATHS.has(pathname)) return false;
   if (robotsDisallows.some((prefix) => prefix && pathname.startsWith(prefix))) return false;
   if (EXCLUDED_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) {
     return false;

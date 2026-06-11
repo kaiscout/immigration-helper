@@ -21,6 +21,7 @@ test("includes current immigration guidance and excludes archives and files", ()
   assert.equal(isRelevantUscisUrl("https://www.uscis.gov/"), false);
   assert.equal(isRelevantUscisUrl("https://www.uscis.gov/archive/old-guidance"), false);
   assert.equal(isRelevantUscisUrl("https://www.uscis.gov/sites/default/files/document/forms/i-485.pdf"), false);
+  assert.equal(isRelevantUscisUrl("https://www.uscis.gov/forms/myaccount-redirect"), false);
 });
 
 test("honors parsed robots disallow paths", () => {
