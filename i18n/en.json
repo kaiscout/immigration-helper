@@ -130,6 +130,7 @@
     "subtitle": "Ask USCIS questions, manage checklist tasks, and review your saved progress.",
     "welcome": "Hi — I can answer general USCIS and immigration questions, summarize your checklist progress, set notice dates, mark steps done, open resources, and help you decide what to verify next.",
     "placeholder": "Ask a question or tell me a task...",
+    "send": "Send message",
     "thinking": "Thinking...",
     "errorTitle": "AI Error",
     "noAnswer": "I could not generate an answer.",

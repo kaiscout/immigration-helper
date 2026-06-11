@@ -17,15 +17,23 @@ Then run:
 npm install
 npm start
 
-Optional AI setup:
-For quick local Expo Go testing:
+`npm start` now starts both Expo and the local USCIS knowledge server. If port
+8081 belongs to another project, it automatically selects the next available
+port without stopping the other project or asking an interactive question.
+
+AI setup:
+The AI Helper can search the packaged USCIS corpus without an API key. This
+fallback returns the matching official passage and USCIS source.
+
+For custom, fully generated, human-like answers in every supported language:
 1. Create a new OpenAI API key at https://platform.openai.com/api-keys
 2. Copy .env.example to .env
-3. Add your key:
-   EXPO_PUBLIC_OPENAI_API_KEY=your_openai_api_key_here
+3. Add the key as a server-only secret:
+   OPENAI_API_KEY=your_openai_api_key_here
 4. Run:
-   npm run check:ai
    npm start
 
-Important: EXPO_PUBLIC variables are visible in a client app. For a real public App Store or Play Store build, use a small backend endpoint instead of putting your API key in the app, then set:
-EXPO_PUBLIC_AI_PROXY_URL=https://your-backend.example.com/openai
+Important: Never put a private key in EXPO_PUBLIC_OPENAI_API_KEY for a public
+build. Deploy `server/index.mjs` to a backend host with OPENAI_API_KEY stored
+there, then set:
+EXPO_PUBLIC_AI_PROXY_URL=https://your-backend.example.com/api/ai

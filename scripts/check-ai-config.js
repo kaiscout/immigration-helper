@@ -33,9 +33,10 @@ async function main() {
   const localEnv = parseEnv(envPath);
   const exampleEnv = parseEnv(examplePath);
   const read = (key) => process.env[key] || localEnv[key] || exampleEnv[key] || "";
-  const apiKey = read("EXPO_PUBLIC_OPENAI_API_KEY").trim();
+  const serverApiKey = read("OPENAI_API_KEY").trim();
+  const clientApiKey = read("EXPO_PUBLIC_OPENAI_API_KEY").trim();
   const proxyUrl = read("EXPO_PUBLIC_AI_PROXY_URL").trim();
-  const model = read("EXPO_PUBLIC_OPENAI_MODEL").trim() || "gpt-4.1-mini";
+  const model = read("EXPO_PUBLIC_OPENAI_MODEL").trim() || "gpt-5.4-mini";
   const live = process.argv.includes("--live");
 
   if (proxyUrl) {
@@ -44,15 +45,21 @@ async function main() {
     return;
   }
 
+  const apiKey = !isPlaceholder(serverApiKey) ? serverApiKey : clientApiKey;
   if (isPlaceholder(apiKey)) {
-    console.error("Open-ended AI is not configured yet.");
-    console.error("Create .env from .env.example and set EXPO_PUBLIC_OPENAI_API_KEY.");
-    console.error("For public store builds, prefer EXPO_PUBLIC_AI_PROXY_URL instead.");
-    process.exit(1);
+    console.log("USCIS corpus fallback is ready and does not require an API key.");
+    console.log("Fully generated multilingual answers are not configured yet.");
+    console.log("Set server-only OPENAI_API_KEY in .env, then restart with npm start.");
+    return;
   }
 
-  console.log(`OpenAI API key is present for local Expo testing. Model: ${model}`);
-  console.log("Restart Expo with npm start so Metro reloads environment variables.");
+  console.log(`OpenAI generation is configured. Model: ${model}`);
+  console.log(
+    !isPlaceholder(serverApiKey)
+      ? "The key is server-only and will not be bundled into the app."
+      : "Warning: EXPO_PUBLIC_OPENAI_API_KEY is visible in the client bundle. Use only for local testing."
+  );
+  console.log("Restart with npm start so the AI server reloads environment variables.");
 
   if (!live) return;
 

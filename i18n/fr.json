@@ -130,6 +130,7 @@
     "subtitle": "Posez des questions USCIS, gérez les tâches et consultez votre progression.",
     "welcome": "Bonjour, je peux répondre aux questions générales USCIS et immigration, résumer votre progression, définir des dates d’avis, marquer des étapes comme terminées, ouvrir des ressources et vous aider à décider quoi vérifier ensuite.",
     "placeholder": "Posez une question ou donnez-moi une tâche...",
+    "send": "Envoyer le message",
     "thinking": "Réflexion...",
     "errorTitle": "Erreur IA",
     "noAnswer": "Je n’ai pas pu générer de réponse.",

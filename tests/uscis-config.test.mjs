@@ -93,3 +93,38 @@ test("recognizes natural address-change phrasing across supported languages", ()
     assert.equal(searchCorpus(index, question, 1)[0]?.title, "How to Change Your Address");
   }
 });
+
+test("prefers canonical USCIS guidance over translated duplicate pages", () => {
+  const index = createCorpusIndex([{
+    url: "https://www.uscis.gov/forms/filing-guidance/preparing-for-your-biometric-services-appointment",
+    title: "Preparing for Your Biometric Services Appointment",
+    description: "",
+    chunks: ["Reschedule a biometrics appointment through your USCIS online account before the appointment time."]
+  }, {
+    url: "https://www.uscis.gov/forms/filing-guidance/preparing-for-your-biometric-services-appointment/preparing-for-your-biometric-services-appointment-french",
+    title: "Confirmation de rendez-vous biométrique",
+    description: "",
+    chunks: ["Biometria appointment account reschedule USCIS."]
+  }]);
+
+  const [result] = searchCorpus(index, "Perdi meu agendamento de biometria");
+  assert.equal(result.title, "Preparing for Your Biometric Services Appointment");
+});
+
+test("excludes non-content error pages from the searchable index", () => {
+  const index = createCorpusIndex([{
+    url: "https://www.uscis.gov/page-not-found",
+    title: "Page Not Found",
+    description: "",
+    chunks: ["work permit employment authorization"]
+  }, {
+    url: "https://www.uscis.gov/working-in-the-united-states",
+    title: "Employment Authorization",
+    description: "",
+    chunks: ["Official information about employment authorization."]
+  }]);
+
+  assert.equal(index.pageCount, 2);
+  assert.equal(index.documents.length, 1);
+  assert.equal(searchCorpus(index, "work permit", 1)[0]?.title, "Employment Authorization");
+});

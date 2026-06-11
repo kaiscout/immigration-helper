@@ -3,7 +3,7 @@
   "main": "index.js",
   "version": "1.0.0",
   "scripts": {
-    "start": "node ./scripts/stop-expo.js && expo start --clear",
+    "start": "node ./scripts/start-project.js",
     "stop": "node ./scripts/stop-expo.js",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo start --android --clear",
@@ -12,6 +12,7 @@
     "lint": "eslint App.js index.js components/**/*.js constants/**/*.js data/**/*.js screens/**/*.js i18n/**/*.js",
     "check:ai": "node ./scripts/check-ai-config.js",
     "test:uscis": "node --test tests/uscis-config.test.mjs",
+    "test:ai": "node --test tests/ai-answer.test.mjs",
     "test:localization": "node --test tests/localization.test.mjs",
     "uscis:plan": "node ./scripts/scrape-uscis.mjs --dry-run",
     "uscis:scrape": "node ./scripts/scrape-uscis.mjs",

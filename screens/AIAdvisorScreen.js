@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Alert, KeyboardAvoidingView, Linking, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import Constants from "expo-constants";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
 import {
   FLOWS,
@@ -46,9 +47,26 @@ const OFFICIAL_LINKS = {
 };
 
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
-const AI_MODEL = (process.env.EXPO_PUBLIC_OPENAI_MODEL || "gpt-4.1-mini").trim();
+const AI_MODEL = (process.env.EXPO_PUBLIC_OPENAI_MODEL || "gpt-5.4-mini").trim();
 const OPENAI_API_KEY = (process.env.EXPO_PUBLIC_OPENAI_API_KEY || "").trim();
-const AI_PROXY_URL = (process.env.EXPO_PUBLIC_AI_PROXY_URL || "").trim();
+const CONFIGURED_AI_PROXY_URL = (process.env.EXPO_PUBLIC_AI_PROXY_URL || "").trim();
+
+const developmentProxyUrl = () => {
+  if (typeof __DEV__ === "undefined" || !__DEV__) return "";
+
+  const hostUri =
+    Constants.expoConfig?.hostUri ||
+    Constants.manifest2?.extra?.expoClient?.hostUri ||
+    "";
+  const rawHost = Platform.OS === "web"
+    ? globalThis.location?.hostname || hostUri.split(":")[0]
+    : hostUri.split(":")[0];
+  const host = rawHost?.replace(/^\[|\]$/g, "");
+  if (!host) return "";
+  return `http://${host.includes(":") ? `[${host}]` : host}:8787/api/ai`;
+};
+
+const AI_PROXY_URL = CONFIGURED_AI_PROXY_URL || developmentProxyUrl();
 
 const isPlaceholderSecret = (value) =>
   !value || /your[_-]?openai|your[_-]?api|replace|paste|example|placeholder/i.test(value);
@@ -288,6 +306,8 @@ const ALL_TERMS = [
   "all", "everything", "todos", "todas", "todo", "tudo", "hepsi", "tum", "tüm", "tout", "tous", "toutes",
   "全部", "所有", "सभी", "सब", "كل", "সব", "সবগুলো", "все", "всё"
 ];
+
+const ACTION_INTENT_THRESHOLD = 4;
 
 const scoreTerms = (normalized, terms) => scoreTextMatch(normalized, terms);
 
@@ -681,25 +701,30 @@ export default function AIAdvisorScreen({ navigation }) {
     const flow = flowMatch?.data;
     const flowKey = flowMatch?.key;
     const explicitQuestion = hasAnyTerm(q, QUESTION_TERMS, 1);
-    const wantsOpen = scores.open >= 1;
-    const hasSummaryTerm = scores.summary >= 1;
-    const mentionsChecklist = scores.checklist >= 1;
+    const wantsOpen = scores.open >= ACTION_INTENT_THRESHOLD;
+    const hasSummaryTerm = scores.summary >= ACTION_INTENT_THRESHOLD;
+    const mentionsChecklist = scores.checklist >= ACTION_INTENT_THRESHOLD;
     const wantsSummary =
       (flow && hasSummaryTerm) ||
       mentionsChecklist ||
-      hasAnyTerm(q, SUMMARY_PHRASES) ||
-      (scores.markDone >= 1 && hasAnyTerm(q, QUESTION_TERMS));
+      hasAnyTerm(q, SUMMARY_PHRASES, ACTION_INTENT_THRESHOLD) ||
+      (scores.markDone >= ACTION_INTENT_THRESHOLD && hasAnyTerm(q, QUESTION_TERMS));
     const hasDateLiteral = /\b\d{4}-\d{2}-\d{2}\b/.test(question);
     const wantsDateQuery = flow && scores.dateNoun >= 1 && explicitQuestion && !hasDateLiteral;
     const wantsDate = flow && (
       (hasDateLiteral && (scores.dateVerb >= 1 || scores.dateNoun >= 1)) ||
       (!explicitQuestion && scores.dateVerb >= 1 && scores.dateNoun >= 1)
     );
-    const wantsUndo = flow && scores.undo >= 1;
-    const wantsMarkDone = flow && scores.markDone >= 1 && !explicitQuestion;
-    const wantsClear = flow && scores.clear >= 1 && scores.checklist >= 1;
-    const wantsReminder = flow && scores.reminder >= 1 && scores.create >= 1;
-
+    const wantsUndo = flow && scores.undo >= ACTION_INTENT_THRESHOLD;
+    const wantsMarkDone = flow && scores.markDone >= ACTION_INTENT_THRESHOLD && !explicitQuestion;
+    const wantsClear =
+      flow &&
+      scores.clear >= ACTION_INTENT_THRESHOLD &&
+      scores.checklist >= ACTION_INTENT_THRESHOLD;
+    const wantsReminder =
+      flow &&
+      scores.reminder >= ACTION_INTENT_THRESHOLD &&
+      scores.create >= ACTION_INTENT_THRESHOLD;
     if (wantsOpen) {
       if (flow) {
         navigation.navigate("Flow", { flow });
@@ -821,7 +846,7 @@ export default function AIAdvisorScreen({ navigation }) {
       return t("ai.taskChecklistCleared", { flow: titleForFlow(flow, t) });
     }
 
-    if (scores.capability >= 1) {
+    if (scores.capability >= ACTION_INTENT_THRESHOLD) {
       return t("ai.capabilities");
     }
 
@@ -886,7 +911,13 @@ export default function AIAdvisorScreen({ navigation }) {
         body: JSON.stringify(requestBody)
       });
 
-      const data = await response.json();
+      const responseText = await response.text();
+      let data = {};
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        throw new Error(t("ai.requestFailed"));
+      }
 
       if (!response.ok) {
         throw new Error(aiErrorMessage(response.status, data, t));
@@ -1035,7 +1066,13 @@ export default function AIAdvisorScreen({ navigation }) {
           textAlignVertical="top"
         />
 
-        <TouchableOpacity style={styles.sendBtn} onPress={() => sendMessage()} disabled={loading}>
+        <TouchableOpacity
+          style={styles.sendBtn}
+          onPress={() => sendMessage()}
+          disabled={loading}
+          accessibilityRole="button"
+          accessibilityLabel={t("ai.send")}
+        >
           <Ionicons name="send" size={18} color={COLORS.primaryTextOn} />
         </TouchableOpacity>
       </View>

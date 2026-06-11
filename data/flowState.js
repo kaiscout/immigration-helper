@@ -165,7 +165,7 @@ export const findFlowByText = (text) => {
     }
   });
 
-  return bestScore >= 1 ? best : null;
+  return bestScore >= 4 ? best : null;
 };
 
 export const normalizeText = (value) =>

@@ -68,11 +68,13 @@ const TOPIC_ALIASES = [
   },
   {
     match: ["request for evidence", "rfe", "solicitud de evidencia", "pedido de provas", "solicitação de provas", "kanit talebi", "demande de preuves", "补件", "सबूत का अनुरोध", "طلب أدلة", "প্রমাণের অনুরোধ", "запрос доказательств"],
-    add: ["request", "evidence", "rfe", "response", "deadline"]
+    add: ["request", "evidence", "rfe", "response", "deadline"],
+    prefer: ["/policy-manual/volume-1-part-e-chapter-6"]
   },
   {
     match: ["biometrics", "fingerprint", "biometria", "impressões digitais", "parmak izi", "biometrie", "生物识别", "बायोमेट्रिक", "بصمات", "বায়োমেট্রিক", "биометрия"],
-    add: ["biometrics", "fingerprint", "appointment", "asc"]
+    add: ["biometrics", "fingerprint", "appointment", "asc"],
+    prefer: ["/preparing-for-your-biometric-services-appointment"]
   },
   {
     match: ["case status", "receipt number", "estado del caso", "status do caso", "número do recibo", "dosya durumu", "statut du dossier", "案件状态", "केस स्थिति", "حالة القضية", "কেস স্ট্যাটাস", "статус дела"],
@@ -83,6 +85,9 @@ const TOPIC_ALIASES = [
     add: ["scam", "fraud", "avoid", "legal", "services"]
   }
 ];
+
+const TRANSLATED_PAGE_SUFFIX =
+  /-(?:arabic|bengali|chinese|french|hindi|portuguese|russian|spanish|tagalog|turkish)(?:$|\/)/;
 
 function normalize(value) {
   return String(value || "")
@@ -173,6 +178,7 @@ export function createCorpusIndex(records) {
   let totalLength = 0;
 
   records.forEach((record) => {
+    if (/^(?:page not found|access denied)$/i.test(record.title || "")) return;
     const rawChunks = record.chunks?.length ? record.chunks : [record.text || ""];
     rawChunks.flatMap((chunk) => splitOversizedChunk(chunk)).forEach((text, chunkIndex) => {
       if (!text.trim()) return;
@@ -241,7 +247,11 @@ export function searchCorpus(indexOrRecords, query, limit = 6) {
     score *= 0.65 + 0.35 * (matchedTerms / queryTokens.length);
     if (normalizedQuery.length > 8 && document.normalizedText.includes(normalizedQuery)) score += 8;
     if (normalizedQuery.length > 8 && document.normalizedTitle.includes(normalizedQuery)) score += 12;
-    if (analysis.preferredPaths.some((preferredPath) => document.url.includes(preferredPath))) score += 20;
+    if (analysis.preferredPaths.some((preferredPath) => document.url.includes(preferredPath))) score += 40;
+    if (document.url.includes("/policy-manual/")) score += 4;
+    if (document.url.includes("/forms/")) score += 2;
+    if (document.url.includes("/newsroom/")) score -= 3;
+    if (TRANSLATED_PAGE_SUFFIX.test(document.url)) score -= 25;
     scored.push({ document, score });
   }
 

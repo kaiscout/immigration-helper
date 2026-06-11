@@ -130,6 +130,7 @@
     "subtitle": "Haz preguntas de USCIS, administra tareas y revisa tu progreso guardado.",
     "welcome": "Hola — puedo responder preguntas generales de USCIS e inmigracion, resumir tu progreso, guardar fechas de aviso, marcar pasos, abrir recursos y ayudarte a decidir que verificar despues.",
     "placeholder": "Haz una pregunta o dime una tarea...",
+    "send": "Enviar mensaje",
     "thinking": "Pensando...",
     "errorTitle": "Error de AI",
     "noAnswer": "No pude generar una respuesta.",
