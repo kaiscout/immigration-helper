@@ -33,6 +33,10 @@ For custom, fully generated, human-like answers in every supported language:
 4. Run:
    npm start
 
+Or use the secure guided setup, which validates the key and writes the ignored
+`.env` file without displaying the key:
+npm run setup:ai-key
+
 Important: Never put a private key in EXPO_PUBLIC_OPENAI_API_KEY for a public
 build. Deploy `server/index.mjs` to a backend host with OPENAI_API_KEY stored
 there, then set:

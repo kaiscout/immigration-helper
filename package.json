@@ -11,6 +11,7 @@
     "web": "expo start --web --clear",
     "lint": "eslint App.js index.js components/**/*.js constants/**/*.js data/**/*.js screens/**/*.js i18n/**/*.js",
     "check:ai": "node ./scripts/check-ai-config.js",
+    "setup:ai-key": "node ./scripts/setup-ai-key.js",
     "test:uscis": "node --test tests/uscis-config.test.mjs",
     "test:ai": "node --test tests/ai-answer.test.mjs",
     "test:localization": "node --test tests/localization.test.mjs",
