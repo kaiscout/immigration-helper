@@ -33,7 +33,8 @@ Style:
 - Use natural everyday wording, varied sentence length, and a warm tone when appropriate.
 - Do not sound like a policy manual, legal memo, form letter, or scripted chatbot.
 - Avoid canned introductions, repetitive disclaimers, and phrases such as "Based on the provided context."
-- Do not include raw citation tokens, Markdown links, or decorative bold markers in the answer; sources are displayed separately.
+- Cite the official source immediately after each factual paragraph or list item it supports. Do not collect citations in a separate sources section at the end.
+- Do not add a bibliography, raw citation tokens, manually written Markdown links, or decorative bold markers. The app uses citation annotations to display sources beneath the supported text.
 - Use headings or bullets only when they genuinely make the answer easier to follow.
 - Keep the answer focused. Do not dump source passages or expose internal retrieval details.
 - Treat checklist data as user-provided organization context, not as proof of filing or eligibility.
@@ -240,6 +241,63 @@ export function extractOutputText(data) {
     .trim();
 }
 
+function outputTextContents(data) {
+  return (data?.output || [])
+    .flatMap((item) => item?.content || [])
+    .filter((content) => content?.type === "output_text" && typeof content.text === "string");
+}
+
+function paragraphRanges(text) {
+  const ranges = [];
+  const pattern = /\S[\s\S]*?(?=\n[ \t]*\n|$)/g;
+  let match;
+
+  while ((match = pattern.exec(text)) !== null) {
+    ranges.push({
+      start: match.index,
+      end: match.index + match[0].length,
+      text: match[0]
+    });
+  }
+
+  return ranges;
+}
+
+function annotationSource(annotation) {
+  const citation = annotation?.url_citation || annotation;
+  return citation?.url
+    ? { title: citation.title || "USCIS", url: citation.url }
+    : null;
+}
+
+function annotationBelongsToRange(annotation, range) {
+  const citation = annotation?.url_citation || annotation;
+  const start = Number(citation?.start_index);
+  const end = Number(citation?.end_index);
+  if (!Number.isFinite(start)) return false;
+
+  return start <= range.end && (Number.isFinite(end) ? end >= range.start : start >= range.start);
+}
+
+export function extractAnswerSections(data) {
+  return outputTextContents(data).flatMap((content) => {
+    const annotations = content.annotations || [];
+    return paragraphRanges(content.text).flatMap((range) => {
+      const text = extractOutputText({ output_text: range.text });
+      if (!text) return [];
+
+      const sources = uniqueSources(
+        annotations
+          .filter((annotation) => annotationBelongsToRange(annotation, range))
+          .map(annotationSource)
+          .filter(Boolean)
+      );
+
+      return [{ text, sources }];
+    });
+  });
+}
+
 function queryTokens(value) {
   return String(value || "")
     .toLowerCase()
@@ -280,6 +338,7 @@ export function buildLocalFallback(question, language, results) {
     return {
       output_text: copy.missing,
       sources,
+      sections: [{ text: copy.missing, sources }],
       grounded_on: "no_matching_uscis_source",
       degraded: true
     };
@@ -288,9 +347,11 @@ export function buildLocalFallback(question, language, results) {
   const primary = results[0];
   const passage = usefulSentences(primary, question).join(" ");
   const sourceLabel = copy.sourceLanguage ? `${copy.sourceLanguage}\n` : "";
+  const outputText = `${copy.intro}\n\n${sourceLabel}${passage}\n\n${copy.verify}`;
   return {
-    output_text: `${copy.intro}\n\n${sourceLabel}${passage}\n\n${copy.verify}`,
+    output_text: outputText,
     sources,
+    sections: [{ text: outputText, sources }],
     grounded_on: "local_uscis_corpus",
     degraded: true
   };
@@ -419,11 +480,15 @@ export function createAnswerService({
       const webSources = extractSources(data);
       const localSources = supportingLocalSources(localResults);
       const sources = webSources.length ? webSources : localSources;
+      const answerSections = extractAnswerSections(data);
       return {
         status: 200,
         body: {
           output_text: outputText,
           sources: uniqueSources(sources),
+          sections: answerSections.length
+            ? answerSections
+            : [{ text: outputText, sources: uniqueSources(sources) }],
           grounded_on: webSources.length ? "live_official_sources" : "local_uscis_corpus",
           degraded: false
         }

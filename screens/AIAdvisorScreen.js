@@ -36,7 +36,8 @@ Start with the direct answer, then explain useful details and next steps.
 Use natural everyday wording and contractions when appropriate. Be warm when the user sounds worried or confused.
 Do not sound like a policy manual, legal memo, chatbot script, or form letter.
 Avoid canned phrases, repetitive disclaimers, and unnecessary headings.
-Do not include raw citation tokens, Markdown links, or decorative bold markers; sources are displayed separately.
+Place an official citation immediately after each factual paragraph or list item it supports. Do not collect citations in a bibliography at the end.
+Do not add raw citation tokens, manually written Markdown links, or decorative bold markers; the app displays citation annotations beneath the supported text.
 Keep answers concise, practical, and clear about dates, forms, fees, exceptions, and next steps.
 `;
 
@@ -658,6 +659,20 @@ function responseOutputText(data, fallback) {
     .trim();
 }
 
+function responseSections(data) {
+  if (!Array.isArray(data?.sections)) return [];
+
+  return data.sections.flatMap((section) => {
+    const text = responseOutputText({ output_text: section?.text }, "");
+    if (!text) return [];
+
+    return [{
+      text,
+      sources: responseSources({ sources: section?.sources })
+    }];
+  });
+}
+
 export default function AIAdvisorScreen({ navigation }) {
   const { t, i18n } = useTranslation();
   const lang = (i18n.language || "en").toLowerCase();
@@ -695,8 +710,8 @@ export default function AIAdvisorScreen({ navigation }) {
 
   const contextText = useMemo(() => buildAssistantContext(flowStates, lang, t), [flowStates, lang, t]);
 
-  const appendAssistant = (text, sources = []) => {
-    setMessages((current) => [...current, { role: "assistant", text, sources }]);
+  const appendAssistant = (text, sources = [], sections = []) => {
+    setMessages((current) => [...current, { role: "assistant", text, sources, sections }]);
   };
 
   const refreshAndSetStates = async () => {
@@ -1000,7 +1015,7 @@ export default function AIAdvisorScreen({ navigation }) {
 
       const answer = responseOutputText(data, t("ai.noAnswer"));
 
-      appendAssistant(answer, responseSources(data));
+      appendAssistant(answer, responseSources(data), responseSections(data));
     } catch (e) {
       Alert.alert(t("ai.errorTitle"), String(e.message || e));
       appendAssistant(`${broadFallback(question, t)}\n\n${t("ai.requestFallback")}`);
@@ -1080,15 +1095,46 @@ export default function AIAdvisorScreen({ navigation }) {
               msg.role === "user" ? styles.userBubble : styles.assistantBubble
             ]}
           >
-            <Text
-              style={[
-                styles.bubbleText,
-                msg.role === "user" ? styles.userText : styles.assistantText
-              ]}
-            >
-              {msg.text}
-            </Text>
-            {msg.role === "assistant" && msg.sources?.length ? (
+            {msg.role === "assistant" && msg.sections?.length ? (
+              <View>
+                {msg.sections.map((section, sectionIndex) => (
+                  <View
+                    key={`section-${sectionIndex}`}
+                    style={sectionIndex ? styles.answerSection : null}
+                  >
+                    <Text style={[styles.bubbleText, styles.assistantText]}>
+                      {section.text}
+                    </Text>
+                    {section.sources?.length ? (
+                      <View style={styles.inlineSources}>
+                        {section.sources.map((source, sourceIndex) => (
+                          <TouchableOpacity
+                            key={`${source.url}-${sourceIndex}`}
+                            style={styles.answerSource}
+                            onPress={() => Linking.openURL(source.url)}
+                          >
+                            <Ionicons name="open-outline" size={14} color={COLORS.primary} />
+                            <Text style={styles.answerSourceText} numberOfLines={2}>
+                              {source.title || "USCIS"}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    ) : null}
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <Text
+                style={[
+                  styles.bubbleText,
+                  msg.role === "user" ? styles.userText : styles.assistantText
+                ]}
+              >
+                {msg.text}
+              </Text>
+            )}
+            {msg.role === "assistant" && !msg.sections?.length && msg.sources?.length ? (
               <View style={styles.answerSources}>
                 {msg.sources.map((source, sourceIndex) => (
                   <TouchableOpacity
@@ -1233,6 +1279,13 @@ const styles = StyleSheet.create({
   bubbleText: { fontSize: 15, lineHeight: 22 },
   assistantText: { color: COLORS.text },
   userText: { color: COLORS.primaryTextOn },
+  answerSection: {
+    marginTop: SPACING.md
+  },
+  inlineSources: {
+    marginTop: 7,
+    gap: 6
+  },
   answerSources: {
     borderTopWidth: 1,
     borderTopColor: COLORS.border,

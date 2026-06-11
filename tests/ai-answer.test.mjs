@@ -4,6 +4,7 @@ import {
   buildLocalFallback,
   buildRetrievalQuery,
   createAnswerService,
+  extractAnswerSections,
   extractOutputText,
   extractSources,
   OFFICIAL_IMMIGRATION_DOMAINS,
@@ -179,6 +180,49 @@ test("cleans citation and markdown artifacts from conversational answers", () =>
   });
 
   assert.equal(text, "Commencez ici. Consultez la page officielle.");
+});
+
+test("keeps each official citation with the paragraph it supports", () => {
+  const firstText = "L’ajustement de statut se fait auprès de l’USCIS. ([uscis.gov](https://www.uscis.gov/green-card/green-card-processes-and-procedures/adjustment-of-status))";
+  const secondText = "Le traitement consulaire passe par le Département d’État. ([travel.state.gov](https://travel.state.gov/content/travel/en/us-visas/immigrate/the-immigrant-visa-process.html))";
+  const fullText = `${firstText}\n\n${secondText}`;
+  const secondStart = firstText.length + 2;
+  const sections = extractAnswerSections({
+    output: [{
+      type: "message",
+      content: [{
+        type: "output_text",
+        text: fullText,
+        annotations: [{
+          type: "url_citation",
+          start_index: firstText.indexOf("([uscis.gov]"),
+          end_index: firstText.length,
+          title: "Adjustment of Status",
+          url: "https://www.uscis.gov/green-card/green-card-processes-and-procedures/adjustment-of-status?utm_source=openai"
+        }, {
+          type: "url_citation",
+          start_index: secondStart + secondText.indexOf("([travel.state.gov]"),
+          end_index: fullText.length,
+          title: "Immigrant Visa Process",
+          url: "https://travel.state.gov/content/travel/en/us-visas/immigrate/the-immigrant-visa-process.html?utm_source=openai"
+        }]
+      }]
+    }]
+  });
+
+  assert.deepEqual(sections, [{
+    text: "L’ajustement de statut se fait auprès de l’USCIS.",
+    sources: [{
+      title: "Adjustment of Status",
+      url: "https://www.uscis.gov/green-card/green-card-processes-and-procedures/adjustment-of-status"
+    }]
+  }, {
+    text: "Le traitement consulaire passe par le Département d’État.",
+    sources: [{
+      title: "Immigrant Visa Process",
+      url: "https://travel.state.gov/content/travel/en/us-visas/immigrate/the-immigrant-visa-process.html"
+    }]
+  }]);
 });
 
 test("canonicalizes duplicate official sources and labels their agencies", () => {
