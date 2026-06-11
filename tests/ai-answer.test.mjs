@@ -4,6 +4,7 @@ import {
   buildLocalFallback,
   buildRetrievalQuery,
   createAnswerService,
+  extractOutputText,
   extractSources
 } from "../server/ai/answer.mjs";
 import { createCorpusIndex } from "../server/uscis/search.mjs";
@@ -140,4 +141,22 @@ test("filters non-USCIS citations returned by web search", () => {
     }]
   });
   assert.deepEqual(sources, [{ title: "USCIS", url: "https://www.uscis.gov/i-765" }]);
+});
+
+test("extracts text from tool-assisted Responses API output", () => {
+  const text = extractOutputText({
+    output: [{
+      type: "web_search_call",
+      status: "completed"
+    }, {
+      type: "message",
+      status: "completed",
+      content: [{
+        type: "output_text",
+        text: "Here is your USCIS answer."
+      }]
+    }]
+  });
+
+  assert.equal(text, "Here is your USCIS answer.");
 });

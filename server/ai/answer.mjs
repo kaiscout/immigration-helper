@@ -133,6 +133,19 @@ export function extractSources(data) {
   return uniqueSources(sources);
 }
 
+export function extractOutputText(data) {
+  if (typeof data?.output_text === "string" && data.output_text.trim()) {
+    return data.output_text.trim();
+  }
+
+  return (data?.output || [])
+    .flatMap((item) => item?.content || [])
+    .filter((content) => content?.type === "output_text" && typeof content.text === "string")
+    .map((content) => content.text.trim())
+    .filter(Boolean)
+    .join("\n\n");
+}
+
 function queryTokens(value) {
   return String(value || "")
     .toLowerCase()
@@ -296,7 +309,8 @@ export function createAnswerService({
       });
 
       const data = await openAIResponse.json();
-      if (!openAIResponse.ok || !data.output_text?.trim()) {
+      const outputText = extractOutputText(data);
+      if (!openAIResponse.ok || !outputText) {
         return {
           status: 200,
           body: {
@@ -311,7 +325,7 @@ export function createAnswerService({
       return {
         status: 200,
         body: {
-          output_text: data.output_text.trim(),
+          output_text: outputText,
           sources: uniqueSources([...webSources, ...localSources]),
           grounded_on: webSources.length ? "live_and_local_uscis" : "local_uscis_corpus",
           degraded: false
