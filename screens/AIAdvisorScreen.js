@@ -4,6 +4,7 @@ import { Alert, KeyboardAvoidingView, Linking, Platform, ScrollView, StyleSheet,
 import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
+import { scoreExactIntent } from "../data/aiIntent";
 import {
   FLOWS,
   computeDueDate,
@@ -169,7 +170,7 @@ const INTENT_TERMS = {
     "isaretle", "işaretle", "tamamla", "bitti", "tamam", "yaptim", "yaptım", "bitirdim", "aldim", "aldım",
     "gonderdim", "gönderdim", "hazir", "hazır",
     "marquer", "cocher", "terminer", "fait", "j ai fait", "j'ai fait", "j ai termine", "j'ai terminé",
-    "j ai", "recu", "reçu", "envoye", "envoyé",
+    "recu", "reçu", "envoye", "envoyé",
     "标记", "勾选", "完成", "已完成", "我完成", "我已经", "我有", "收到", "寄出", "提交",
     "चिह्नित", "पूरा", "हो गया", "मैंने कर लिया", "मैंने किया", "मेरे पास", "मिल गया", "भेज दिया", "जमा किया",
     "تم", "أكمل", "اكمل", "ضع علامة", "أنهيت", "انهيت", "لدي", "حصلت", "أرسلت", "ارسلت", "قدمت",
@@ -343,8 +344,10 @@ const ACTION_INTENT_THRESHOLD = 4;
 
 const scoreTerms = (normalized, terms) => scoreTextMatch(normalized, terms);
 
+const scoreIntentTerms = (normalized, terms) => scoreExactIntent(normalized, terms);
+
 const hasAnyTerm = (normalized, terms, threshold = 1) =>
-  scoreTerms(normalized, terms) >= threshold;
+  scoreIntentTerms(normalized, terms) >= threshold;
 
 const intentTerms = (key) => [
   ...(INTENT_TERMS[key] || []),
@@ -354,7 +357,7 @@ const intentTerms = (key) => [
 const intentSnapshot = (text) => {
   const q = normalizeText(text);
   return Object.fromEntries(
-    Object.keys(INTENT_TERMS).map((key) => [key, scoreTerms(q, intentTerms(key))])
+    Object.keys(INTENT_TERMS).map((key) => [key, scoreIntentTerms(q, intentTerms(key))])
   );
 };
 
@@ -774,14 +777,13 @@ export default function AIAdvisorScreen({ navigation }) {
     const flow = flowMatch?.data;
     const flowKey = flowMatch?.key;
     const explicitQuestion = hasAnyTerm(q, QUESTION_TERMS, 1);
-    const wantsOpen = scores.open >= ACTION_INTENT_THRESHOLD;
+    const wantsOpen = scores.open >= ACTION_INTENT_THRESHOLD && !explicitQuestion;
     const hasSummaryTerm = scores.summary >= ACTION_INTENT_THRESHOLD;
     const mentionsChecklist = scores.checklist >= ACTION_INTENT_THRESHOLD;
     const wantsSummary =
       (flow && hasSummaryTerm) ||
       mentionsChecklist ||
-      hasAnyTerm(q, SUMMARY_PHRASES, ACTION_INTENT_THRESHOLD) ||
-      (scores.markDone >= ACTION_INTENT_THRESHOLD && hasAnyTerm(q, QUESTION_TERMS));
+      hasAnyTerm(q, SUMMARY_PHRASES, ACTION_INTENT_THRESHOLD);
     const hasDateLiteral = /\b\d{4}-\d{2}-\d{2}\b/.test(question);
     const wantsDateQuery = flow && scores.dateNoun >= 1 && explicitQuestion && !hasDateLiteral;
     const wantsDate = flow && (

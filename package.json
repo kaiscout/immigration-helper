@@ -14,6 +14,7 @@
     "setup:ai-key": "node ./scripts/setup-ai-key.js",
     "test:uscis": "node --test tests/uscis-config.test.mjs",
     "test:ai": "node --test tests/ai-answer.test.mjs",
+    "test:ai-intent": "node --test tests/ai-intent.test.mjs",
     "test:localization": "node --test tests/localization.test.mjs",
     "uscis:plan": "node ./scripts/scrape-uscis.mjs --dry-run",
     "uscis:scrape": "node ./scripts/scrape-uscis.mjs",
