@@ -6,6 +6,7 @@ import {
   parseRobotsRules
 } from "../server/uscis/config.mjs";
 import { extractUscisPage } from "../server/uscis/corpus.mjs";
+import { createCorpusIndex, searchCorpus } from "../server/uscis/search.mjs";
 
 test("normalizes only official USCIS URLs", () => {
   assert.equal(
@@ -40,4 +41,50 @@ test("extracts readable page text and chunks", () => {
   assert.equal(page.title, "Entering the United States");
   assert.ok(page.text.includes("official test guidance"));
   assert.ok(page.chunks.length >= 1);
+});
+
+test("retrieves the matching passage instead of always returning the first chunk", () => {
+  const index = createCorpusIndex([{
+    url: "https://www.uscis.gov/forms/filing-fees",
+    title: "Filing Fees",
+    description: "Official fee guidance",
+    chunks: [
+      "This opening passage describes how to find a form.",
+      "You may pay certain USCIS filing fees online. Check the current fee schedule before filing."
+    ]
+  }]);
+
+  const [result] = searchCorpus(index, "How do I pay a filing fee?");
+  assert.ok(result.excerpt.includes("pay certain USCIS filing fees"));
+  assert.equal(result.chunkIndex, 1);
+});
+
+test("expands supported-language immigration terms for English USCIS retrieval", () => {
+  const index = createCorpusIndex([{
+    url: "https://www.uscis.gov/working-in-the-united-states",
+    title: "Employment Authorization",
+    description: "",
+    chunks: ["Use Form I-765 to request employment authorization in eligible categories."]
+  }]);
+
+  const [result] = searchCorpus(index, "¿Cómo solicito un permiso de trabajo?");
+  assert.equal(result.title, "Employment Authorization");
+});
+
+test("recognizes natural address-change phrasing across supported languages", () => {
+  const index = createCorpusIndex([{
+    url: "https://www.uscis.gov/addresschange",
+    title: "How to Change Your Address",
+    description: "",
+    chunks: ["Most people can report a change of address through a USCIS online account."]
+  }]);
+
+  for (const question of [
+    "मैं अपना पता कैसे बदलूं?",
+    "Comment changer mon adresse auprès de USCIS?",
+    "كيف أغير عنواني؟",
+    "Как изменить адрес в USCIS?"
+  ]) {
+    assert.equal(searchCorpus(index, question, 1)[0]?.title, "How to Change Your Address");
+  }
 });

@@ -3,7 +3,7 @@
 The app now supports a server-side USCIS information assistant with two official-source layers:
 
 1. Live OpenAI web search restricted to `uscis.gov`.
-2. An optional local corpus produced from the current USCIS sitemap.
+2. A packaged local corpus produced from the current USCIS sitemap and searched passage by passage.
 
 The live search keeps answers current. The local corpus provides additional retrieval context and can later be uploaded to an OpenAI vector store.
 
@@ -40,6 +40,14 @@ npm run uscis:scrape -- --limit=20
 ```
 
 Use `--refresh` to re-download every selected page. Generated corpus files are intentionally excluded from Git because they are large and become stale.
+
+Every successful crawl automatically rebuilds the compressed deployable knowledge package. You can also rebuild it manually without crawling:
+
+```bash
+npm run uscis:package
+```
+
+The server automatically prefers the uncompressed local corpus during development and falls back to the committed compressed package in deployments.
 
 ## 3. Start the secure proxy
 

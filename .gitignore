@@ -38,6 +38,7 @@ yarn-error.*
 server/data/*.json
 server/data/*.jsonl
 server/data/*.tmp
+!server/data/uscis-corpus.jsonl.gz
 
 # typescript
 *.tsbuildinfo

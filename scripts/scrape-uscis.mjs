@@ -10,6 +10,7 @@ import {
   readExistingCorpus,
   writeCorpus
 } from "../server/uscis/corpus.mjs";
+import { packageCorpus } from "../server/uscis/package.mjs";
 
 function option(name) {
   const prefix = `--${name}=`;
@@ -89,3 +90,8 @@ for (const page of selected) {
 
 writeCorpus(records, CORPUS_PATH);
 console.log(`Done. Saved ${completed}, failed/skipped ${failed}, corpus total ${records.size}.`);
+const packaged = packageCorpus();
+console.log(
+  `Updated deployable USCIS knowledge package: ${packaged.packagedPath} ` +
+  `(${(packaged.packagedBytes / 1024 / 1024).toFixed(1)} MB).`
+);
