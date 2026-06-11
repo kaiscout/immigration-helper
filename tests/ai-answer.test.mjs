@@ -5,7 +5,9 @@ import {
   buildRetrievalQuery,
   createAnswerService,
   extractOutputText,
-  extractSources
+  extractSources,
+  resolveResponseLanguage,
+  SUPPORTED_AI_LANGUAGES
 } from "../server/ai/answer.mjs";
 import { createCorpusIndex } from "../server/uscis/search.mjs";
 
@@ -159,4 +161,29 @@ test("extracts text from tool-assisted Responses API output", () => {
   });
 
   assert.equal(text, "Here is your USCIS answer.");
+});
+
+test("supports every app language with an explicit response language", async () => {
+  for (const [code, name] of Object.entries(SUPPORTED_AI_LANGUAGES)) {
+    let requestBody;
+    const answer = createAnswerService({
+      corpusIndex: index,
+      apiKey: "test-key",
+      fetchImpl: async (_url, options) => {
+        requestBody = JSON.parse(options.body);
+        return new Response(JSON.stringify({
+          output_text: `${name} answer`
+        }), { status: 200, headers: { "Content-Type": "application/json" } });
+      }
+    });
+
+    const result = await answer({ question: "What does USCIS do?", language: code });
+    assert.match(requestBody.input, new RegExp(`Requested response language: ${name}`));
+    assert.match(requestBody.input, new RegExp(`answer in ${name}`));
+    assert.equal(result.body.degraded, false);
+  }
+});
+
+test("falls back to English for an unsupported language code", () => {
+  assert.deepEqual(resolveResponseLanguage("xx-YY"), { code: "en", name: "English" });
 });

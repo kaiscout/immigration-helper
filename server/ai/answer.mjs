@@ -94,8 +94,27 @@ const LOCAL_COPY = {
   }
 };
 
+export const SUPPORTED_AI_LANGUAGES = Object.freeze({
+  en: "English",
+  tr: "Turkish",
+  es: "Spanish",
+  zh: "Mandarin Chinese",
+  hi: "Hindi",
+  fr: "French",
+  ar: "Modern Standard Arabic",
+  bn: "Bengali",
+  ru: "Russian",
+  pt: "Portuguese"
+});
+
 const normalizeLanguage = (language) =>
   String(language || "en").toLowerCase().split("-")[0];
+
+export function resolveResponseLanguage(language) {
+  const requestedCode = normalizeLanguage(language);
+  const code = SUPPORTED_AI_LANGUAGES[requestedCode] ? requestedCode : "en";
+  return { code, name: SUPPORTED_AI_LANGUAGES[code] };
+}
 
 const uniqueSources = (sources) => {
   const seen = new Set();
@@ -256,12 +275,12 @@ export function createAnswerService({
       return { status: 400, body: { error: { message: "A question is required." } } };
     }
 
-    const language = String(payload.language || "en").slice(0, 20);
+    const language = resolveResponseLanguage(String(payload.language || "en").slice(0, 20));
     const conversation = String(payload.conversation || "").slice(0, 12_000);
     const checklistContext = String(payload.checklistContext || "").slice(0, 12_000);
     const retrievalQuery = buildRetrievalQuery(question, conversation);
     const localResults = searchCorpus(corpusIndex, retrievalQuery, 8);
-    const localFallback = buildLocalFallback(question, language, localResults);
+    const localFallback = buildLocalFallback(question, language.code, localResults);
 
     if (!apiKey) {
       return { status: 200, body: localFallback };
@@ -290,7 +309,8 @@ export function createAnswerService({
           model,
           instructions: SYSTEM_PROMPT,
           input:
-            `Requested language: ${language}\n\n` +
+            `Requested response language: ${language.name} (${language.code}).\n` +
+            `Write the entire user-facing answer in ${language.name}, translating English source material naturally when needed.\n\n` +
             `Recent conversation:\n${conversation || "None"}\n\n` +
             `Current question:\n${question}\n\n` +
             `User-provided checklist context:\n${checklistContext || "None"}\n\n` +
