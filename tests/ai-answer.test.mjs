@@ -6,6 +6,8 @@ import {
   createAnswerService,
   extractOutputText,
   extractSources,
+  OFFICIAL_IMMIGRATION_DOMAINS,
+  officialDomainsForQuestion,
   resolveResponseLanguage,
   SUPPORTED_AI_LANGUAGES
 } from "../server/ai/answer.mjs";
@@ -89,8 +91,8 @@ test("sends retrieved USCIS passages to the model and keeps official sources", a
 
   assert.match(requestBody.input, /How to Change Your Address/);
   assert.match(requestBody.input, /TPS: 1\/5 complete/);
-  assert.equal(requestBody.tool_choice, "auto");
-  assert.deepEqual(requestBody.tools[0].filters.allowed_domains, ["uscis.gov"]);
+  assert.equal(requestBody.tool_choice, "required");
+  assert.deepEqual(requestBody.tools[0].filters.allowed_domains, OFFICIAL_IMMIGRATION_DOMAINS);
   assert.equal(result.body.output_text, "You can usually update it through your USCIS online account.");
   assert.equal(result.body.sources.length, 1);
   assert.equal(result.body.degraded, false);
@@ -131,18 +133,24 @@ test("uses the previous user question only for short follow-up retrieval", () =>
   );
 });
 
-test("filters non-USCIS citations returned by web search", () => {
+test("keeps official immigration sources and filters unofficial citations", () => {
   const sources = extractSources({
     output: [{
       content: [{
         annotations: [
           { url_citation: { title: "USCIS", url: "https://www.uscis.gov/i-765" } },
+          { url_citation: { title: "Visitor Visa", url: "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html" } },
+          { url_citation: { title: "I-94", url: "https://www.cbp.gov/travel/international-visitors/i-94" } },
           { url_citation: { title: "Other", url: "https://example.com/i-765" } }
         ]
       }]
     }]
   });
-  assert.deepEqual(sources, [{ title: "USCIS", url: "https://www.uscis.gov/i-765" }]);
+  assert.deepEqual(sources, [
+    { title: "USCIS", url: "https://www.uscis.gov/i-765" },
+    { title: "Visitor Visa", url: "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html" },
+    { title: "I-94", url: "https://www.cbp.gov/travel/international-visitors/i-94" }
+  ]);
 });
 
 test("extracts text from tool-assisted Responses API output", () => {
@@ -161,6 +169,41 @@ test("extracts text from tool-assisted Responses API output", () => {
   });
 
   assert.equal(text, "Here is your USCIS answer.");
+});
+
+test("cleans citation and markdown artifacts from conversational answers", () => {
+  const text = extractOutputText({
+    output_text:
+      "**Commencez ici.** Consultez [la page officielle](https://travel.state.gov/visitor). " +
+      "citeturn0search0 (travel.state.gov)"
+  });
+
+  assert.equal(text, "Commencez ici. Consultez la page officielle.");
+});
+
+test("canonicalizes duplicate official sources and labels their agencies", () => {
+  const sources = extractSources({
+    output: [{
+      action: {
+        sources: [{
+          url: "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html?one=1"
+        }, {
+          title: "USCIS",
+          url: "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html?two=2"
+        }, {
+          url: "https://www.cbp.gov/travel/international-visitors/i-94?language=es"
+        }]
+      }
+    }]
+  });
+
+  assert.deepEqual(sources, [{
+    title: "U.S. Department of State",
+    url: "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html"
+  }, {
+    title: "U.S. Customs and Border Protection",
+    url: "https://www.cbp.gov/travel/international-visitors/i-94"
+  }]);
 });
 
 test("supports every app language with an explicit response language", async () => {
@@ -186,4 +229,59 @@ test("supports every app language with an explicit response language", async () 
 
 test("falls back to English for an unsupported language code", () => {
   assert.deepEqual(resolveResponseLanguage("xx-YY"), { code: "en", name: "English" });
+});
+
+test("routes visitor-visa questions in every supported language to State and CBP", () => {
+  const questions = [
+    "My uncle wants to visit the United States.",
+    "Amcam Amerika'yı ziyaret etmek istiyor.",
+    "Mi tío quiere visitar Estados Unidos.",
+    "我的叔叔想来美国旅游。",
+    "मेरे चाचा अमेरिका घूमने आना चाहते हैं।",
+    "Mon oncle veut visiter les États-Unis.",
+    "عمي يريد زيارة الولايات المتحدة.",
+    "আমার চাচা যুক্তরাষ্ট্রে বেড়াতে আসতে চান।",
+    "Мой дядя хочет приехать в США в гости.",
+    "Meu tio quer visitar os Estados Unidos."
+  ];
+
+  for (const question of questions) {
+    assert.deepEqual(officialDomainsForQuestion(question), ["state.gov", "cbp.gov"]);
+  }
+});
+
+test("gives non-English users the same conversational contract and agency access", async () => {
+  let requestBody;
+  const answer = createAnswerService({
+    corpusIndex: index,
+    apiKey: "test-key",
+    fetchImpl: async (_url, options) => {
+      requestBody = JSON.parse(options.body);
+      return new Response(JSON.stringify({
+        output_text: "Il devrait commencer par vérifier les instructions du visa de visiteur.",
+        output: [{
+          type: "web_search_call",
+          action: {
+            sources: [{
+              title: "Visitor Visa",
+              url: "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html"
+            }]
+          }
+        }]
+      }), { status: 200, headers: { "Content-Type": "application/json" } });
+    }
+  });
+
+  const result = await answer({
+    question: "Mon oncle turc veut visiter les États-Unis. Par où devrait-il commencer ?",
+    language: "fr",
+    conversation: "User: Il souhaite rester deux semaines."
+  });
+
+  assert.match(requestBody.input, /same completeness, reasoning, warmth, task awareness/);
+  assert.match(requestBody.instructions, /Department of State|State Department/i);
+  assert.match(requestBody.input, /Il souhaite rester deux semaines/);
+  assert.deepEqual(requestBody.tools[0].filters.allowed_domains, ["state.gov", "cbp.gov"]);
+  assert.equal(result.body.sources[0].url.includes("travel.state.gov"), true);
+  assert.equal(result.body.degraded, false);
 });

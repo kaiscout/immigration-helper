@@ -20,9 +20,12 @@ import {
 import { loadNotificationsAsync } from "../data/notificationService";
 
 const SYSTEM_PROMPT = `
-You are Immigration Helper's USCIS information assistant.
-Answer U.S. immigration questions using current official USCIS sources only, and cite the USCIS pages supporting the answer.
-If USCIS does not govern an issue, say so and identify the appropriate official agency without relying on unofficial sources.
+You are Immigration Helper's U.S. immigration information assistant.
+Give every supported language the same reasoning quality, useful detail, conversational warmth, follow-up awareness, and task capability as English.
+Understand natural questions in the requested language without requiring English immigration terms or a specific phrasing.
+Keep every ordinary word in the requested language without accidentally mixing in another language or script, except official names, acronyms, and form numbers.
+Use current official U.S. government sources and route the question to the agency that governs it: USCIS for immigration benefits, the Department of State for visas and consular processing, CBP for admission and I-94 matters, EOIR/DOJ for immigration court, and DOL for labor-certification matters.
+For visitor-visa questions from outside the United States, explain that the Department of State and the relevant U.S. embassy or consulate are the proper starting points, then provide useful official next steps.
 Do not provide legal advice, determine eligibility, predict approval, guarantee outcomes, or ask for sensitive identifiers.
 For case-specific or high-stakes decisions, recommend a licensed immigration attorney or DOJ-accredited representative.
 Use the provided checklist context only for organization and clearly treat it as user-provided information.
@@ -32,6 +35,7 @@ Start with the direct answer, then explain useful details and next steps.
 Use natural everyday wording and contractions when appropriate. Be warm when the user sounds worried or confused.
 Do not sound like a policy manual, legal memo, chatbot script, or form letter.
 Avoid canned phrases, repetitive disclaimers, and unnecessary headings.
+Do not include raw citation tokens, Markdown links, or decorative bold markers; sources are displayed separately.
 Keep answers concise, practical, and clear about dates, forms, fees, exceptions, and next steps.
 `;
 
@@ -47,6 +51,27 @@ const OFFICIAL_LINKS = {
 };
 
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
+const OFFICIAL_IMMIGRATION_DOMAINS = [
+  "uscis.gov",
+  "state.gov",
+  "cbp.gov",
+  "dhs.gov",
+  "ice.gov",
+  "justice.gov",
+  "dol.gov"
+];
+const VISITOR_VISA_TERMS = [
+  "visit the united states", "visit america", "visitor visa", "tourist visa", "tourism", "embassy", "consulate",
+  "abd yi ziyaret", "amerika yi ziyaret", "amerika yı ziyaret", "amerikayi ziyaret", "amerikayı ziyaret", "ziyaretci vizesi", "ziyaretçi vizesi", "turist vizesi", "buyukelcilik", "büyükelçilik", "konsolosluk",
+  "visitar estados unidos", "visa de visitante", "visa de turista", "turismo", "embajada", "consulado",
+  "visiter les etats unis", "visiter les états unis", "visa de visiteur", "visa touristique", "tourisme", "ambassade", "consulat",
+  "visitar os estados unidos", "visto de visitante", "visto de turista", "turismo", "embaixada", "consulado",
+  "访问美国", "来美国旅游", "去美国旅游", "访客签证", "旅游签证", "美国大使馆", "美国领事馆",
+  "अमेरिका घूमने", "अमेरिका जाना", "विजिटर वीजा", "पर्यटक वीजा", "दूतावास", "वाणिज्य दूतावास",
+  "زيارة الولايات المتحدة", "تأشيرة زيارة", "تأشيرة سياحية", "السياحة", "السفارة", "القنصلية",
+  "যুক্তরাষ্ট্রে বেড়াতে", "আমেরিকা বেড়াতে", "ভিজিটর ভিসা", "পর্যটন ভিসা", "দূতাবাস", "কনস্যুলেট",
+  "посетить сша", "приехать в сша в гости", "гостевая виза", "туристическая виза", "туризм", "посольство", "консульство"
+];
 const AI_MODEL = (process.env.EXPO_PUBLIC_OPENAI_MODEL || "gpt-5.4-mini").trim();
 const OPENAI_API_KEY = (process.env.EXPO_PUBLIC_OPENAI_API_KEY || "").trim();
 const CONFIGURED_AI_PROXY_URL = (process.env.EXPO_PUBLIC_AI_PROXY_URL || "").trim();
@@ -72,6 +97,13 @@ const isPlaceholderSecret = (value) =>
   !value || /your[_-]?openai|your[_-]?api|replace|paste|example|placeholder/i.test(value);
 
 const openEndedAiConfigured = Boolean(AI_PROXY_URL || !isPlaceholderSecret(OPENAI_API_KEY));
+
+const officialDomainsForQuestion = (question) => {
+  const normalized = normalizeText(question);
+  return VISITOR_VISA_TERMS.some((term) => normalized.includes(normalizeText(term)))
+    ? ["state.gov", "cbp.gov"]
+    : OFFICIAL_IMMIGRATION_DOMAINS;
+};
 
 const INTENT_TERMS = {
   open: [
@@ -550,6 +582,19 @@ function aiErrorMessage(status, data, t) {
   return data?.error?.message || t("ai.requestFailed");
 }
 
+function officialSourceTitle(url, title) {
+  const hostname = url.hostname;
+  if (title && !(title === "USCIS" && !hostname.endsWith("uscis.gov"))) return title;
+  if (hostname.endsWith("uscis.gov")) return "USCIS";
+  if (hostname.endsWith("state.gov")) return "U.S. Department of State";
+  if (hostname.endsWith("cbp.gov")) return "U.S. Customs and Border Protection";
+  if (hostname.endsWith("dhs.gov")) return "U.S. Department of Homeland Security";
+  if (hostname.endsWith("ice.gov")) return "U.S. Immigration and Customs Enforcement";
+  if (hostname.endsWith("justice.gov")) return "U.S. Department of Justice";
+  if (hostname.endsWith("dol.gov")) return "U.S. Department of Labor";
+  return "Official U.S. government source";
+}
+
 function responseSources(data) {
   const candidates = Array.isArray(data?.sources) ? [...data.sources] : [];
 
@@ -569,17 +614,45 @@ function responseSources(data) {
   });
 
   const seen = new Set();
-  return candidates.filter((source) => {
+  return candidates.flatMap((source) => {
     try {
       const url = new URL(source.url);
-      const official = url.hostname === "uscis.gov" || url.hostname.endsWith(".uscis.gov");
-      if (!official || seen.has(url.href)) return false;
-      seen.add(url.href);
-      return true;
+      const official = OFFICIAL_IMMIGRATION_DOMAINS.some(
+        (domain) => url.hostname === domain || url.hostname.endsWith(`.${domain}`)
+      );
+      const canonicalUrl = `${url.origin}${url.pathname}`.replace(/\/$/, "");
+      if (!official || seen.has(canonicalUrl)) return [];
+      seen.add(canonicalUrl);
+      return [{
+        title: officialSourceTitle(url, source.title),
+        url: canonicalUrl
+      }];
     } catch {
-      return false;
+      return [];
     }
   }).slice(0, 6);
+}
+
+function responseOutputText(data, fallback) {
+  const text = typeof data?.output_text === "string" && data.output_text.trim()
+    ? data.output_text.trim()
+    : (data?.output || [])
+      .flatMap((item) => item?.content || [])
+      .filter((content) => content?.type === "output_text" && typeof content.text === "string")
+      .map((content) => content.text.trim())
+      .filter(Boolean)
+      .join("\n\n");
+
+  return (text || fallback)
+    .replace(/cite[^]+/g, "")
+    .replace(/\[([^\]]+)\]\(https?:\/\/[^)]+\)/g, "$1")
+    .replace(/\s*\((?:[a-z0-9-]+\.)*(?:uscis|state|cbp|dhs|ice|justice|dol)\.gov\)/gi, "")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/[ \t]+([,.;:!?])/g, "$1")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 export default function AIAdvisorScreen({ navigation }) {
@@ -895,7 +968,7 @@ export default function AIAdvisorScreen({ navigation }) {
           input: requestInput,
           tools: [{
             type: "web_search",
-            filters: { allowed_domains: ["uscis.gov"] }
+            filters: { allowed_domains: officialDomainsForQuestion(question) }
           }],
           tool_choice: "required",
           include: ["web_search_call.action.sources"],
@@ -923,10 +996,7 @@ export default function AIAdvisorScreen({ navigation }) {
         throw new Error(aiErrorMessage(response.status, data, t));
       }
 
-      const answer =
-        data?.output_text ||
-        data?.output?.[0]?.content?.[0]?.text ||
-        t("ai.noAnswer");
+      const answer = responseOutputText(data, t("ai.noAnswer"));
 
       appendAssistant(answer, responseSources(data));
     } catch (e) {
