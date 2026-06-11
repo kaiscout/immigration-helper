@@ -10,6 +10,7 @@ import fr from "./fr.json";
 import ar from "./ar.json";
 import bn from "./bn.json";
 import ru from "./ru.json";
+import pt from "./pt.json";
 
 const resources = {
   en: { translation: en },
@@ -20,7 +21,8 @@ const resources = {
   fr: { translation: fr },
   ar: { translation: ar },
   bn: { translation: bn },
-  ru: { translation: ru }
+  ru: { translation: ru },
+  pt: { translation: pt }
 };
 
 const i18n = createInstance();

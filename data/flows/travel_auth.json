@@ -17,6 +17,7 @@
       "label_ar": "تاريخ الإرسال المقترح",
       "label_bn": "প্রস্তাবিত মেইলিং তারিখ",
       "label_ru": "Предлагаемая дата отправки",
+      "label_pt": "Data de envio sugerida",
       "anchor": "notice_date",
       "offsetDays": 45
     }
@@ -34,6 +35,7 @@
       "title_ar": "نموذج I-131 (السفر)",
       "title_bn": "Form I-131 (ভ্রমণ)",
       "title_ru": "Форма I-131 (поездка)",
+      "title_pt": "Formulário I-131 (viagem)",
       "url": "https://www.uscis.gov/i-131"
     }
   ],
@@ -48,6 +50,7 @@
       "label_ar": "الصفحة الرسمية لنموذج I-131",
       "label_bn": "Form I-131 অফিসিয়াল পেজ",
       "label_ru": "Официальная страница Form I-131",
+      "label_pt": "Página oficial do Formulário I-131",
       "url": "https://www.uscis.gov/i-131"
     },
     {
@@ -60,6 +63,7 @@
       "label_ar": "ابحث عن مساعدة قانونية قبل السفر",
       "label_bn": "ভ্রমণের আগে আইনি সাহায্য খুঁজুন",
       "label_ru": "Найти юридическую помощь перед поездкой",
+      "label_pt": "Encontre ajuda jurídica antes de viajar",
       "url": "https://www.uscis.gov/scams-fraud-and-misconduct/avoid-scams/find-legal-services"
     }
   ],
@@ -75,6 +79,7 @@
       "title_ar": "تحقق من مخاطر السفر",
       "title_bn": "ভ্রমণের ঝুঁকি দেখুন",
       "title_ru": "Проверьте риск поездки",
+      "title_pt": "Verifique os riscos da viagem",
       "details_en": "Travel can affect immigration status. Consider speaking with a qualified attorney before leaving the U.S.",
       "details_tr": "Seyahat gocmenlik durumunu etkileyebilir. ABD'den cikmadan once yetkili bir avukatla gorusmeyi dusunun.",
       "details_es": "Viajar puede afectar tu estatus migratorio. Considera hablar con un abogado calificado antes de salir de EE.UU.",
@@ -83,7 +88,8 @@
       "details_fr": "Voyager peut affecter le statut d’immigration. Envisagez de parler à un avocat qualifié avant de quitter les États-Unis.",
       "details_ar": "قد يؤثر السفر على وضع الهجرة. فكر في التحدث مع محامٍ مؤهل قبل مغادرة الولايات المتحدة.",
       "details_bn": "ভ্রমণ ইমিগ্রেশন স্ট্যাটাসে প্রভাব ফেলতে পারে। যুক্তরাষ্ট্র ছাড়ার আগে যোগ্য আইনজীবীর সঙ্গে কথা বলার কথা ভাবুন।",
-      "details_ru": "Поездка может повлиять на иммиграционный статус. Перед выездом из США рассмотрите консультацию с квалифицированным адвокатом."
+      "details_ru": "Поездка может повлиять на иммиграционный статус. Перед выездом из США рассмотрите консультацию с квалифицированным адвокатом.",
+      "details_pt": "Viajar pode afetar seu status de imigração. Considere conversar com um advogado qualificado antes de sair dos Estados Unidos."
     },
     {
       "id": "travel_2",
@@ -96,6 +102,7 @@
       "title_ar": "أكمل النموذج الرسمي",
       "title_bn": "অফিসিয়াল ফর্ম পূরণ করুন",
       "title_ru": "Заполните официальную форму",
+      "title_pt": "Preencha o formulário oficial",
       "details_en": "Use the current USCIS I-131 page and instructions.",
       "details_tr": "Guncel USCIS I-131 sayfasini ve talimatlarini kullanin.",
       "details_es": "Usa la pagina e instrucciones actuales de USCIS I-131.",
@@ -104,7 +111,8 @@
       "details_fr": "Utilisez la page et les instructions USCIS I-131 actuelles.",
       "details_ar": "استخدم صفحة وتعليمات USCIS I-131 الحالية.",
       "details_bn": "বর্তমান USCIS I-131 পেজ ও নির্দেশনা ব্যবহার করুন।",
-      "details_ru": "Используйте текущую страницу и инструкции USCIS I-131."
+      "details_ru": "Используйте текущую страницу и инструкции USCIS I-131.",
+      "details_pt": "Use a página e as instruções atuais do Formulário I-131 do USCIS."
     },
     {
       "id": "travel_3",
@@ -117,6 +125,7 @@
       "title_ar": "احتفظ بالإثباتات والنسخ",
       "title_bn": "প্রমাণ ও কপি রাখুন",
       "title_ru": "Храните доказательства и копии",
+      "title_pt": "Guarde comprovantes e cópias",
       "details_en": "Save copies of your packet, mailing receipt, and any approval notice.",
       "details_tr": "Dosyanizin, posta makbuzunun ve onay bildirimlerinin kopyalarini saklayin.",
       "details_es": "Guarda copias del paquete, recibo de envio y cualquier aviso de aprobacion.",
@@ -125,7 +134,8 @@
       "details_fr": "Conservez des copies du dossier, du reçu d’envoi et de tout avis d’approbation.",
       "details_ar": "احفظ نسخاً من ملفك وإيصال البريد وأي إشعار موافقة.",
       "details_bn": "আপনার প্যাকেট, মেইলিং রসিদ এবং অনুমোদন নোটিশের কপি রাখুন।",
-      "details_ru": "Сохраните копии пакета, почтовой квитанции и любых уведомлений об одобрении."
+      "details_ru": "Сохраните копии пакета, почтовой квитанции и любых уведомлений об одобрении.",
+      "details_pt": "Guarde cópias do pacote, do recibo de envio e de qualquer aviso de aprovação."
     }
   ]
 }

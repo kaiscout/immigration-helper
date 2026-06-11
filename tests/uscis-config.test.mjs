@@ -67,8 +67,12 @@ test("expands supported-language immigration terms for English USCIS retrieval",
     chunks: ["Use Form I-765 to request employment authorization in eligible categories."]
   }]);
 
-  const [result] = searchCorpus(index, "¿Cómo solicito un permiso de trabajo?");
-  assert.equal(result.title, "Employment Authorization");
+  for (const question of [
+    "¿Cómo solicito un permiso de trabajo?",
+    "Como solicito uma autorização de trabalho?"
+  ]) {
+    assert.equal(searchCorpus(index, question, 1)[0]?.title, "Employment Authorization");
+  }
 });
 
 test("recognizes natural address-change phrasing across supported languages", () => {
@@ -83,7 +87,8 @@ test("recognizes natural address-change phrasing across supported languages", ()
     "मैं अपना पता कैसे बदलूं?",
     "Comment changer mon adresse auprès de USCIS?",
     "كيف أغير عنواني؟",
-    "Как изменить адрес в USCIS?"
+    "Как изменить адрес в USCIS?",
+    "Como posso mudar meu endereço no USCIS?"
   ]) {
     assert.equal(searchCorpus(index, question, 1)[0]?.title, "How to Change Your Address");
   }

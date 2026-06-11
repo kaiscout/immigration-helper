@@ -7,5 +7,6 @@ export const LANGUAGES = [
   { code: "fr", shortLabel: "FR", labelKey: "common.french" },
   { code: "ar", shortLabel: "ع", labelKey: "common.arabic" },
   { code: "bn", shortLabel: "বা", labelKey: "common.bengali" },
-  { code: "ru", shortLabel: "RU", labelKey: "common.russian" }
+  { code: "ru", shortLabel: "RU", labelKey: "common.russian" },
+  { code: "pt", shortLabel: "PT", labelKey: "common.portuguese" }
 ];

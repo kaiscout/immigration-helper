@@ -12,6 +12,7 @@
     "lint": "eslint App.js index.js components/**/*.js constants/**/*.js data/**/*.js screens/**/*.js i18n/**/*.js",
     "check:ai": "node ./scripts/check-ai-config.js",
     "test:uscis": "node --test tests/uscis-config.test.mjs",
+    "test:localization": "node --test tests/localization.test.mjs",
     "uscis:plan": "node ./scripts/scrape-uscis.mjs --dry-run",
     "uscis:scrape": "node ./scripts/scrape-uscis.mjs",
     "uscis:package": "node ./scripts/package-uscis-corpus.mjs",

@@ -222,9 +222,46 @@ const INTENT_TERMS = {
   ]
 };
 
+const PORTUGUESE_INTENT_TERMS = {
+  open: ["abrir", "abra", "ir para", "me leve", "mostrar", "mostre", "ver"],
+  summary: [
+    "progresso", "status", "falta", "faltando", "restante", "resumo", "mostrar",
+    "lista", "próximo passo", "o que falta", "o que preciso", "o que concluí"
+  ],
+  dateVerb: [
+    "definir", "salvar", "mudar", "alterar", "atualizar", "inserir", "recebi",
+    "chegou", "datado"
+  ],
+  dateNoun: [
+    "data", "aviso", "recebimento", "data do aviso", "data de recebimento", "prazo",
+    "data limite"
+  ],
+  markDone: [
+    "marcar", "concluir", "terminar", "concluído", "feito", "pronto", "já fiz",
+    "eu fiz", "recebi", "enviei"
+  ],
+  undo: [
+    "desmarcar", "desfazer", "incompleto", "pendente", "não concluído", "ainda não",
+    "remover marca", "não fiz"
+  ],
+  clear: ["limpar", "redefinir", "reiniciar", "começar de novo", "apagar progresso"],
+  checklist: ["lista", "checklist", "progresso", "passos", "tarefas", "pendências"],
+  reminder: ["lembrar", "lembrete", "notificação", "alerta", "me avise", "avise"],
+  create: ["definir", "programar", "criar", "adicionar", "colocar"],
+  resource: ["recurso", "oficial", "uscis", "página de ajuda", "guia"],
+  privacy: ["privacidade", "segurança", "dados", "privado"],
+  link: [
+    "link", "site", "página", "formulário", "caso", "taxa", "status", "processamento"
+  ],
+  capability: [
+    "o que você pode fazer", "como pode ajudar", "comandos", "o que sabe"
+  ]
+};
+
 const QUESTION_TERMS = [
   "what", "which", "how", "when", "why", "where", "can i", "do i", "did i", "have i", "am i", "should i",
   "que", "qué", "cual", "cuál", "como", "cómo", "cuando", "cuándo", "por que", "por qué", "porque",
+  "o que", "qual", "como", "quando", "por que", "porque", "onde", "posso", "devo",
   "ne", "hangi", "nasil", "nasıl", "ne zaman", "neden", "nerede", "yapabilir miyim",
   "quoi", "quel", "quelle", "comment", "quand", "pourquoi", "ou", "où", "puis je", "dois je",
   "什么", "哪些", "怎么", "如何", "何时", "什么时候", "为什么", "哪里", "可以吗",
@@ -237,6 +274,7 @@ const QUESTION_TERMS = [
 const SUMMARY_PHRASES = [
   "what have i", "where am i", "what is next", "what's next", "what do i need",
   "que me falta", "qué me falta", "que sigue", "qué sigue", "que necesito", "qué necesito",
+  "o que falta", "qual o próximo passo", "o que preciso", "onde estou", "o que concluí",
   "neredeyim", "bende ne var", "ne kaldi", "ne kaldı", "sirada ne", "sırada ne",
   "ou en suis", "où en suis", "que reste", "prochaine etape", "prochaine étape",
   "我还剩", "下一步", "我需要什么",
@@ -247,7 +285,7 @@ const SUMMARY_PHRASES = [
 ];
 
 const ALL_TERMS = [
-  "all", "everything", "todos", "todas", "todo", "hepsi", "tum", "tüm", "tout", "tous", "toutes",
+  "all", "everything", "todos", "todas", "todo", "tudo", "hepsi", "tum", "tüm", "tout", "tous", "toutes",
   "全部", "所有", "सभी", "सब", "كل", "সব", "সবগুলো", "все", "всё"
 ];
 
@@ -256,10 +294,15 @@ const scoreTerms = (normalized, terms) => scoreTextMatch(normalized, terms);
 const hasAnyTerm = (normalized, terms, threshold = 1) =>
   scoreTerms(normalized, terms) >= threshold;
 
+const intentTerms = (key) => [
+  ...(INTENT_TERMS[key] || []),
+  ...(PORTUGUESE_INTENT_TERMS[key] || [])
+];
+
 const intentSnapshot = (text) => {
   const q = normalizeText(text);
   return Object.fromEntries(
-    Object.entries(INTENT_TERMS).map(([key, terms]) => [key, scoreTerms(q, terms)])
+    Object.keys(INTENT_TERMS).map((key) => [key, scoreTerms(q, intentTerms(key))])
   );
 };
 
@@ -271,6 +314,7 @@ const bestTopicKey = (question) => {
       "my case has not updated", "receipt number", "online account", "egov", "status check",
       "case pending", "my application", "case number", "online status",
       "estado del caso", "recibo", "caso", "numero de recibo", "número de recibo", "mi solicitud",
+      "status do caso", "número do recibo", "meu pedido", "minha solicitação",
       "case durumu", "dosya durumu", "makbuz", "basvuru", "başvuru", "makbuz numarasi", "makbuz numarası",
       "statut du dossier", "numero de recu", "numéro de reçu", "ma demande",
       "案件状态", "收据", "收据号", "我的申请", "案件号",
@@ -282,6 +326,7 @@ const bestTopicKey = (question) => {
     fees: [
       "fee", "fees", "filing fee", "cost", "payment", "money order", "check payable", "how much",
       "pay for form", "filing cost", "tarifa", "costo", "pago", "cuanto cuesta", "cuánto cuesta",
+      "taxa", "taxas", "custo", "pagamento", "quanto custa", "taxa de envio",
       "ucret", "ücret", "odeme", "ödeme", "ne kadar", "harc",
       "frais", "cout", "coût", "paiement", "combien",
       "费用", "付款", "多少钱", "申请费",
@@ -294,6 +339,7 @@ const bestTopicKey = (question) => {
       "rfe", "request for evidence", "evidence request", "they asked for more proof", "more documents",
       "notice asking evidence", "extra evidence", "proof", "supporting evidence",
       "solicitud de evidencia", "pruebas", "mas documentos", "más documentos", "evidencia adicional",
+      "pedido de provas", "solicitação de provas", "mais documentos", "provas adicionais",
       "evidence talebi", "kanit", "kanıt", "ek belge", "delil",
       "demande de preuves", "preuves", "documents supplementaires", "documents supplémentaires",
       "补件", "证据请求", "更多材料", "补充证据",
@@ -306,6 +352,7 @@ const bestTopicKey = (question) => {
       "biometric", "biometrics", "fingerprint", "fingerprints", "asc appointment", "photo appointment",
       "appointment notice", "fingerprint appointment",
       "biometria", "biometría", "huella", "cita de huellas", "cita biometrica", "cita biométrica",
+      "biometria", "impressões digitais", "agendamento",
       "biyometri", "parmak izi", "randevu",
       "biometrie", "biométrie", "empreinte", "rendez vous",
       "生物识别", "指纹", "预约", "打指纹",
@@ -318,6 +365,7 @@ const bestTopicKey = (question) => {
       "address", "change address", "moved", "moving", "new apartment", "ar 11", "mailing address",
       "new home", "mail address",
       "direccion", "dirección", "mudanza", "me mude", "me mudé", "nueva direccion", "nueva dirección",
+      "endereço", "mudar endereço", "me mudei", "novo endereço",
       "adres", "tasindim", "taşındım", "yeni adres",
       "adresse", "demenage", "déménagé", "nouvelle adresse",
       "地址", "搬家", "新地址", "邮寄地址",
@@ -330,6 +378,7 @@ const bestTopicKey = (question) => {
       "processing time", "how long", "waiting", "delay", "delayed", "taking too long", "normal wait",
       "when will uscis", "timeline", "tiempo de procesamiento", "cuanto tarda", "ne kadar surer",
       "cuánto tarda", "demora", "retraso",
+      "tempo de processamento", "quanto tempo", "atraso", "espera",
       "ne kadar surer", "ne kadar sürer", "gecikme", "bekleme", "sure", "süre",
       "delai", "délai", "combien de temps", "retard", "attente",
       "多久", "处理时间", "延迟", "等待",
@@ -342,6 +391,7 @@ const bestTopicKey = (question) => {
       "scam", "fraud", "notario", "fake lawyer", "guarantee approval", "sign blank forms",
       "special access", "blank form", "too good to be true",
       "estafa", "fraude", "notario", "abogado falso", "garantiza aprobacion", "garantiza aprobación",
+      "golpe", "fraude", "advogado falso", "garantia de aprovação",
       "dolandirici", "dolandırıcı", "sahte avukat", "garanti onay",
       "arnaque", "fraude", "faux avocat", "garantit approbation",
       "诈骗", "欺诈", "假律师", "保证批准",
@@ -353,6 +403,7 @@ const bestTopicKey = (question) => {
     tps: [
       "tps", "temporary protected", "protected status", "re register", "renew tps", "tps renewal",
       "country designation", "temporary protected status", "estatus de proteccion temporal", "renovar tps",
+      "status de proteção temporária", "renovação do tps",
       "gecici koruma", "geçici koruma", "tps yenileme",
       "statut de protection temporaire", "renouveler tps",
       "临时保护", "临时保护身份", "续期",
@@ -366,6 +417,7 @@ const bestTopicKey = (question) => {
       "job authorization", "card to work", "permiso de trabajo", "工作许可", "वर्क परमिट",
       "تصريح العمل", "কাজের অনুমতি", "разрешение на работу",
       "autorizacion de empleo", "autorización de empleo", "tarjeta de trabajo",
+      "autorização de trabalho", "permissão de trabalho",
       "calisma izni", "çalışma izni", "permis de travail", "autorisation de travail",
       "工作授权", "कार्य अनुमति", "إذن العمل", "اذن العمل", "ওয়ার্ক পারমিট", "разрешение на трудоустройство"
     ],
@@ -374,6 +426,7 @@ const bestTopicKey = (question) => {
       "leave the us", "come back after travel", "travel while case pending", "旅行授权", "यात्रा अनुमति",
       "تصريح السفر", "ভ্রমণ অনুমতি", "разрешение на поездку",
       "autorizacion de viaje", "autorización de viaje", "permiso de viaje",
+      "autorização de viagem", "documento de viagem", "permissão para viajar",
       "seyahat izni", "autorisation de voyage", "document de voyage",
       "旅行许可", "回美纸", "यात्रा परमिट", "إذن السفر", "اذن السفر", "وثيقة سفر",
       "ভ্রমণ পারমিট", "разрешение на путешествие", "проездной документ"
@@ -409,6 +462,7 @@ function summaryLabels(lang) {
     en: { complete: "complete", noticeDate: "Notice date", suggestedDate: "Suggested date", completed: "Completed", remaining: "Remaining", keyDates: "Key dates", notSet: "not set", none: "none", notCalculated: "not calculated yet" },
     tr: { complete: "tamamlandı", noticeDate: "Bildirim tarihi", suggestedDate: "Önerilen tarih", completed: "Tamamlanan", remaining: "Kalan", keyDates: "Önemli tarihler", notSet: "ayarlanmadı", none: "yok", notCalculated: "henüz hesaplanmadı" },
     es: { complete: "completo", noticeDate: "Fecha de aviso", suggestedDate: "Fecha sugerida", completed: "Completado", remaining: "Restante", keyDates: "Fechas clave", notSet: "no configurada", none: "ninguno", notCalculated: "aún no calculadas" },
+    pt: { complete: "concluídos", noticeDate: "Data do aviso", suggestedDate: "Data sugerida", completed: "Concluído", remaining: "Pendente", keyDates: "Datas importantes", notSet: "não definida", none: "nenhum", notCalculated: "ainda não calculadas" },
     zh: { complete: "完成", noticeDate: "通知日期", suggestedDate: "建议日期", completed: "已完成", remaining: "剩余", keyDates: "重要日期", notSet: "未设置", none: "无", notCalculated: "尚未计算" },
     hi: { complete: "पूरा", noticeDate: "नोटिस तारीख", suggestedDate: "सुझाई गई तारीख", completed: "पूरा", remaining: "बाकी", keyDates: "मुख्य तारीखें", notSet: "सेट नहीं", none: "कोई नहीं", notCalculated: "अभी गणना नहीं हुई" },
     fr: { complete: "terminé", noticeDate: "Date d’avis", suggestedDate: "Date suggérée", completed: "Terminé", remaining: "Restant", keyDates: "Dates clés", notSet: "non définie", none: "aucun", notCalculated: "pas encore calculées" },
@@ -558,12 +612,12 @@ export default function AIAdvisorScreen({ navigation }) {
   const openOfficialLink = (question) => {
     const q = normalizeText(question);
     if (hasAnyTerm(q, ["case", "receipt", "status", "caso", "recibo", "estado", "durum", "makbuz", "dossier", "recu", "reçu", "案件", "收据", "状态", "केस", "रसीद", "स्थिति", "قضية", "إيصال", "حالة", "কেস", "রসিদ", "অবস্থা", "дело", "квитанц", "статус"])) return OFFICIAL_LINKS.status;
-    if (hasAnyTerm(q, ["processing", "procesamiento", "islem", "işlem", "traitement", "处理", "प्रोसेसिंग", "معالجة", "প্রসেসিং", "обработ"])) return OFFICIAL_LINKS.processing;
-    if (hasAnyTerm(q, ["fee", "cost", "payment", "tarifa", "costo", "pago", "ucret", "ücret", "odeme", "ödeme", "frais", "费用", "付款", "फीस", "भुगतान", "رسوم", "دفع", "ফি", "পেমেন্ট", "сбор", "оплата"])) return OFFICIAL_LINKS.fees;
-    if (hasAnyTerm(q, ["address", "move", "ar 11", "direccion", "dirección", "mudanza", "adres", "adresse", "地址", "पता", "عنوان", "ঠিকানা", "адрес"])) return OFFICIAL_LINKS.address;
-    if (hasAnyTerm(q, ["legal", "lawyer", "attorney", "ayuda legal", "abogado", "hukuki", "avukat", "juridique", "avocat", "法律", "律师", "कानूनी", "वकील", "قانوني", "محامي", "আইনি", "আইনজীবী", "юрид", "адвокат"])) return OFFICIAL_LINKS.legal;
-    if (hasAnyTerm(q, ["scam", "fraud", "notario", "estafa", "fraude", "dolandirici", "dolandırıcı", "arnaque", "诈骗", "धोखाधड़ी", "احتيال", "প্রতারণা", "мошеннич"])) return OFFICIAL_LINKS.scams;
-    if (hasAnyTerm(q, ["form", "formulario", "form", "formulaire", "表格", "फॉर्म", "نموذج", "ফর্ম", "форма"])) return OFFICIAL_LINKS.forms;
+    if (hasAnyTerm(q, ["processing", "procesamiento", "processamento", "islem", "işlem", "traitement", "处理", "प्रोसेसिंग", "معالجة", "প্রসেসিং", "обработ"])) return OFFICIAL_LINKS.processing;
+    if (hasAnyTerm(q, ["fee", "cost", "payment", "tarifa", "costo", "pago", "taxa", "custo", "pagamento", "ucret", "ücret", "odeme", "ödeme", "frais", "费用", "付款", "फीस", "भुगतान", "رسوم", "دفع", "ফি", "পেমেন্ট", "сбор", "оплата"])) return OFFICIAL_LINKS.fees;
+    if (hasAnyTerm(q, ["address", "move", "ar 11", "direccion", "dirección", "mudanza", "endereço", "mudar", "adres", "adresse", "地址", "पता", "عنوان", "ঠিকানা", "адрес"])) return OFFICIAL_LINKS.address;
+    if (hasAnyTerm(q, ["legal", "lawyer", "attorney", "ayuda legal", "abogado", "jurídico", "advogado", "hukuki", "avukat", "juridique", "avocat", "法律", "律师", "कानूनी", "वकील", "قانوني", "محامي", "আইনি", "আইনজীবী", "юрид", "адвокат"])) return OFFICIAL_LINKS.legal;
+    if (hasAnyTerm(q, ["scam", "fraud", "notario", "estafa", "fraude", "golpe", "dolandirici", "dolandırıcı", "arnaque", "诈骗", "धोखाधड़ी", "احتيال", "প্রতারণা", "мошеннич"])) return OFFICIAL_LINKS.scams;
+    if (hasAnyTerm(q, ["form", "formulario", "formulário", "form", "formulaire", "表格", "फॉर्म", "نموذج", "ফর্ম", "форма"])) return OFFICIAL_LINKS.forms;
     return OFFICIAL_LINKS.uscis;
   };
 
@@ -652,23 +706,23 @@ export default function AIAdvisorScreen({ navigation }) {
         return t("ai.taskOpenedFlow", { flow: titleForFlow(flow, t) });
       }
 
-      if (hasAnyTerm(q, INTENT_TERMS.link)) {
+      if (hasAnyTerm(q, intentTerms("link"))) {
         const url = openOfficialLink(question);
         Linking.openURL(url);
         return t("ai.taskOpenedLink");
       }
 
-      if (hasAnyTerm(q, INTENT_TERMS.resource)) {
+      if (hasAnyTerm(q, intentTerms("resource"))) {
         navigation.navigate("Resources");
         return t("ai.taskOpenedResources");
       }
 
-      if (hasAnyTerm(q, INTENT_TERMS.privacy)) {
+      if (hasAnyTerm(q, intentTerms("privacy"))) {
         navigation.navigate("Privacy");
         return t("ai.taskOpenedPrivacy");
       }
 
-      if (hasAnyTerm(q, INTENT_TERMS.reminder)) {
+      if (hasAnyTerm(q, intentTerms("reminder"))) {
         navigation.navigate("Reminders");
         return t("ai.taskOpenedReminders");
       }

@@ -13,20 +13,20 @@ const STOP_WORDS = new Set([
 
 const TOPIC_ALIASES = [
   {
-    match: ["green card", "permanent resident", "residencia", "tarjeta verde", "yeşil kart", "carte verte", "绿卡", "ग्रीन कार्ड", "البطاقة الخضراء", "গ্রিন কার্ড", "грин карта"],
+    match: ["green card", "permanent resident", "residencia", "tarjeta verde", "cartão verde", "residente permanente", "yeşil kart", "carte verte", "绿卡", "ग्रीन कार्ड", "البطاقة الخضراء", "গ্রিন কার্ড", "грин карта"],
     add: ["green", "card", "permanent", "resident", "adjustment", "status"]
   },
   {
-    match: ["citizenship", "naturalization", "ciudadania", "ciudadanía", "vatandaslik", "vatandaşlık", "citoyennete", "citoyenneté", "公民", "入籍", "नागरिकता", "الجنسية", "নাগরিকত্ব", "гражданство"],
+    match: ["citizenship", "naturalization", "ciudadania", "ciudadanía", "cidadania", "naturalização", "vatandaslik", "vatandaşlık", "citoyennete", "citoyenneté", "公民", "入籍", "नागरिकता", "الجنسية", "নাগরিকত্ব", "гражданство"],
     add: ["citizenship", "naturalization", "n-400"]
   },
   {
-    match: ["work permit", "employment authorization", "permiso de trabajo", "calisma izni", "çalışma izni", "permis de travail", "工作许可", "वर्क परमिट", "تصريح العمل", "কাজের অনুমতি", "разрешение на работу"],
+    match: ["work permit", "employment authorization", "permiso de trabajo", "autorização de trabalho", "permissão de trabalho", "calisma izni", "çalışma izni", "permis de travail", "工作许可", "वर्क परमिट", "تصريح العمل", "কাজের অনুমতি", "разрешение на работу"],
     add: ["work", "permit", "employment", "authorization", "ead", "i-765"],
     prefer: ["/employment-authorization"]
   },
   {
-    match: ["travel document", "advance parole", "travel authorization", "permiso de viaje", "seyahat izni", "document de voyage", "旅行许可", "यात्रा अनुमति", "وثيقة سفر", "ভ্রমণ অনুমতি", "проездной документ"],
+    match: ["travel document", "advance parole", "travel authorization", "permiso de viaje", "autorização de viagem", "documento de viagem", "permissão para viajar", "seyahat izni", "document de voyage", "旅行许可", "यात्रा अनुमति", "وثيقة سفر", "ভ্রমণ অনুমতি", "проездной документ"],
     add: ["travel", "document", "advance", "parole", "i-131"]
   },
   {
@@ -34,26 +34,27 @@ const TOPIC_ALIASES = [
     add: ["asylum", "refugee", "humanitarian", "i-589"]
   },
   {
-    match: ["tps", "temporary protected status", "estatus de proteccion temporal", "gecici koruma", "statut de protection temporaire", "临时保护身份", "अस्थायी संरक्षित", "الحماية المؤقتة", "অস্থায়ী সুরক্ষিত", "временный защищенный"],
+    match: ["tps", "temporary protected status", "estatus de proteccion temporal", "status de proteção temporária", "renovação do tps", "gecici koruma", "statut de protection temporaire", "临时保护身份", "अस्थायी संरक्षित", "الحماية المؤقتة", "অস্থায়ী সুরক্ষিত", "временный защищенный"],
     add: ["tps", "temporary", "protected", "status", "re-registration"]
   },
   {
-    match: ["family petition", "petition relative", "peticion familiar", "aile dilekce", "regroupement familial", "家庭移民", "परिवार याचिका", "التماس عائلي", "পারিবারিক আবেদন", "семейная петиция"],
+    match: ["family petition", "petition relative", "peticion familiar", "petição familiar", "parente", "aile dilekce", "regroupement familial", "家庭移民", "परिवार याचिका", "التماس عائلي", "পারিবারিক আবেদন", "семейная петиция"],
     add: ["family", "petition", "relative", "i-130"]
   },
   {
-    match: ["fee", "cost", "tarifa", "costo", "ucret", "ücret", "frais", "费用", "फीस", "رسوم", "ফি", "сбор"],
+    match: ["fee", "cost", "tarifa", "costo", "taxa", "custo", "pagamento", "ucret", "ücret", "frais", "费用", "फीस", "رسوم", "ফি", "сбор"],
     add: ["fee", "filing", "payment", "g-1055"],
     prefer: ["/forms/filing-fees", "/g-1055"]
   },
   {
-    match: ["processing time", "how long", "tiempo de procesamiento", "ne kadar surer", "délai de traitement", "处理时间", "प्रोसेसिंग समय", "وقت المعالجة", "প্রসেসিং সময়", "срок обработки"],
+    match: ["processing time", "how long", "tiempo de procesamiento", "tempo de processamento", "quanto tempo", "atraso", "ne kadar surer", "délai de traitement", "处理时间", "प्रोसेसिंग समय", "وقت المعالجة", "প্রসেসিং সময়", "срок обработки"],
     add: ["processing", "time", "delay", "case"]
   },
   {
     match: [
       "change address", "changed my address", "moved",
       "cambio de direccion", "cambiar direccion", "cambié de dirección", "direccion",
+      "mudar endereço", "alteração de endereço", "endereço",
       "adres degisikligi", "adres değiştirme", "taşındım", "adres",
       "changement adresse", "changer adresse", "j ai demenage", "adresse",
       "更改地址", "修改地址", "搬家", "地址",
@@ -66,19 +67,19 @@ const TOPIC_ALIASES = [
     prefer: ["/addresschange"]
   },
   {
-    match: ["request for evidence", "rfe", "solicitud de evidencia", "kanit talebi", "demande de preuves", "补件", "सबूत का अनुरोध", "طلب أدلة", "প্রমাণের অনুরোধ", "запрос доказательств"],
+    match: ["request for evidence", "rfe", "solicitud de evidencia", "pedido de provas", "solicitação de provas", "kanit talebi", "demande de preuves", "补件", "सबूत का अनुरोध", "طلب أدلة", "প্রমাণের অনুরোধ", "запрос доказательств"],
     add: ["request", "evidence", "rfe", "response", "deadline"]
   },
   {
-    match: ["biometrics", "fingerprint", "biometria", "parmak izi", "biometrie", "生物识别", "बायोमेट्रिक", "بصمات", "বায়োমেট্রিক", "биометрия"],
+    match: ["biometrics", "fingerprint", "biometria", "impressões digitais", "parmak izi", "biometrie", "生物识别", "बायोमेट्रिक", "بصمات", "বায়োমেট্রিক", "биометрия"],
     add: ["biometrics", "fingerprint", "appointment", "asc"]
   },
   {
-    match: ["case status", "receipt number", "estado del caso", "dosya durumu", "statut du dossier", "案件状态", "केस स्थिति", "حالة القضية", "কেস স্ট্যাটাস", "статус дела"],
+    match: ["case status", "receipt number", "estado del caso", "status do caso", "número do recibo", "dosya durumu", "statut du dossier", "案件状态", "केस स्थिति", "حالة القضية", "কেস স্ট্যাটাস", "статус дела"],
     add: ["case", "status", "receipt", "number", "online"]
   },
   {
-    match: ["scam", "fraud", "estafa", "fraude", "dolandirici", "arnaque", "诈骗", "धोखाधड़ी", "احتيال", "প্রতারণা", "мошенничество"],
+    match: ["scam", "fraud", "estafa", "fraude", "golpe", "dolandirici", "arnaque", "诈骗", "धोखाधड़ी", "احتيال", "প্রতারণা", "мошенничество"],
     add: ["scam", "fraud", "avoid", "legal", "services"]
   }
 ];

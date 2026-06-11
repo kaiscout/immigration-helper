@@ -17,6 +17,7 @@
       "label_ar": "تاريخ الإرسال المقترح",
       "label_bn": "প্রস্তাবিত মেইলিং তারিখ",
       "label_ru": "Предлагаемая дата отправки",
+      "label_pt": "Data de envio sugerida",
       "anchor": "notice_date",
       "offsetDays": 60
     },
@@ -31,6 +32,7 @@
       "label_ar": "إغلاق فترة إعادة التسجيل",
       "label_bn": "পুনঃনিবন্ধন সময়সীমা শেষ",
       "label_ru": "Окно перерегистрации закрывается",
+      "label_pt": "Fim do período de novo registro",
       "anchor": "notice_date",
       "offsetDays": 180
     }
@@ -47,6 +49,7 @@
       "title_ar": "نموذج I-821 (TPS)",
       "title_bn": "Form I-821 (TPS)",
       "title_ru": "Форма I-821 (TPS)",
+      "title_pt": "Formulário I-821 (TPS)",
       "url": "https://www.uscis.gov/i-821"
     },
     {
@@ -60,6 +63,7 @@
       "title_ar": "نموذج I-765 (تصريح العمل، إذا لزم)",
       "title_bn": "Form I-765 (কাজের অনুমতি, প্রয়োজন হলে)",
       "title_ru": "Форма I-765 (разрешение на работу, если нужно)",
+      "title_pt": "Formulário I-765 (autorização de trabalho, se necessário)",
       "url": "https://www.uscis.gov/i-765"
     }
   ],
@@ -75,6 +79,7 @@
       "title_ar": "تحقق من فترة التقديم",
       "title_bn": "আপনার ফাইলিং সময়সীমা নিশ্চিত করুন",
       "title_ru": "Подтвердите окно подачи",
+      "title_pt": "Confirme seu período de envio",
       "details_en": "Check your country’s TPS announcement and the dates.",
       "details_tr": "Ulkenizin TPS duyurusunu ve tarihlerini kontrol edin.",
       "details_es": "Revisa el anuncio TPS de tu pais y las fechas.",
@@ -83,7 +88,8 @@
       "details_fr": "Vérifiez l’annonce TPS de votre pays et les dates.",
       "details_ar": "راجع إعلان TPS الخاص ببلدك والتواريخ.",
       "details_bn": "আপনার দেশের TPS ঘোষণা ও তারিখ দেখুন।",
-      "details_ru": "Проверьте объявление TPS для вашей страны и даты."
+      "details_ru": "Проверьте объявление TPS для вашей страны и даты.",
+      "details_pt": "Confira o anúncio do TPS para seu país e as datas correspondentes."
     },
     {
       "id": "photos",
@@ -96,6 +102,7 @@
       "title_ar": "احصل على صور جواز سفر (2x2 بوصة)",
       "title_bn": "পাসপোর্ট ছবি নিন (2x2 ইঞ্চি)",
       "title_ru": "Сделайте паспортные фото (2x2 дюйма)",
+      "title_pt": "Tire fotos de passaporte (2x2 pol.)",
       "details_en": "Two identical color photos with white background.",
       "details_tr": "Beyaz arka planli, ayni, iki adet renkli fotograf.",
       "details_es": "Dos fotos identicas a color con fondo blanco.",
@@ -104,7 +111,8 @@
       "details_fr": "Deux photos couleur identiques sur fond blanc.",
       "details_ar": "صورتان ملونتان متطابقتان بخلفية بيضاء.",
       "details_bn": "সাদা ব্যাকগ্রাউন্ডে একই রঙিন দুইটি ছবি।",
-      "details_ru": "Две одинаковые цветные фотографии на белом фоне."
+      "details_ru": "Две одинаковые цветные фотографии на белом фоне.",
+      "details_pt": "Duas fotos coloridas idênticas com fundo branco."
     },
     {
       "id": "payment",
@@ -117,6 +125,7 @@
       "title_ar": "حضّر الدفع",
       "title_bn": "পেমেন্ট প্রস্তুত করুন",
       "title_ru": "Подготовьте оплату",
+      "title_pt": "Prepare o pagamento",
       "details_en": "Confirm fee and payee name per official instructions.",
       "details_tr": "Resmi talimatlara gore ucreti ve alici adini dogrulayin.",
       "details_es": "Confirma la tarifa y el beneficiario segun instrucciones oficiales.",
@@ -125,7 +134,8 @@
       "details_fr": "Confirmez les frais et le bénéficiaire selon les instructions officielles.",
       "details_ar": "تحقق من الرسوم واسم المستفيد حسب التعليمات الرسمية.",
       "details_bn": "অফিসিয়াল নির্দেশনা অনুযায়ী ফি ও প্রাপকের নাম নিশ্চিত করুন।",
-      "details_ru": "Подтвердите сбор и получателя согласно официальным инструкциям."
+      "details_ru": "Подтвердите сбор и получателя согласно официальным инструкциям.",
+      "details_pt": "Confirme a taxa e o nome do beneficiário nas instruções oficiais."
     },
     {
       "id": "make_copies",
@@ -138,6 +148,7 @@
       "title_ar": "اصنع نسخاً من الهويات والإيصالات",
       "title_bn": "ID ও রসিদের কপি করুন",
       "title_ru": "Сделайте копии ID и квитанций",
+      "title_pt": "Faça cópias das identificações e dos recibos",
       "details_en": "Keep copies for your records.",
       "details_tr": "Kayitlariniz icin kopyalari saklayin.",
       "details_es": "Guarda copias para tus registros.",
@@ -146,7 +157,8 @@
       "details_fr": "Gardez des copies pour vos dossiers.",
       "details_ar": "احتفظ بالنسخ لسجلاتك.",
       "details_bn": "নিজের রেকর্ডের জন্য কপি রাখুন।",
-      "details_ru": "Храните копии для своих записей."
+      "details_ru": "Храните копии для своих записей.",
+      "details_pt": "Guarde cópias para seus registros."
     },
     {
       "id": "mail_packet",
@@ -159,6 +171,7 @@
       "title_ar": "أرسل ملفك بالبريد",
       "title_bn": "আপনার প্যাকেট মেইল করুন",
       "title_ru": "Отправьте пакет",
+      "title_pt": "Envie seu pacote",
       "details_en": "Use trackable shipping. Keep the receipt.",
       "details_tr": "Takip edilebilir gonderim kullanin. Makbuzu saklayin.",
       "details_es": "Usa envio con rastreo. Guarda el recibo.",
@@ -167,7 +180,8 @@
       "details_fr": "Utilisez un envoi avec suivi. Gardez le reçu.",
       "details_ar": "استخدم شحناً قابلاً للتتبع واحتفظ بالإيصال.",
       "details_bn": "ট্র্যাক করা যায় এমন শিপিং ব্যবহার করুন। রসিদ রাখুন।",
-      "details_ru": "Используйте отправку с отслеживанием. Сохраните квитанцию."
+      "details_ru": "Используйте отправку с отслеживанием. Сохраните квитанцию.",
+      "details_pt": "Use um envio com rastreamento e guarde o recibo."
     }
   ],
   "resources": [
@@ -181,6 +195,7 @@
       "label_ar": "التعليمات الرسمية",
       "label_bn": "অফিসিয়াল নির্দেশনা",
       "label_ru": "Официальные инструкции",
+      "label_pt": "Instruções oficiais",
       "url": "https://www.uscis.gov/humanitarian/temporary-protected-status"
     },
     {
@@ -193,6 +208,7 @@
       "label_ar": "تجنب احتيال TPS",
       "label_bn": "TPS প্রতারণা এড়ান",
       "label_ru": "Избегать мошенничества TPS",
+      "label_pt": "Evitar golpes relacionados ao TPS",
       "url": "https://www.uscis.gov/scams-fraud-and-misconduct/avoid-scams"
     }
   ],
@@ -205,6 +221,7 @@
     "note_fr": "Peut varier",
     "note_ar": "قد يختلف",
     "note_bn": "পরিবর্তিত হতে পারে",
-    "note_ru": "Может меняться"
+    "note_ru": "Может меняться",
+    "note_pt": "Pode variar"
   }
 }
