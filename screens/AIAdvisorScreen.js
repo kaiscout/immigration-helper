@@ -1340,7 +1340,12 @@ export default function AIAdvisorScreen({ navigation }) {
                 {msg.text}
               </Text>
             )}
-            {msg.role === "assistant" && !msg.sections?.length && msg.sources?.length ? (
+            {msg.role === "assistant" &&
+            msg.sources?.length &&
+            (
+              !msg.sections?.length ||
+              !msg.sections.some((section) => section.sources?.length)
+            ) ? (
               <View style={styles.answerSources}>
                 {msg.sources.map((source, sourceIndex) => (
                   <TouchableOpacity
