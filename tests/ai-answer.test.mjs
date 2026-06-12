@@ -225,6 +225,50 @@ test("keeps each official citation with the paragraph it supports", () => {
   }]);
 });
 
+test("maps paragraph citations correctly across every supported writing system", () => {
+  const samples = {
+    en: "Start with the official instructions.",
+    tr: "Resmî talimatlarla başlayın.",
+    es: "Empiece con las instrucciones oficiales.",
+    zh: "请先查看官方说明。",
+    hi: "आधिकारिक निर्देशों से शुरुआत करें।",
+    fr: "Commencez par les instructions officielles.",
+    ar: "ابدأ بالتعليمات الرسمية.",
+    bn: "সরকারি নির্দেশনা দিয়ে শুরু করুন।",
+    ru: "Начните с официальных инструкций.",
+    pt: "Comece pelas instruções oficiais."
+  };
+
+  for (const [code, sentence] of Object.entries(samples)) {
+    const citation = ` ([uscis.gov](https://www.uscis.gov/forms))`;
+    const text = `${sentence}${citation}`;
+    const sections = extractAnswerSections({
+      output: [{
+        type: "message",
+        content: [{
+          type: "output_text",
+          text,
+          annotations: [{
+            type: "url_citation",
+            start_index: sentence.length + 1,
+            end_index: text.length,
+            title: "USCIS Forms",
+            url: "https://www.uscis.gov/forms?utm_source=openai"
+          }]
+        }]
+      }]
+    });
+
+    assert.deepEqual(sections, [{
+      text: sentence,
+      sources: [{
+        title: "USCIS Forms",
+        url: "https://www.uscis.gov/forms"
+      }]
+    }], code);
+  }
+});
+
 test("canonicalizes duplicate official sources and labels their agencies", () => {
   const sources = extractSources({
     output: [{
@@ -267,6 +311,7 @@ test("supports every app language with an explicit response language", async () 
     const result = await answer({ question: "What does USCIS do?", language: code });
     assert.match(requestBody.input, new RegExp(`Requested response language: ${name}`));
     assert.match(requestBody.input, new RegExp(`answer in ${name}`));
+    assert.match(requestBody.input, new RegExp(`Write idiomatically in ${name}`));
     assert.equal(result.body.degraded, false);
   }
 });

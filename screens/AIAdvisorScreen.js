@@ -25,6 +25,7 @@ You are Immigration Helper's U.S. immigration information assistant.
 Give every supported language the same reasoning quality, useful detail, conversational warmth, follow-up awareness, and task capability as English.
 Understand natural questions in the requested language without requiring English immigration terms or a specific phrasing.
 Keep every ordinary word in the requested language without accidentally mixing in another language or script, except official names, acronyms, and form numbers.
+Write naturally in the requested language, using its normal script, punctuation, phrasing, and sentence structure rather than translating English word for word.
 Use current official U.S. government sources and route the question to the agency that governs it: USCIS for immigration benefits, the Department of State for visas and consular processing, CBP for admission and I-94 matters, EOIR/DOJ for immigration court, and DOL for labor-certification matters.
 For visitor-visa questions from outside the United States, explain that the Department of State and the relevant U.S. embassy or consulate are the proper starting points, then provide useful official next steps.
 Do not provide legal advice, determine eligibility, predict approval, guarantee outcomes, or ask for sensitive identifiers.
@@ -36,7 +37,7 @@ Start with the direct answer, then explain useful details and next steps.
 Use natural everyday wording and contractions when appropriate. Be warm when the user sounds worried or confused.
 Do not sound like a policy manual, legal memo, chatbot script, or form letter.
 Avoid canned phrases, repetitive disclaimers, and unnecessary headings.
-Place an official citation immediately after each factual paragraph or list item it supports. Do not collect citations in a bibliography at the end.
+Place an official citation immediately after each factual paragraph or list block it supports. Every factual paragraph or list block must have a relevant official citation. Do not collect citations in a bibliography at the end.
 Do not add raw citation tokens, manually written Markdown links, or decorative bold markers; the app displays citation annotations beneath the supported text.
 Keep answers concise, practical, and clear about dates, forms, fees, exceptions, and next steps.
 `;
@@ -660,22 +661,64 @@ function responseOutputText(data, fallback) {
 }
 
 function responseSections(data) {
-  if (!Array.isArray(data?.sections)) return [];
+  if (Array.isArray(data?.sections)) {
+    return data.sections.flatMap((section) => {
+      const text = responseOutputText({ output_text: section?.text }, "");
+      if (!text) return [];
 
-  return data.sections.flatMap((section) => {
-    const text = responseOutputText({ output_text: section?.text }, "");
-    if (!text) return [];
+      return [{
+        text,
+        sources: responseSources({ sources: section?.sources })
+      }];
+    });
+  }
 
-    return [{
-      text,
-      sources: responseSources({ sources: section?.sources })
-    }];
-  });
+  return (data?.output || [])
+    .flatMap((item) => item?.content || [])
+    .filter((content) => content?.type === "output_text" && typeof content.text === "string")
+    .flatMap((content) => {
+      const ranges = [];
+      const pattern = /\S[\s\S]*?(?=\n[ \t]*\n|$)/g;
+      let match;
+
+      while ((match = pattern.exec(content.text)) !== null) {
+        ranges.push({
+          start: match.index,
+          end: match.index + match[0].length,
+          text: match[0]
+        });
+      }
+
+      return ranges.flatMap((range) => {
+        const text = responseOutputText({ output_text: range.text }, "");
+        if (!text) return [];
+
+        const sources = (content.annotations || []).flatMap((annotation) => {
+          const citation = annotation?.url_citation || annotation;
+          const start = Number(citation?.start_index);
+          const end = Number(citation?.end_index);
+          const overlaps =
+            Number.isFinite(start) &&
+            start < range.end &&
+            (Number.isFinite(end) ? end > range.start : start >= range.start);
+
+          return overlaps && citation?.url
+            ? [{ title: citation.title || "USCIS", url: citation.url }]
+            : [];
+        });
+
+        return [{
+          text,
+          sources: responseSources({ sources })
+        }];
+      });
+    });
 }
 
 export default function AIAdvisorScreen({ navigation }) {
   const { t, i18n } = useTranslation();
   const lang = (i18n.language || "en").toLowerCase();
+  const isRtl = lang.split("-")[0] === "ar";
   const scrollRef = useRef(null);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -1102,7 +1145,7 @@ export default function AIAdvisorScreen({ navigation }) {
                     key={`section-${sectionIndex}`}
                     style={sectionIndex ? styles.answerSection : null}
                   >
-                    <Text style={[styles.bubbleText, styles.assistantText]}>
+                    <Text style={[styles.bubbleText, styles.assistantText, isRtl && styles.rtlText]}>
                       {section.text}
                     </Text>
                     {section.sources?.length ? (
@@ -1110,11 +1153,14 @@ export default function AIAdvisorScreen({ navigation }) {
                         {section.sources.map((source, sourceIndex) => (
                           <TouchableOpacity
                             key={`${source.url}-${sourceIndex}`}
-                            style={styles.answerSource}
+                            style={[styles.answerSource, isRtl && styles.rtlRow]}
                             onPress={() => Linking.openURL(source.url)}
                           >
                             <Ionicons name="open-outline" size={14} color={COLORS.primary} />
-                            <Text style={styles.answerSourceText} numberOfLines={2}>
+                            <Text
+                              style={[styles.answerSourceText, isRtl && styles.rtlSourceText]}
+                              numberOfLines={2}
+                            >
                               {source.title || "USCIS"}
                             </Text>
                           </TouchableOpacity>
@@ -1128,7 +1174,8 @@ export default function AIAdvisorScreen({ navigation }) {
               <Text
                 style={[
                   styles.bubbleText,
-                  msg.role === "user" ? styles.userText : styles.assistantText
+                  msg.role === "user" ? styles.userText : styles.assistantText,
+                  isRtl && styles.rtlText
                 ]}
               >
                 {msg.text}
@@ -1139,11 +1186,14 @@ export default function AIAdvisorScreen({ navigation }) {
                 {msg.sources.map((source, sourceIndex) => (
                   <TouchableOpacity
                     key={`${source.url}-${sourceIndex}`}
-                    style={styles.answerSource}
+                    style={[styles.answerSource, isRtl && styles.rtlRow]}
                     onPress={() => Linking.openURL(source.url)}
                   >
                     <Ionicons name="open-outline" size={14} color={COLORS.primary} />
-                    <Text style={styles.answerSourceText} numberOfLines={2}>
+                    <Text
+                      style={[styles.answerSourceText, isRtl && styles.rtlSourceText]}
+                      numberOfLines={2}
+                    >
                       {source.title || "USCIS"}
                     </Text>
                   </TouchableOpacity>
@@ -1177,7 +1227,7 @@ export default function AIAdvisorScreen({ navigation }) {
           onChangeText={setInput}
           placeholder={t("ai.placeholder")}
           placeholderTextColor={COLORS.subtext}
-          style={styles.input}
+          style={[styles.input, isRtl && styles.rtlInput]}
           cursorColor={COLORS.primary}
           selectionColor={COLORS.primaryLight}
           multiline
@@ -1279,6 +1329,10 @@ const styles = StyleSheet.create({
   bubbleText: { fontSize: 15, lineHeight: 22 },
   assistantText: { color: COLORS.text },
   userText: { color: COLORS.primaryTextOn },
+  rtlText: {
+    textAlign: "right",
+    writingDirection: "rtl"
+  },
   answerSection: {
     marginTop: SPACING.md
   },
@@ -1298,12 +1352,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6
   },
+  rtlRow: {
+    flexDirection: "row-reverse"
+  },
   answerSourceText: {
     color: COLORS.primary,
     flex: 1,
     fontSize: 12,
     fontWeight: "800",
     lineHeight: 17
+  },
+  rtlSourceText: {
+    textAlign: "right"
   },
   sourceRow: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: SPACING.md },
   sourceBtn: {
@@ -1340,6 +1400,10 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     fontSize: 15,
     lineHeight: 21
+  },
+  rtlInput: {
+    textAlign: "right",
+    writingDirection: "rtl"
   },
   sendBtn: {
     width: 44,

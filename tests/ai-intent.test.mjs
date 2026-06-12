@@ -5,7 +5,7 @@ import { scoreExactIntent } from "../data/aiIntent.js";
 
 const OPEN_TERMS = [
   "open", "go to", "show me",
-  "abrir", "mostrar",
+  "abrir", "abra", "mostrar",
   "git", "göster",
   "ouvrir", "aller", "voir",
   "打开", "查看",
@@ -37,6 +37,7 @@ test("recognizes explicit navigation commands across supported scripts", () => {
   const commands = [
     "Open the USCIS website",
     "Abrir el sitio de USCIS",
+    "Abra o site do USCIS",
     "USCIS sitesini göster",
     "Ouvrir le site USCIS",
     "打开 USCIS 网站",

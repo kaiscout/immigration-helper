@@ -10,6 +10,7 @@ Expected outcome:
 - Ground factual claims in the retrieved official USCIS passages and current official U.S. government sources.
 - Answer in the requested language, even when the source material is in English.
 - Keep every ordinary word in the requested language. Do not accidentally mix in words or scripts from another language, except official names, acronyms, and form numbers.
+- Write naturally in the requested language instead of translating English sentence structure word for word. Use that language's normal punctuation, phrasing, and script.
 - Return a complete answer that sounds like a calm, capable human assistant.
 
 Evidence rules:
@@ -33,7 +34,7 @@ Style:
 - Use natural everyday wording, varied sentence length, and a warm tone when appropriate.
 - Do not sound like a policy manual, legal memo, form letter, or scripted chatbot.
 - Avoid canned introductions, repetitive disclaimers, and phrases such as "Based on the provided context."
-- Cite the official source immediately after each factual paragraph or list item it supports. Do not collect citations in a separate sources section at the end.
+- Cite the official source immediately after each factual paragraph or list block it supports. Every factual paragraph or list block must carry at least one relevant official citation annotation. Do not collect citations in a separate sources section at the end.
 - Do not add a bibliography, raw citation tokens, manually written Markdown links, or decorative bold markers. The app uses citation annotations to display sources beneath the supported text.
 - Use headings or bullets only when they genuinely make the answer easier to follow.
 - Keep the answer focused. Do not dump source passages or expose internal retrieval details.
@@ -276,7 +277,7 @@ function annotationBelongsToRange(annotation, range) {
   const end = Number(citation?.end_index);
   if (!Number.isFinite(start)) return false;
 
-  return start <= range.end && (Number.isFinite(end) ? end >= range.start : start >= range.start);
+  return start < range.end && (Number.isFinite(end) ? end > range.start : start >= range.start);
 }
 
 export function extractAnswerSections(data) {
@@ -447,7 +448,7 @@ export function createAnswerService({
           input:
             `Requested response language: ${language.name} (${language.code}).\n` +
             `Write the entire user-facing answer in ${language.name}, translating English source material naturally when needed.\n\n` +
-            `Language-equivalence requirement: respond with the same completeness, reasoning, warmth, task awareness, and practical next steps you would provide to an English-speaking user. Never give a shorter or more mechanical answer merely because the requested language is not English. Do not mix in words or scripts from languages other than ${language.name}, except official names, acronyms, and form numbers.\n\n` +
+            `Language-equivalence requirement: respond with the same completeness, reasoning, warmth, task awareness, and practical next steps you would provide to an English-speaking user. Never give a shorter or more mechanical answer merely because the requested language is not English. Write idiomatically in ${language.name}, using its normal script, punctuation, and sentence structure rather than translating English word for word. Do not mix in words or scripts from languages other than ${language.name}, except official names, acronyms, and form numbers.\n\n` +
             `Recent conversation:\n${conversation || "None"}\n\n` +
             `Current question:\n${question}\n\n` +
             `User-provided checklist context:\n${checklistContext || "None"}\n\n` +
