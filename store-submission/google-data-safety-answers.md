@@ -2,41 +2,38 @@
 
 Use this as the starting point for Play Console. Keep it consistent with the final production build and privacy policy.
 
-## If You Ship Without A Production AI Backend/API Key
+## Production Build Answers
 
-### Does your app collect or share any required user data types?
+The production build uses an online AI backend and collects user-provided content when the user chooses to submit an AI question.
 
-Suggested answer: No.
+Declarations:
 
-Reasoning:
-
-- Checklist dates, progress, language preference, onboarding state, and reminders are stored locally on the user's device.
-- The AI Helper can read and update this local checklist data at the user's request.
-- No account system.
-- No analytics SDK.
-- No advertising SDK.
-- No developer-operated server receives local checklist data.
-
-### Is all user data collected encrypted in transit?
-
-If no data is collected by your servers, answer according to Play Console's available flow. External links use HTTPS. If support email is listed, support messages happen outside the app.
-
-### Can users request that data be deleted?
-
-For local app data: users can delete the app or clear app data. If users contact support, they can request deletion of support communications where applicable.
-
-## If You Enable Production AI Calls
-
-You likely collect user-provided text/content and relevant checklist context for App Functionality when users submit AI questions.
-
-Likely declarations:
-
-- Data type: App activity or User content, depending on Play Console's current options.
+- Data type: User content → Other user-generated content. Use App activity only if the current Play definition specifically requires the AI conversation or checklist actions there.
 - Purpose: App functionality.
-- Shared: Yes if sent to a third-party AI service provider for processing.
-- Required: No if AI questions are optional.
-- Encrypted in transit: Yes, if sent over HTTPS/TLS.
-- Deletion: Explain how users can request deletion, and whether third-party provider retention applies.
+- Collected: Yes.
+- Required: No. Online AI is optional.
+- Encrypted in transit: Yes, using HTTPS/TLS.
+- Linked to identity: No account or profile is attached.
+- Used for advertising or tracking: No.
+- Temporarily processed: Do not select this exemption because OpenAI may retain API content for abuse monitoring for up to 30 days.
+
+Data sent:
+
+- Submitted AI question.
+- Recent current-session conversation.
+- Checklist dates and completed steps only when optional checklist sharing is enabled.
+
+Sharing:
+
+- Render and OpenAI process the data as service providers for app functionality.
+- Apply Google Play's current service-provider exemption when answering the "shared" question if the provider relationship meets its definition; otherwise declare the transfer.
+
+Deletion and controls:
+
+- Users can disable checklist sharing or withdraw online AI permission in Privacy & Safety.
+- Local data can be removed by clearing app data or deleting the app.
+- Users can contact admin@immigrationhelper.org about developer-controlled support communications.
+- Content already processed by OpenAI may remain for its applicable retention period.
 
 ## Permissions
 

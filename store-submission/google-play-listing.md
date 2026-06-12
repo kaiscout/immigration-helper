@@ -20,9 +20,10 @@ Features:
 - Key-date helper for suggested mailing and follow-up timing
 - Local notification reminders
 - Official USCIS links for forms, fees, case status, legal help, and scam prevention
-- Privacy-first design with checklist progress stored on your device
-- General AI helper prompts with legal-safety guardrails
-- English, Turkish, Spanish, Mandarin Chinese, Hindi, French, Modern Standard Arabic, Bengali, and Russian support
+- Privacy controls that keep checklist progress on your device unless you choose to share it with the online AI
+- Conversational AI answers grounded in official USCIS sources, with source links and legal-safety guardrails
+- Clear first-use permission before questions or optional checklist context are sent through our Render-hosted service to OpenAI
+- English, Turkish, Spanish, Portuguese, Mandarin Chinese, Hindi, French, Modern Standard Arabic, Bengali, and Russian support
 
 Important: Immigration Helper is independent and is not affiliated with USCIS, DHS, or any government agency. The app provides general information and organization tools only. It does not provide legal advice, does not determine eligibility, and does not replace official USCIS instructions or help from a qualified attorney or DOJ-accredited representative.
 

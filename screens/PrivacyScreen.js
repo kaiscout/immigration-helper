@@ -1,11 +1,48 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { Alert, Linking, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
 import { PRIVACY_POINTS } from "../data/resources";
+import { loadAiConsent, revokeAiConsent, updateChecklistSharing } from "../data/aiConsent";
+import { OFFICIAL_LINKS } from "../constants/officialLinks";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
 
-export default function PrivacyScreen() {
+export default function PrivacyScreen({ navigation }) {
   const { t } = useTranslation();
+  const [consent, setConsent] = useState(undefined);
+
+  const loadConsent = useCallback(async () => {
+    setConsent(await loadAiConsent());
+  }, []);
+
+  useEffect(() => {
+    loadConsent();
+    const unsubscribe = navigation.addListener?.("focus", loadConsent);
+    return unsubscribe;
+  }, [navigation, loadConsent]);
+
+  const changeChecklistSharing = async (value) => {
+    const next = await updateChecklistSharing(value);
+    setConsent(next);
+  };
+
+  const withdrawConsent = () => {
+    Alert.alert(
+      t("privacy.revokeTitle"),
+      t("privacy.revokeBody"),
+      [
+        { text: t("privacy.cancel"), style: "cancel" },
+        {
+          text: t("privacy.revokeConfirm"),
+          style: "destructive",
+          onPress: async () => {
+            await revokeAiConsent();
+            setConsent(null);
+          }
+        }
+      ]
+    );
+  };
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.wrap}>
@@ -28,6 +65,50 @@ export default function PrivacyScreen() {
           </View>
         </View>
       ))}
+
+      <View style={styles.controls}>
+        <View style={styles.controlsHeader}>
+          <View style={styles.iconBox}>
+            <Ionicons name="options-outline" size={22} color={COLORS.primary} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.cardTitle}>{t("privacy.controlsTitle")}</Text>
+            <Text style={styles.cardBody}>
+              {consent ? t("privacy.consentActive") : t("privacy.consentInactive")}
+            </Text>
+          </View>
+        </View>
+
+        {consent ? (
+          <View style={styles.settingRow}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.settingTitle}>{t("privacy.checklistConsentTitle")}</Text>
+              <Text style={styles.settingBody}>{t("privacy.checklistSettingBody")}</Text>
+            </View>
+            <Switch
+              value={consent.shareChecklist === true}
+              onValueChange={changeChecklistSharing}
+              trackColor={{ false: COLORS.border, true: COLORS.primaryLight }}
+              thumbColor={consent.shareChecklist ? COLORS.primary : COLORS.subtext}
+              accessibilityLabel={t("privacy.checklistConsentTitle")}
+            />
+          </View>
+        ) : null}
+
+        <TouchableOpacity
+          style={styles.controlButton}
+          onPress={() => consent ? withdrawConsent() : navigation.navigate("AIAdvisor")}
+        >
+          <Text style={[styles.controlButtonText, consent && styles.dangerText]}>
+            {consent ? t("privacy.revokeButton") : t("privacy.reviewConsent")}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.policyButton} onPress={() => Linking.openURL(OFFICIAL_LINKS.privacy)}>
+          <Ionicons name="open-outline" size={16} color={COLORS.primary} />
+          <Text style={styles.policyButtonText}>{t("privacy.policyLink")}</Text>
+        </TouchableOpacity>
+      </View>
 
       <View style={styles.notice}>
         <Ionicons name="warning-outline" size={18} color={COLORS.warning} />
@@ -77,6 +158,46 @@ const styles = StyleSheet.create({
   },
   cardTitle: { color: COLORS.text, fontWeight: "900", fontSize: 16 },
   cardBody: { color: COLORS.subtext, lineHeight: 20, marginTop: 4 },
+  controls: {
+    backgroundColor: COLORS.card,
+    borderRadius: RADII.xl,
+    padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    gap: SPACING.md,
+    ...SHADOW.soft
+  },
+  controlsHeader: { flexDirection: "row", gap: SPACING.md, alignItems: "flex-start" },
+  settingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.md,
+    paddingTop: SPACING.md,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border
+  },
+  settingTitle: { color: COLORS.text, fontWeight: "900" },
+  settingBody: { color: COLORS.subtext, fontSize: 12, lineHeight: 17, marginTop: 3 },
+  controlButton: {
+    minHeight: 46,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: RADII.lg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.cardSoft,
+    paddingHorizontal: SPACING.md
+  },
+  controlButtonText: { color: COLORS.primary, fontWeight: "900", textAlign: "center" },
+  dangerText: { color: COLORS.danger },
+  policyButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: SPACING.xs
+  },
+  policyButtonText: { color: COLORS.primary, fontWeight: "900" },
   notice: { flexDirection: "row", gap: 8, alignItems: "flex-start", marginTop: SPACING.sm },
   noticeText: { color: COLORS.subtext, fontSize: 12, lineHeight: 18, flex: 1 }
 });

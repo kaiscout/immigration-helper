@@ -2,33 +2,19 @@
 
 Use this as the starting point for App Store Connect. Keep it consistent with the final production build and privacy policy.
 
-## If You Ship Without A Production AI Backend/API Key
+## Production Build Answers
 
-Suggested privacy label:
+The production build uses an online AI backend. Do not answer "Data Not Collected."
 
-- Data Collected: No
-- Data Used to Track You: No
-- Data Linked to You: No
+Data type:
 
-Reasoning:
+- User Content → Other User Content.
 
-- Checklist dates, progress, language preference, onboarding state, and reminders are stored locally on the device.
-- The AI Helper can read and update this local checklist data at the user's request.
-- No account system.
-- No analytics SDK.
-- No advertising SDK.
-- No tracking.
-- No developer-operated server receives local checklist data.
+What this includes:
 
-Still provide a privacy policy URL because Apple requires it.
-
-## If You Enable Production AI Calls
-
-You may need to disclose user-provided content and relevant app activity/checklist context depending on the implementation.
-
-Likely data type:
-
-- Other User Content or Other Data, depending on App Store Connect's current form options.
+- Questions submitted to the AI Helper.
+- Recent messages from the current AI conversation.
+- Saved checklist dates and completed steps only when the user enables optional checklist sharing.
 
 Purpose:
 
@@ -36,18 +22,35 @@ Purpose:
 
 Linked to user:
 
-- No, if you do not require accounts and do not attach identifiers.
+- No. The app has no account system and does not attach a profile, advertising identifier, or user identity to AI requests.
 
 Tracking:
 
-- No, if not used for advertising/tracking.
+- No. The data is not used for advertising, data-broker profiling, or cross-app tracking.
+
+Collection status:
+
+- Collected: Yes, because this content leaves the device and OpenAI may retain API content in abuse-monitoring logs for up to 30 days.
+- Optional: Yes. The user can use the checklist, resources, and reminders without granting online AI permission.
+
+Checklist sharing:
+
+- Off by default.
+- Enabled only through a separate switch in the AI disclosure.
+- Can be disabled at any time in Privacy & Safety.
+
+Other technical data:
+
+- Render and OpenAI may process IP address, timestamps, and security or diagnostic metadata as service providers.
+- Review App Store Connect's current "Other Data" and diagnostics questions and disclose any category its definitions require for this provider processing.
 
 Notes:
 
-- Do not ship an OpenAI or other AI API key inside the app binary.
-- Use a backend if you enable production AI.
-- Update privacy policy and in-app disclosure before submitting an AI-backed build.
-- If checklist context is sent to an AI backend, disclose that context according to App Store Connect's available categories.
+- The OpenAI API key remains only in Render.
+- The app presents a first-use disclosure before any online AI content is sent.
+- Users can withdraw permission in Privacy & Safety.
+- The app uses HTTPS for AI requests.
+- No analytics, advertising, tracking, or third-party sign-in is included.
 
 ## Permission Notes
 

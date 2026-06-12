@@ -19,33 +19,48 @@
   <main>
     <article>
       <h1>Immigration Helper Privacy Policy</h1>
-      <p class="meta">Effective date: June 8, 2026</p>
+      <p class="meta">Effective date: June 12, 2026</p>
       <p>Immigration Helper is an independent checklist, reminder, and official-resource app. It is not affiliated with USCIS, DHS, or any government agency. It provides general information only and does not provide legal advice.</p>
 
       <h2>Information Stored On Your Device</h2>
-      <p>The app can save checklist progress, dates, language preference, onboarding status, and reminder-related choices locally on your device. This information is used to show your progress, help you organize reminders, and let the in-app helper summarize or update your checklist when you ask it to.</p>
-      <p>The developer does not operate a user account system and does not receive this local checklist data from the app.</p>
+      <p>The app can save checklist progress, dates, language preference, onboarding status, AI consent choices, and reminder-related choices locally on your device. This information is used to show your progress and preferences and help you organize reminders.</p>
+      <p>The app does not operate a user account system. Locally stored checklist data is not sent to the online AI unless you separately enable the optional checklist-sharing setting.</p>
 
       <h2>Notifications</h2>
       <p>If you choose to set reminders, the app asks for notification permission and schedules local notifications on your device. You can deny notification permission or clear scheduled reminders in the app.</p>
 
-      <h2>In-App Helper</h2>
-      <p>The app includes a helper screen. In this first release, the helper uses built-in guidance and local checklist progress without sending your questions to a developer-operated server.</p>
-      <p>Do not enter sensitive personal information, immigration case numbers, alien registration numbers, passport numbers, financial information, or private legal facts into the helper.</p>
-      <p>Helper responses are for general information only. They are not legal advice and do not determine eligibility for any immigration benefit.</p>
+      <h2>Online AI Helper And Consent</h2>
+      <p>Before online AI is enabled, the app presents a disclosure and asks for your permission. If you agree and submit a question, the app sends your question and recent AI conversation through Immigration Helper's backend hosted by Render to OpenAI to generate a response.</p>
+      <p>Sharing saved checklist dates and completed steps with the online AI is optional, starts turned off, and can be changed at any time in Privacy &amp; Safety. You can also withdraw online AI permission. Withdrawing permission stops future online AI transmissions and does not delete your local checklists.</p>
+      <p>Do not enter an A-Number, USCIS receipt number, passport number, Social Security number, payment information, or private legal details into the AI Helper.</p>
+      <p>AI responses are for general information only. They are not legal advice and do not determine eligibility or predict an immigration outcome.</p>
+
+      <h2>Information Processed For Online AI</h2>
+      <p>When you choose to use online AI, the following information is processed for app functionality:</p>
+      <ul>
+        <li>Your submitted question.</li>
+        <li>Recent messages in the current AI conversation so the assistant can understand follow-up questions.</li>
+        <li>Saved checklist dates and completed steps only if you enable optional checklist sharing.</li>
+        <li>Technical request information that hosting and AI service providers normally process, such as IP address, timestamps, and security or diagnostic metadata.</li>
+      </ul>
+      <p>The app does not attach a user account, advertising identifier, or profile to AI requests.</p>
 
       <h2>External Links</h2>
       <p>The app links to official resources such as USCIS pages and legal-help resources. When you open those links, they may open in your browser or another app, and the external website's privacy policy applies.</p>
 
-      <h2>Data Collection By The Developer</h2>
-      <p>The app does not include advertising SDKs, analytics SDKs, tracking SDKs, or third-party sign-in. The developer does not sell user data.</p>
+      <h2>Service Providers And Data Sharing</h2>
+      <p>Render hosts the Immigration Helper backend, and OpenAI processes AI requests and generates responses. Information is shared with these providers only to operate the AI Helper, maintain security, and provide the requested response.</p>
+      <p>OpenAI states that API data is not used to train or improve its models unless the API customer explicitly opts in. OpenAI's standard abuse-monitoring logs may retain API inputs and outputs for up to 30 days, unless longer retention is required by law or needed to protect the service or others.</p>
+      <p>The app does not include advertising SDKs, analytics SDKs, tracking SDKs, or third-party sign-in. The developer does not sell user data or use it for cross-app tracking or advertising.</p>
       <p>If you contact the developer for support by email or another external method, you may choose to provide contact information and support details. That information is used only to respond to your request.</p>
 
-      <h2>Data Sharing</h2>
-      <p>The developer does not share locally stored checklist data with third parties.</p>
+      <h2>Data Retention, Controls, And Deletion</h2>
+      <p>Checklist, consent, and reminder data stored locally remains on your device until you change or clear it, clear app data, or delete the app. AI chat is not saved as an account history by Immigration Helper and is cleared when the in-memory app session ends.</p>
+      <p>The Immigration Helper backend is designed to process AI request content without intentionally storing the question or answer in an application database. Render and OpenAI may process technical logs and content under their own security and retention practices, including OpenAI's retention described above.</p>
+      <p>You can turn off checklist sharing or withdraw AI permission in the app's Privacy &amp; Safety screen. You may contact admin@immigrationhelper.org with a privacy question or deletion request relating to support communications or data controlled by the developer. Data already processed by a service provider may remain for the provider's applicable retention period.</p>
 
-      <h2>Data Retention And Deletion</h2>
-      <p>Checklist and reminder data stored locally remains on your device until you delete the app, clear app data, or clear reminders where available. Support messages sent outside the app may be retained as needed to respond to support requests and maintain business records.</p>
+      <h2>Security</h2>
+      <p>AI requests are sent using HTTPS encryption in transit. No method of storage or transmission is completely secure, so users should avoid submitting sensitive identifiers or private legal facts.</p>
 
       <h2>Children</h2>
       <p>The app is not directed to children under 13.</p>
@@ -57,6 +72,7 @@
       <p>Developer: Deniz Izci</p>
       <p>Support email: <a href="mailto:admin@immigrationhelper.org">admin@immigrationhelper.org</a></p>
       <p>Privacy policy URL: <a href="https://kaiscout.github.io/immigration-helper/privacy-policy.html">https://kaiscout.github.io/immigration-helper/privacy-policy.html</a></p>
+      <p>OpenAI API data information: <a href="https://developers.openai.com/api/docs/guides/your-data">https://developers.openai.com/api/docs/guides/your-data</a></p>
     </article>
   </main>
 </body>

@@ -8,13 +8,14 @@ Suggested review path:
 
 1. Open the app.
 2. Complete onboarding.
-3. Choose a language: English, Turkish, Spanish, Mandarin Chinese, Hindi, French, Modern Standard Arabic, Bengali, or Russian.
+3. Choose a language: English, Turkish, Spanish, Portuguese, Mandarin Chinese, Hindi, French, Modern Standard Arabic, Bengali, or Russian.
 4. Open TPS Renewal, Work Permit, or Travel Authorization.
 5. Enter a sample date such as `2026-07-01`.
 6. Tap Save to see suggested key dates.
 7. Open Resources to verify official links.
 8. Open Reminders and send a test notification.
 9. Open Privacy & Safety to review disclosures.
+10. Open AI Helper. The first-use screen discloses Render and OpenAI processing and offers optional checklist sharing, which is off by default.
 
 ## Safety Positioning
 
@@ -24,9 +25,13 @@ The app does not provide legal advice, does not determine eligibility, and does 
 
 ## Helper Notes
 
-The in-app helper is framed as general information only. It can summarize and update local checklist progress at the user's request. The interface warns users not to rely on it for legal advice and points users to official USCIS and legal-help resources.
+The in-app helper is framed as general information only. It can answer general immigration questions from official sources and can summarize or update local checklist progress at the user's request. The interface warns users not to rely on it for legal advice and points users to official government and legal-help resources.
 
-This first release does not include a production AI API key in the app binary. Expanded online AI answers are not enabled in the submitted build.
+Online answers use a developer-operated HTTPS backend hosted by Render, which calls OpenAI with a server-side API key. No OpenAI API key is included in the app binary.
+
+Before any online AI content is sent, the app asks the user to agree to a disclosure explaining that submitted questions and recent chat are processed by Render and OpenAI. Optional checklist sharing is off by default. Users can change that setting or withdraw online AI permission in Privacy & Safety.
+
+No login is required. AI requests are not attached to an account, advertising identifier, or user profile.
 
 ## Notification Notes
 

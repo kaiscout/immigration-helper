@@ -6,5 +6,6 @@ export const OFFICIAL_LINKS = Object.freeze({
   processing: "https://egov.uscis.gov/processing-times/",
   address: "https://www.uscis.gov/addresschange",
   legal: "https://www.uscis.gov/scams-fraud-and-misconduct/avoid-scams/find-legal-services",
-  scams: "https://www.uscis.gov/avoid-scams"
+  scams: "https://www.uscis.gov/avoid-scams",
+  privacy: "https://kaiscout.github.io/immigration-helper/privacy-policy.html"
 });

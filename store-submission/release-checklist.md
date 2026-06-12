@@ -16,11 +16,11 @@
 
 - [ ] Enroll in Apple Developer Program.
 - [ ] Create App Store Connect app record.
-- [ ] Host privacy policy at a public URL.
-- [ ] Replace placeholders in `store-submission/privacy-policy.md`.
-- [ ] Add privacy policy URL to App Store Connect.
-- [ ] Add support URL to App Store Connect.
-- [ ] Complete App Privacy questionnaire.
+- [x] Host privacy policy at a public URL.
+- [x] Replace placeholders in `store-submission/privacy-policy.md`.
+- [x] Add privacy policy URL to App Store Connect.
+- [x] Add support URL to App Store Connect.
+- [ ] Update App Privacy questionnaire for online AI user content.
 - [ ] Upload required screenshots.
 - [ ] Add age rating.
 - [ ] Add review notes from `store-submission/review-notes.md`.
@@ -41,8 +41,11 @@
 - [ ] If using a new personal account, run closed testing with at least 12 opted-in testers for 14 continuous days.
 - [ ] Apply for production access after testing if required.
 
-## Recommended First Release Choice
+## Production AI
 
-- [ ] Ship AI Helper in fallback/offline mode.
-- [ ] Do not include any AI API key in the app binary.
-- [ ] Add backend and updated disclosures only after the first stable release.
+- [x] Deploy AI backend with the OpenAI key stored server-side.
+- [x] Add first-use AI disclosure and explicit consent.
+- [x] Keep optional checklist sharing off by default.
+- [x] Allow users to withdraw AI permission.
+- [x] Update public and in-app privacy disclosures.
+- [ ] Confirm App Store Connect and Play Console privacy answers match the production build.

@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, KeyboardAvoidingView, Linking, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Linking, Platform, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
 import { OFFICIAL_LINKS } from "../constants/officialLinks";
+import { loadAiConsent, saveAiConsent } from "../data/aiConsent";
 import { scoreExactIntent } from "../data/aiIntent";
 import {
   FLOWS,
@@ -714,6 +715,8 @@ export default function AIAdvisorScreen({ navigation }) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [flowStates, setFlowStates] = useState({});
+  const [aiConsent, setAiConsent] = useState(undefined);
+  const [consentChecklist, setConsentChecklist] = useState(false);
   const [messages, setMessages] = useState([
     {
       role: "assistant",
@@ -721,15 +724,21 @@ export default function AIAdvisorScreen({ navigation }) {
     }
   ]);
 
-  const loadContext = useCallback(async () => {
-    setFlowStates(await loadAllFlowStates());
+  const loadScreenState = useCallback(async () => {
+    const [states, consent] = await Promise.all([
+      loadAllFlowStates(),
+      loadAiConsent()
+    ]);
+    setFlowStates(states);
+    setAiConsent(consent);
+    setConsentChecklist(consent?.shareChecklist === true);
   }, []);
 
   useEffect(() => {
-    loadContext();
-    const unsubscribe = navigation.addListener?.("focus", loadContext);
+    loadScreenState();
+    const unsubscribe = navigation.addListener?.("focus", loadScreenState);
     return unsubscribe;
-  }, [navigation, loadContext]);
+  }, [navigation, loadScreenState]);
 
   useEffect(() => {
     scrollRef.current?.scrollToEnd?.({ animated: true });
@@ -746,6 +755,11 @@ export default function AIAdvisorScreen({ navigation }) {
 
   const appendAssistant = (text, sources = [], sections = []) => {
     setMessages((current) => [...current, { role: "assistant", text, sources, sections }]);
+  };
+
+  const acceptAiConsent = async () => {
+    const consent = await saveAiConsent({ shareChecklist: consentChecklist });
+    setAiConsent(consent);
   };
 
   const refreshAndSetStates = async () => {
@@ -1003,14 +1017,15 @@ export default function AIAdvisorScreen({ navigation }) {
         .join("\n");
 
       const instructions = `${SYSTEM_PROMPT}\nRequested language code: ${i18n.language}.`;
-      const requestInput = `Recent conversation:\n${recentConversation}\n\nCurrent user question:\n${question}\n\nCurrent in-app checklist context:\n${contextText}`;
+      const sharedChecklistContext = aiConsent?.shareChecklist ? contextText : "";
+      const requestInput = `Recent conversation:\n${recentConversation}\n\nCurrent user question:\n${question}\n\nCurrent in-app checklist context:\n${sharedChecklistContext || "Not shared by user."}`;
       const useProxy = Boolean(AI_PROXY_URL);
       const requestBody = useProxy
         ? {
           model: AI_MODEL,
           question,
           conversation: recentConversation,
-          checklistContext: contextText,
+          checklistContext: sharedChecklistContext,
           language: i18n.language
         }
         : {
@@ -1071,6 +1086,73 @@ export default function AIAdvisorScreen({ navigation }) {
       flow: item.data
     };
   });
+
+  if (aiConsent === undefined) {
+    return (
+      <View style={styles.consentLoading}>
+        <ActivityIndicator color={COLORS.primary} />
+      </View>
+    );
+  }
+
+  if (!aiConsent) {
+    return (
+      <ScrollView style={styles.screen} contentContainerStyle={styles.consentWrap}>
+        <View style={styles.consentHero}>
+          <View style={styles.aiIcon}>
+            <Ionicons name="sparkles-outline" size={24} color={COLORS.primaryTextOn} />
+          </View>
+          <Text style={styles.title}>{t("privacy.consentTitle")}</Text>
+          <Text style={styles.subtitle}>{t("privacy.consentIntro")}</Text>
+        </View>
+
+        <View style={styles.consentCard}>
+          <View style={styles.consentPoint}>
+            <Ionicons name="cloud-upload-outline" size={21} color={COLORS.primary} />
+            <Text style={styles.consentPointText}>{t("privacy.consentRequiredData")}</Text>
+          </View>
+          <View style={styles.consentPoint}>
+            <Ionicons name="time-outline" size={21} color={COLORS.primary} />
+            <Text style={styles.consentPointText}>{t("privacy.consentRetention")}</Text>
+          </View>
+          <View style={styles.consentPoint}>
+            <Ionicons name="warning-outline" size={21} color={COLORS.warning} />
+            <Text style={styles.consentPointText}>{t("privacy.consentSensitive")}</Text>
+          </View>
+        </View>
+
+        <View style={styles.checklistChoice}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.choiceTitle}>{t("privacy.checklistConsentTitle")}</Text>
+            <Text style={styles.choiceBody}>{t("privacy.checklistConsentBody")}</Text>
+          </View>
+          <Switch
+            value={consentChecklist}
+            onValueChange={setConsentChecklist}
+            trackColor={{ false: COLORS.border, true: COLORS.primaryLight }}
+            thumbColor={consentChecklist ? COLORS.primary : COLORS.subtext}
+            accessibilityLabel={t("privacy.checklistConsentTitle")}
+          />
+        </View>
+
+        <Text style={styles.consentAgreement}>{t("privacy.consentAgreement")}</Text>
+
+        <TouchableOpacity style={styles.consentPrimary} onPress={acceptAiConsent}>
+          <Ionicons name="checkmark-circle-outline" size={20} color={COLORS.primaryTextOn} />
+          <Text style={styles.consentPrimaryText}>{t("privacy.consentContinue")}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.consentSecondary} onPress={() => navigation.goBack()}>
+          <Text style={styles.consentSecondaryText}>{t("privacy.consentNotNow")}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.policyLink} onPress={() => Linking.openURL(OFFICIAL_LINKS.privacy)}>
+          <Ionicons name="open-outline" size={16} color={COLORS.primary} />
+          <Text style={styles.policyLinkText}>{t("privacy.policyLink")}</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    );
+  }
 
   return (
     <KeyboardAvoidingView
@@ -1245,6 +1327,85 @@ export default function AIAdvisorScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: COLORS.bg },
+  consentLoading: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: COLORS.bg
+  },
+  consentWrap: {
+    padding: SPACING.lg,
+    paddingBottom: SPACING.xxl,
+    gap: SPACING.md
+  },
+  consentHero: {
+    backgroundColor: COLORS.ai,
+    borderRadius: RADII.xl,
+    padding: SPACING.xl,
+    ...SHADOW.card
+  },
+  consentCard: {
+    backgroundColor: COLORS.card,
+    borderRadius: RADII.xl,
+    padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    gap: SPACING.md,
+    ...SHADOW.soft
+  },
+  consentPoint: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: SPACING.md
+  },
+  consentPointText: {
+    flex: 1,
+    color: COLORS.text,
+    lineHeight: 20
+  },
+  checklistChoice: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.md,
+    backgroundColor: COLORS.card,
+    borderRadius: RADII.xl,
+    padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOW.soft
+  },
+  choiceTitle: { color: COLORS.text, fontWeight: "900", fontSize: 16 },
+  choiceBody: { color: COLORS.subtext, lineHeight: 19, marginTop: 4, fontSize: 13 },
+  consentAgreement: { color: COLORS.subtext, fontSize: 12, lineHeight: 18 },
+  consentPrimary: {
+    minHeight: 52,
+    borderRadius: RADII.lg,
+    backgroundColor: COLORS.primary,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    ...SHADOW.card
+  },
+  consentPrimaryText: { color: COLORS.primaryTextOn, fontWeight: "900", fontSize: 16 },
+  consentSecondary: {
+    minHeight: 48,
+    borderRadius: RADII.lg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.card,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  consentSecondaryText: { color: COLORS.text, fontWeight: "900" },
+  policyLink: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: SPACING.sm
+  },
+  policyLinkText: { color: COLORS.primary, fontWeight: "900" },
   messages: { padding: SPACING.lg, paddingBottom: SPACING.lg },
   headerCard: {
     backgroundColor: COLORS.ai,
