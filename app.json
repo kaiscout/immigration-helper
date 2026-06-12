@@ -2,6 +2,7 @@
   "expo": {
     "name": "Immigration Helper",
     "slug": "immigration-helper",
+    "owner": "deniropro",
     "version": "1.0.0",
     "description": "Private immigration checklist, reminders, and official resources.",
     "orientation": "portrait",
@@ -31,6 +32,11 @@
     "web": {
       "output": "single",
       "favicon": "./assets/images/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "1d9691d7-a4b4-4182-b813-12442ed5168c"
+      }
     },
     "plugins": [
       [
