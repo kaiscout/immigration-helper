@@ -4,6 +4,7 @@ import { Alert, KeyboardAvoidingView, Linking, Platform, ScrollView, StyleSheet,
 import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
+import { OFFICIAL_LINKS } from "../constants/officialLinks";
 import { scoreExactIntent } from "../data/aiIntent";
 import {
   FLOWS,
@@ -41,17 +42,6 @@ Place an official citation immediately after each factual paragraph or list bloc
 Do not add raw citation tokens, manually written Markdown links, or decorative bold markers; the app displays citation annotations beneath the supported text.
 Keep answers concise, practical, and clear about dates, forms, fees, exceptions, and next steps.
 `;
-
-const OFFICIAL_LINKS = {
-  uscis: "https://www.uscis.gov/",
-  forms: "https://www.uscis.gov/forms/all-forms",
-  fees: "https://www.uscis.gov/g-1055",
-  status: "https://egov.uscis.gov/",
-  processing: "https://egov.uscis.gov/processing-times/",
-  address: "https://www.uscis.gov/addresschange",
-  legal: "https://www.uscis.gov/scams-fraud-and-misconduct/avoid-scams/find-legal-services",
-  scams: "https://www.uscis.gov/scams-fraud-and-misconduct/avoid-scams"
-};
 
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const OFFICIAL_IMMIGRATION_DOMAINS = [

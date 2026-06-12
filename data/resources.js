@@ -1,45 +1,47 @@
+import { OFFICIAL_LINKS } from "../constants/officialLinks";
+
 export const OFFICIAL_RESOURCES = [
   {
     id: "uscis-home",
     icon: "shield-checkmark-outline",
     titleKey: "resources.uscisTitle",
     descriptionKey: "resources.uscisDesc",
-    url: "https://www.uscis.gov/"
+    url: OFFICIAL_LINKS.uscis
   },
   {
     id: "forms",
     icon: "document-text-outline",
     titleKey: "resources.formsTitle",
     descriptionKey: "resources.formsDesc",
-    url: "https://www.uscis.gov/forms/all-forms"
+    url: OFFICIAL_LINKS.forms
   },
   {
     id: "fees",
     icon: "card-outline",
     titleKey: "resources.feesTitle",
     descriptionKey: "resources.feesDesc",
-    url: "https://www.uscis.gov/g-1055"
+    url: OFFICIAL_LINKS.fees
   },
   {
     id: "case-status",
     icon: "search-outline",
     titleKey: "resources.caseStatusTitle",
     descriptionKey: "resources.caseStatusDesc",
-    url: "https://egov.uscis.gov/"
+    url: OFFICIAL_LINKS.status
   },
   {
     id: "legal-help",
     icon: "people-outline",
     titleKey: "resources.legalHelpTitle",
     descriptionKey: "resources.legalHelpDesc",
-    url: "https://www.uscis.gov/scams-fraud-and-misconduct/avoid-scams/find-legal-services"
+    url: OFFICIAL_LINKS.legal
   },
   {
     id: "avoid-scams",
     icon: "alert-circle-outline",
     titleKey: "resources.scamsTitle",
     descriptionKey: "resources.scamsDesc",
-    url: "https://www.uscis.gov/scams-fraud-and-misconduct/avoid-scams"
+    url: OFFICIAL_LINKS.scams
   }
 ];
 

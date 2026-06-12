@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import {
   isRelevantUscisUrl,
   normalizeUscisUrl,
@@ -7,6 +8,30 @@ import {
 } from "../server/uscis/config.mjs";
 import { extractUscisPage } from "../server/uscis/corpus.mjs";
 import { createCorpusIndex, searchCorpus } from "../server/uscis/search.mjs";
+
+test("uses the current USCIS Avoid Scams hub everywhere", () => {
+  const files = [
+    "../constants/officialLinks.js",
+    "../data/resources.js",
+    "../screens/HomeScreen.js",
+    "../screens/AIAdvisorScreen.js",
+    "../data/flows/tps_renewal.json"
+  ];
+  const source = files
+    .map((file) => readFileSync(new URL(file, import.meta.url), "utf8"))
+    .join("\n");
+
+  assert.equal(
+    source.match(/https:\/\/www\.uscis\.gov\/avoid-scams/g)?.length,
+    2,
+    "The shared link constant and TPS flow should use the current Avoid Scams hub."
+  );
+  assert.doesNotMatch(
+    source,
+    /https:\/\/www\.uscis\.gov\/scams-fraud-and-misconduct\/avoid-scams["']/
+  );
+  assert.match(source, /OFFICIAL_LINKS\.scams/);
+});
 
 test("normalizes only official USCIS URLs", () => {
   assert.equal(

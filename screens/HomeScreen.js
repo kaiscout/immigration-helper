@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Alert, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
+import { OFFICIAL_LINKS } from "../constants/officialLinks";
 
 export default function HomeScreen({ navigation }) {
   const { t } = useTranslation();
@@ -123,7 +124,7 @@ export default function HomeScreen({ navigation }) {
           <Ionicons name="lock-closed-outline" size={16} color={COLORS.subtext} />
           <Text style={styles.bottomLinkText}>{t("privacy.title")}</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.bottomLink} onPress={() => Linking.openURL("https://www.uscis.gov/scams-fraud-and-misconduct/avoid-scams")}>
+        <TouchableOpacity style={styles.bottomLink} onPress={() => Linking.openURL(OFFICIAL_LINKS.scams)}>
           <Ionicons name="alert-circle-outline" size={16} color={COLORS.subtext} />
           <Text style={styles.bottomLinkText}>{t("resources.scamsTitle")}</Text>
         </TouchableOpacity>
