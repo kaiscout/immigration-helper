@@ -26,7 +26,7 @@
 - [x] Add age rating.
 - [x] Add review notes from `store-submission/review-notes.md`.
 - [x] Build production iOS binary with `eas build --platform ios --profile production`.
-- [ ] Submit with EAS or manually through App Store Connect.
+- [x] Submit with EAS or manually through App Store Connect.
 
 ## Before Google Play Submission
 
