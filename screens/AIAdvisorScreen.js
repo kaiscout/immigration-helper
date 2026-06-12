@@ -642,6 +642,8 @@ function responseOutputText(data, fallback) {
 
   return (text || fallback)
     .replace(/cite[^]+/g, "")
+    .replace(/\s*\(\s*\[\s*\]\(\s*\)\s*\)/g, "")
+    .replace(/\[\s*\]\(\s*(?:https?:\/\/[^)]*)?\s*\)/g, "")
     .replace(/\[([^\]]+)\]\(https?:\/\/[^)]+\)/g, "$1")
     .replace(/\s*\((?:[a-z0-9-]+\.)*(?:uscis|state|cbp|dhs|ice|justice|dol)\.gov\)/gi, "")
     .replace(/\*\*([^*]+)\*\*/g, "$1")

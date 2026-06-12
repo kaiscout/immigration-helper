@@ -176,7 +176,7 @@ test("cleans citation and markdown artifacts from conversational answers", () =>
   const text = extractOutputText({
     output_text:
       "**Commencez ici.** Consultez [la page officielle](https://travel.state.gov/visitor). " +
-      "citeturn0search0 (travel.state.gov)"
+      "citeturn0search0 (travel.state.gov) ([]()) [](https://www.uscis.gov/case-status)"
   });
 
   assert.equal(text, "Commencez ici. Consultez la page officielle.");

@@ -14,16 +14,16 @@
 
 ## Before Apple Submission
 
-- [ ] Enroll in Apple Developer Program.
-- [ ] Create App Store Connect app record.
+- [x] Enroll in Apple Developer Program.
+- [x] Create App Store Connect app record.
 - [x] Host privacy policy at a public URL.
 - [x] Replace placeholders in `store-submission/privacy-policy.md`.
 - [x] Add privacy policy URL to App Store Connect.
 - [x] Add support URL to App Store Connect.
 - [ ] Update App Privacy questionnaire for online AI user content.
 - [ ] Upload required screenshots.
-- [ ] Add age rating.
-- [ ] Add review notes from `store-submission/review-notes.md`.
+- [x] Add age rating.
+- [x] Add review notes from `store-submission/review-notes.md`.
 - [ ] Build production iOS binary with `eas build --platform ios --profile production`.
 - [ ] Submit with EAS or manually through App Store Connect.
 
