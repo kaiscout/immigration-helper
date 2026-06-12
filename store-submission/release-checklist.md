@@ -20,7 +20,7 @@
 - [x] Replace placeholders in `store-submission/privacy-policy.md`.
 - [x] Add privacy policy URL to App Store Connect.
 - [x] Add support URL to App Store Connect.
-- [ ] Update App Privacy questionnaire for online AI user content.
+- [x] Update App Privacy questionnaire for online AI user content.
 - [x] Prepare required iPhone screenshots at `1242 x 2688`.
 - [ ] Upload required screenshots.
 - [x] Add age rating.
@@ -49,4 +49,5 @@
 - [x] Keep optional checklist sharing off by default.
 - [x] Allow users to withdraw AI permission.
 - [x] Update public and in-app privacy disclosures.
-- [ ] Confirm App Store Connect and Play Console privacy answers match the production build.
+- [x] Confirm App Store Connect privacy answers match the production build.
+- [ ] Confirm Google Play Console privacy answers match the production build.
