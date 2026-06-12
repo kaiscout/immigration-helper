@@ -81,7 +81,8 @@ async function main() {
   if (expoPort !== Number.parseInt(process.env.EXPO_PORT || "8081", 10)) {
     console.log(`Port 8081 is in use by another project. Starting this app on port ${expoPort}.`);
   }
-  spawnChild([expoCli, "start", "--clear", "--port", String(expoPort)], "Expo");
+  console.log("Starting Expo Go with a tunnel so phones can connect reliably.");
+  spawnChild([expoCli, "start", "--tunnel", "--clear", "--port", String(expoPort)], "Expo");
 }
 
 process.on("SIGINT", () => shutdown(0));
