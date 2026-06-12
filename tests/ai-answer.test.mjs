@@ -117,6 +117,48 @@ test("falls back to the USCIS corpus when the model service fails", async () => 
   assert.match(result.body.output_text, /reschedule a biometric services appointment/i);
 });
 
+test("replaces irrelevant live citations with relevant USCIS corpus sources", async () => {
+  const scamIndex = createCorpusIndex([{
+    url: "https://www.uscis.gov/avoid-scams",
+    title: "Avoid Scams",
+    description: "Official USCIS scam prevention guidance",
+    chunks: [
+      "Avoid immigration scams. Only attorneys and Department of Justice accredited representatives can give legal advice. Report suspected immigration scams through official government channels."
+    ]
+  }]);
+  const answer = createAnswerService({
+    corpusIndex: scamIndex,
+    apiKey: "test-key",
+    fetchImpl: async () => new Response(JSON.stringify({
+      output_text: "Only authorized legal service providers should give immigration legal advice.",
+      output: [{
+        type: "message",
+        content: [{
+          type: "output_text",
+          text: "Only authorized legal service providers should give immigration legal advice.",
+          annotations: [{
+            type: "url_citation",
+            start_index: 0,
+            end_index: 75,
+            title: "Unrelated USCIS Policy",
+            url: "https://www.uscis.gov/policy-manual/volume-8-part-j-chapter-3"
+          }]
+        }]
+      }]
+    }), { status: 200, headers: { "Content-Type": "application/json" } })
+  });
+
+  const result = await answer({
+    question: "How do I avoid immigration scams?",
+    language: "en"
+  });
+
+  assert.deepEqual(result.body.sections[0].sources, [{
+    title: "Avoid Scams",
+    url: "https://www.uscis.gov/avoid-scams"
+  }]);
+});
+
 test("uses the previous user question only for short follow-up retrieval", () => {
   assert.match(
     buildRetrievalQuery(

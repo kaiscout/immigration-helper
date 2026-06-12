@@ -78,11 +78,13 @@ const TOPIC_ALIASES = [
   },
   {
     match: ["case status", "receipt number", "estado del caso", "status do caso", "número do recibo", "dosya durumu", "statut du dossier", "案件状态", "केस स्थिति", "حالة القضية", "কেস স্ট্যাটাস", "статус дела"],
-    add: ["case", "status", "receipt", "number", "online"]
+    add: ["case", "status", "receipt", "number", "online"],
+    prefer: ["/tools/checking-your-case-status-online"]
   },
   {
     match: ["scam", "fraud", "estafa", "fraude", "golpe", "dolandirici", "arnaque", "诈骗", "धोखाधड़ी", "احتيال", "প্রতারণা", "мошенничество"],
-    add: ["scam", "fraud", "avoid", "legal", "services"]
+    add: ["scam", "fraud", "avoid", "legal", "services"],
+    prefer: ["/avoid-scams"]
   }
 ];
 

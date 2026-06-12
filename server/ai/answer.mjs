@@ -301,6 +301,22 @@ export function extractAnswerSections(data) {
   });
 }
 
+function groundSectionsWithLocalUscis(sections, question, corpusIndex, domains) {
+  if (!domains.includes("uscis.gov")) return sections;
+
+  return sections.map((section) => {
+    const match = searchCorpus(corpusIndex, `${question}\n${section.text}`, 1)[0];
+    const localSources = match && Number(match.score) >= 12
+      ? uniqueSources([{ title: match.title, url: match.url }])
+      : [];
+
+    return {
+      ...section,
+      sources: localSources.length ? localSources : section.sources
+    };
+  });
+}
+
 function queryTokens(value) {
   return String(value || "")
     .toLowerCase()
@@ -483,17 +499,28 @@ export function createAnswerService({
 
       const webSources = extractSources(data);
       const localSources = supportingLocalSources(localResults);
-      const sources = webSources.length ? webSources : localSources;
       const answerSections = extractAnswerSections(data);
+      const groundedSections = groundSectionsWithLocalUscis(
+        answerSections,
+        question,
+        corpusIndex,
+        officialDomainsForQuestion(question)
+      );
+      const sectionSources = uniqueSources(
+        groundedSections.flatMap((section) => section.sources || [])
+      );
+      const sources = sectionSources.length
+        ? sectionSources
+        : (localSources.length ? localSources : webSources);
       return {
         status: 200,
         body: {
           output_text: outputText,
           sources: uniqueSources(sources),
-          sections: answerSections.length
-            ? answerSections
+          sections: groundedSections.length
+            ? groundedSections
             : [{ text: outputText, sources: uniqueSources(sources) }],
-          grounded_on: webSources.length ? "live_official_sources" : "local_uscis_corpus",
+          grounded_on: sectionSources.length ? "local_uscis_corpus" : "live_official_sources",
           degraded: false
         }
       };
