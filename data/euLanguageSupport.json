@@ -1,0 +1,4251 @@
+{
+  "cs": {
+    "summaryLabels": {
+      "complete": "hotovo",
+      "noticeDate": "datum oznámení",
+      "suggestedDate": "doporučené datum",
+      "completed": "dokončeno",
+      "remaining": "zbývá",
+      "keyDates": "klíčová data",
+      "notSet": "nenastaveno",
+      "none": "žádné",
+      "notCalculated": "nevypočítáno"
+    },
+    "intents": {
+      "open": [
+        "otevřít",
+        "zobrazit",
+        "spustit",
+        "jít na"
+      ],
+      "summary": [
+        "shrnutí postupu",
+        "co zbývá",
+        "kolik je hotovo"
+      ],
+      "dateVerb": [
+        "nastavit datum",
+        "změnit datum",
+        "uložit datum"
+      ],
+      "dateNoun": [
+        "datum oznámení",
+        "termín",
+        "datum podání"
+      ],
+      "markDone": [
+        "označit jako hotové",
+        "zaškrtnout krok",
+        "hotovo"
+      ],
+      "undo": [
+        "vrátit zpět",
+        "odškrtnout",
+        "označit jako nehotové"
+      ],
+      "clear": [
+        "vymazat",
+        "smazat vše",
+        "resetovat"
+      ],
+      "checklist": [
+        "kontrolní seznam",
+        "seznam kroků",
+        "postup"
+      ],
+      "reminder": [
+        "připomínka",
+        "upozornění",
+        "remind"
+      ],
+      "create": [
+        "vytvořit",
+        "nastavit",
+        "přidat"
+      ],
+      "resource": [
+        "zdroje",
+        "oficiální odkazy",
+        "pomoc"
+      ],
+      "privacy": [
+        "soukromí",
+        "bezpečnost",
+        "ochrana dat"
+      ],
+      "link": [
+        "odkaz",
+        "otevřít odkaz",
+        "stránka"
+      ],
+      "capability": [
+        "co umíš",
+        "možnosti",
+        "pomoc"
+      ],
+      "question": [
+        "mám otázku",
+        "zeptat se",
+        "potřebuji poradit"
+      ],
+      "summaryPhrases": [
+        "co zbývá",
+        "co je hotové",
+        "další krok",
+        "pokrok",
+        "jak pokračovat"
+      ],
+      "all": [
+        "vše",
+        "všechno",
+        "všechny kroky"
+      ]
+    },
+    "topics": {
+      "caseStatus": [
+        "stav případu",
+        "kontrola stavu",
+        "sledování případu"
+      ],
+      "fees": [
+        "poplatky",
+        "ceny podání",
+        "kolik to stojí"
+      ],
+      "rfe": [
+        "RFE",
+        "výzva k doplnění",
+        "požadavek na důkazy"
+      ],
+      "biometrics": [
+        "biometrie",
+        "otisky prstů",
+        "schůzka biometrie"
+      ],
+      "address": [
+        "změna adresy",
+        "hlášení adresy",
+        "přestěhování"
+      ],
+      "processing": [
+        "doba zpracování",
+        "čekací doba",
+        "jak dlouho to trvá"
+      ],
+      "scams": [
+        "podvody",
+        "imigrační podvod",
+        "falešná pomoc"
+      ],
+      "tps": [
+        "TPS",
+        "obnovení TPS",
+        "registrace TPS"
+      ],
+      "ead": [
+        "EAD",
+        "pracovní povolení",
+        "Form I-765"
+      ],
+      "travel": [
+        "cestovní oprávnění",
+        "parole",
+        "cestovní dokument"
+      ],
+      "legal": [
+        "právní pomoc",
+        "advokát",
+        "právní zástupce"
+      ],
+      "forms": [
+        "formuláře",
+        "pokyny formuláře",
+        "vyplnit formulář"
+      ],
+      "visitorVisa": [
+        "návštěva USA",
+        "turistické vízum",
+        "vízum pro návštěvu",
+        "ambasáda",
+        "konzulát"
+      ]
+    },
+    "flowAliases": {
+      "tps": [
+        "TPS",
+        "obnovení TPS",
+        "TPS renewal"
+      ],
+      "ead": [
+        "EAD",
+        "pracovní povolení",
+        "Form I-765"
+      ],
+      "travel": [
+        "cestovní oprávnění",
+        "advance parole",
+        "Form I-131"
+      ]
+    },
+    "stopWords": [
+      "prosím",
+      "můžeš",
+      "můžete",
+      "mi",
+      "to",
+      "ten",
+      "ta",
+      "ty",
+      "na",
+      "o",
+      "pro",
+      "jak",
+      "co",
+      "kdy",
+      "kde",
+      "a",
+      "nebo"
+    ]
+  },
+  "hr": {
+    "summaryLabels": {
+      "complete": "dovršeno",
+      "noticeDate": "datum obavijesti",
+      "suggestedDate": "predloženi datum",
+      "completed": "dovršeno",
+      "remaining": "preostalo",
+      "keyDates": "ključni datumi",
+      "notSet": "nije postavljeno",
+      "none": "nema",
+      "notCalculated": "nije izračunato"
+    },
+    "intents": {
+      "open": [
+        "otvori",
+        "prikaži",
+        "izbaci",
+        "idi na"
+      ],
+      "summary": [
+        "sažmi napredak",
+        "što je preostalo",
+        "koliko je gotovo",
+        "prikaži stanje"
+      ],
+      "dateVerb": [
+        "postavi datum",
+        "unesi datum",
+        "promijeni datum",
+        "zapamti datum"
+      ],
+      "dateNoun": [
+        "datum obavijesti",
+        "datum podnošenja",
+        "rok",
+        "krajnji datum"
+      ],
+      "markDone": [
+        "označi kao dovršeno",
+        "završi korak",
+        "čekiraj korak",
+        "označi gotovo"
+      ],
+      "undo": [
+        "poništi",
+        "vrati nazad",
+        "nevažeće",
+        "odznači"
+      ],
+      "clear": [
+        "očisti",
+        "obriši",
+        "resetiraj",
+        "ukloni sve"
+      ],
+      "checklist": [
+        "kontrolna lista",
+        "koraci",
+        "zadaci",
+        "popis"
+      ],
+      "reminder": [
+        "podsjetnik",
+        "podsjeti me",
+        "upozorenje",
+        "alarm"
+      ],
+      "create": [
+        "izradi",
+        "napravi",
+        "dodaj",
+        "postavi"
+      ],
+      "resource": [
+        "izvor",
+        "poveznica",
+        "službeni link",
+        "USCIS link"
+      ],
+      "privacy": [
+        "privatnost",
+        "sigurnost",
+        "AI privatnost",
+        "dozvola za AI"
+      ],
+      "link": [
+        "otvori poveznicu",
+        "prikaži link",
+        "službena stranica",
+        "web stranica"
+      ],
+      "capability": [
+        "što možeš",
+        "što znaš",
+        "kako pomažeš",
+        "mogućnosti"
+      ],
+      "question": [
+        "kako",
+        "što",
+        "zašto",
+        "kad"
+      ],
+      "summaryPhrases": [
+        "što je preostalo",
+        "sljedeći korak",
+        "napredak do sada",
+        "koliko je gotovo"
+      ],
+      "all": [
+        "sve",
+        "sve stavke",
+        "cijela lista",
+        "sve korake"
+      ]
+    },
+    "topics": {
+      "caseStatus": [
+        "status slučaja",
+        "provjera statusa",
+        "broj potvrde primitka",
+        "USCIS status"
+      ],
+      "fees": [
+        "naknade",
+        "trošak podnošenja",
+        "USCIS naknade",
+        "koliko platiti"
+      ],
+      "rfe": [
+        "RFE",
+        "zahtjev za dokazima",
+        "dodatni dokaz",
+        "rok za odgovor"
+      ],
+      "biometrics": [
+        "biometrija",
+        "otisak prstiju",
+        "termin biometrije",
+        "obavijest o terminu"
+      ],
+      "address": [
+        "promjena adrese",
+        "ažuriranje adrese",
+        "USCIS adresa",
+        "preseljenje"
+      ],
+      "processing": [
+        "vrijeme obrade",
+        "procjena obrade",
+        "koliko traje",
+        "USCIS obrada"
+      ],
+      "scams": [
+        "prijevare",
+        "imigracijske prijevare",
+        "lažni odvjetnik",
+        "sumnjivi savjeti"
+      ],
+      "tps": [
+        "TPS",
+        "obnova TPS-a",
+        "re-registracija TPS",
+        "TPS rok"
+      ],
+      "ead": [
+        "EAD",
+        "radna dozvola",
+        "obrazac I-765",
+        "radno odobrenje"
+      ],
+      "travel": [
+        "putovanje",
+        "odobrenje putovanja",
+        "advance parole",
+        "obrazac I-131"
+      ],
+      "legal": [
+        "pravna pomoć",
+        "odvjetnik",
+        "akreditirani predstavnik",
+        "pravni savjet"
+      ],
+      "forms": [
+        "obrasci",
+        "USCIS obrasci",
+        "upute obrasca",
+        "službeni obrazac"
+      ],
+      "visitorVisa": [
+        "posjet SAD-u",
+        "turistička viza",
+        "posjetiteljska viza",
+        "američka ambasada",
+        "konzulat"
+      ]
+    },
+    "flowAliases": {
+      "tps": [
+        "TPS obnova",
+        "obnova TPS-a",
+        "TPS re-registracija",
+        "TPS filing"
+      ],
+      "ead": [
+        "EAD",
+        "radna dozvola",
+        "obrazac I-765",
+        "work permit"
+      ],
+      "travel": [
+        "putna dozvola",
+        "advance parole",
+        "obrazac I-131",
+        "travel document"
+      ]
+    },
+    "stopWords": [
+      "molim",
+      "može",
+      "možete",
+      "mi",
+      "da",
+      "li",
+      "pa",
+      "samo",
+      "ovaj",
+      "onaj",
+      "taj",
+      "ove",
+      "ti"
+    ]
+  },
+  "bg": {
+    "summaryLabels": {
+      "complete": "завършено",
+      "noticeDate": "дата на известие",
+      "suggestedDate": "предложена дата",
+      "completed": "завършени",
+      "remaining": "остават",
+      "keyDates": "ключови дати",
+      "notSet": "не е зададено",
+      "none": "няма",
+      "notCalculated": "не е изчислено"
+    },
+    "intents": {
+      "open": [
+        "отвори",
+        "покажи",
+        "извади",
+        "отвори процес",
+        "отвори раздел"
+      ],
+      "summary": [
+        "какво остава",
+        "какво е завършено",
+        "напредък по списъка",
+        "какво следва",
+        "общ напредък"
+      ],
+      "dateVerb": [
+        "задай дата",
+        "промени датата",
+        "въведи дата",
+        "постави дата"
+      ],
+      "dateNoun": [
+        "дата",
+        "срок",
+        "краен срок",
+        "дата на известие"
+      ],
+      "markDone": [
+        "отбележи готово",
+        "маркирай завършено",
+        "готово е",
+        "отметни стъпка"
+      ],
+      "undo": [
+        "отмени",
+        "махни отметката",
+        "не е готово",
+        "върни назад"
+      ],
+      "clear": [
+        "изчисти",
+        "нулирай",
+        "изтрий напредъка",
+        "изчисти списъка"
+      ],
+      "checklist": [
+        "контролен списък",
+        "списък със задачи",
+        "стъпки",
+        "задачи",
+        "чеклист"
+      ],
+      "reminder": [
+        "напомняне",
+        "известие",
+        "аларма",
+        "напомни ми"
+      ],
+      "create": [
+        "създай",
+        "направи",
+        "задай",
+        "добави"
+      ],
+      "resource": [
+        "официална връзка",
+        "ресурси",
+        "USCIS връзка",
+        "формуляр"
+      ],
+      "privacy": [
+        "поверителност",
+        "сигурност",
+        "лични данни",
+        "AI поверителност"
+      ],
+      "link": [
+        "връзка",
+        "линк",
+        "отворете връзката",
+        "официална страница"
+      ],
+      "capability": [
+        "какво можеш",
+        "как помагаш",
+        "какво правиш",
+        "възможности"
+      ],
+      "question": [
+        "как",
+        "как да",
+        "може ли",
+        "ще"
+      ],
+      "summaryPhrases": [
+        "какво остава",
+        "какво следва",
+        "какъв е напредъкът",
+        "кои стъпки остават",
+        "колко е готово"
+      ],
+      "all": [
+        "всички",
+        "цялото",
+        "всички стъпки",
+        "покази всичко"
+      ]
+    },
+    "topics": {
+      "caseStatus": [
+        "статус на дело",
+        "проверка на статус",
+        "номер на разписка",
+        "case status",
+        "USCIS статус"
+      ],
+      "fees": [
+        "такси",
+        "такса за подаване",
+        "USCIS такси",
+        "цени на формуляри",
+        "плащане"
+      ],
+      "rfe": [
+        "RFE",
+        "искане за доказателства",
+        "допълнителни доказателства",
+        "уведомление за RFE"
+      ],
+      "biometrics": [
+        "биометрични данни",
+        "снемане на отпечатъци",
+        "час за биометрия",
+        "уведомление за час"
+      ],
+      "address": [
+        "смяна на адрес",
+        "промяна на адрес",
+        "адрес при USCIS",
+        "нов адрес"
+      ],
+      "processing": [
+        "време за обработка",
+        "обработка на дело",
+        "колко време",
+        "processing time"
+      ],
+      "scams": [
+        "измами",
+        "имиграционни измами",
+        "фалшив адвокат",
+        "лоши практики"
+      ],
+      "tps": [
+        "TPS",
+        "подновяване TPS",
+        "TPS срок",
+        "презаписване TPS"
+      ],
+      "ead": [
+        "EAD",
+        "работно разрешение",
+        "I-765",
+        "разрешение за работа"
+      ],
+      "travel": [
+        "пътуване",
+        "разрешение за пътуване",
+        "I-131",
+        "advance parole"
+      ],
+      "legal": [
+        "правна помощ",
+        "адвокат",
+        "акредитиран представител",
+        "юридическа помощ"
+      ],
+      "forms": [
+        "формуляри",
+        "официален формуляр",
+        "инструкции на USCIS",
+        "подаване"
+      ],
+      "visitorVisa": [
+        "виза за посещение",
+        "туристическа виза",
+        "пътуване до САЩ",
+        "посолство и консулство",
+        "visitor visa"
+      ]
+    },
+    "flowAliases": {
+      "tps": [
+        "TPS",
+        "подновяване на TPS",
+        "TPS renewal",
+        "презаписване TPS"
+      ],
+      "ead": [
+        "EAD",
+        "I-765",
+        "работно разрешение",
+        "разрешение за работа"
+      ],
+      "travel": [
+        "I-131",
+        "разрешение за пътуване",
+        "advance parole",
+        "travel authorization"
+      ]
+    },
+    "stopWords": [
+      "моля",
+      "искам",
+      "ми",
+      "да",
+      "мога ли",
+      "как",
+      "за",
+      "по",
+      "в",
+      "на",
+      "от",
+      "и",
+      "или"
+    ]
+  },
+  "da": {
+    "summaryLabels": {
+      "complete": "Fuldført",
+      "noticeDate": "Dato for meddelelse",
+      "suggestedDate": "Foreslået dato",
+      "completed": "Fuldførte",
+      "remaining": "Resten",
+      "keyDates": "Vigtige datoer",
+      "notSet": "Ikke sat",
+      "none": "Ingen",
+      "notCalculated": "Ikke beregnet"
+    },
+    "intents": {
+      "open": [
+        "åbn",
+        "vis",
+        "gå til",
+        "åbn side"
+      ],
+      "summary": [
+        "hvad mangler",
+        "fremskridt tilbage",
+        "status på tjekliste",
+        "hvad er næste"
+      ],
+      "dateVerb": [
+        "sæt dato",
+        "indtast dato",
+        "opdater dato",
+        "ændr dato"
+      ],
+      "dateNoun": [
+        "dato",
+        "frist",
+        "meddelelsesdato",
+        "afsendelsesdato"
+      ],
+      "markDone": [
+        "marker udført",
+        "sæt flueben",
+        "færdiggjort",
+        "marker som done"
+      ],
+      "undo": [
+        "fortryd",
+        "fjern flueben",
+        "marker ikke udført",
+        "ugør"
+      ],
+      "clear": [
+        "ryd",
+        "nulstil",
+        "fjern alt",
+        "tøm"
+      ],
+      "checklist": [
+        "tjekliste",
+        "trin",
+        "opgaver",
+        "checkliste"
+      ],
+      "reminder": [
+        "påmindelse",
+        "advarsel",
+        "notifikation",
+        "reminder"
+      ],
+      "create": [
+        "opret",
+        "lav",
+        "planlæg",
+        "tilføj"
+      ],
+      "resource": [
+        "ressource",
+        "officiel side",
+        "USCIS-link",
+        "hjælp"
+      ],
+      "privacy": [
+        "privatliv",
+        "sikkerhed",
+        "data",
+        "AI-privatliv"
+      ],
+      "link": [
+        "link",
+        "åbn link",
+        "officielt link",
+        "websted"
+      ],
+      "capability": [
+        "hvad kan du",
+        "funktioner",
+        "hjælp mig",
+        "hvad gør du"
+      ],
+      "question": [
+        "hvordan",
+        "hvad",
+        "hvor",
+        "hvornår"
+      ],
+      "summaryPhrases": [
+        "hvad er tilbage",
+        "hvad mangler",
+        "næste skridt",
+        "fremskridt indtil nu"
+      ],
+      "all": [
+        "alle",
+        "hele",
+        "samtlige",
+        "vis alt"
+      ]
+    },
+    "topics": {
+      "caseStatus": [
+        "sagsstatus",
+        "kvitteringsstatus",
+        "case status",
+        "tjek status"
+      ],
+      "fees": [
+        "gebyrer",
+        "indsendelsesgebyr",
+        "aktuelle gebyrer",
+        "hvad koster det"
+      ],
+      "rfe": [
+        "RFE",
+        "anmodning om bevis",
+        "efterspurgte dokumenter",
+        "svarfrist"
+      ],
+      "biometrics": [
+        "biometrik",
+        "fingeraftryk",
+        "aftale om biometrik",
+        "biometrisk møde"
+      ],
+      "address": [
+        "adresseændring",
+        "flytteadresse",
+        "opdater adresse",
+        "ny adresse"
+      ],
+      "processing": [
+        "behandlingstid",
+        "sagsbehandling",
+        "ventetid",
+        "hvor længe"
+      ],
+      "scams": [
+        "svindel",
+        "immigrationssvindel",
+        "falske hjælpere",
+        "bedrageri"
+      ],
+      "tps": [
+        "TPS",
+        "TPS-fornyelse",
+        "genregistrering TPS",
+        "forny TPS"
+      ],
+      "ead": [
+        "EAD",
+        "arbejdstilladelse",
+        "I-765",
+        "arbejdskort"
+      ],
+      "travel": [
+        "rejsetilladelse",
+        "I-131",
+        "advance parole",
+        "rejse papirer"
+      ],
+      "legal": [
+        "juridisk hjælp",
+        "advokat",
+        "DOJ-akkrediteret",
+        "juridisk repræsentant"
+      ],
+      "forms": [
+        "formularer",
+        "USCIS-formular",
+        "formular I-765",
+        "formular I-131"
+      ],
+      "visitorVisa": [
+        "besøgsvisum",
+        "turistvisum",
+        "besøge USA",
+        "ambassade og konsulat"
+      ]
+    },
+    "flowAliases": {
+      "tps": [
+        "tps fornyelse",
+        "fornyelse af TPS",
+        "tps genregistrering",
+        "forny TPS"
+      ],
+      "ead": [
+        "ead fornyelse",
+        "arbejdstilladelse ead",
+        "i-765",
+        "forny ead"
+      ],
+      "travel": [
+        "rejsetilladelse",
+        "advance parole",
+        "i-131",
+        "rejseautorisation"
+      ]
+    },
+    "stopWords": [
+      "den",
+      "det",
+      "at",
+      "og",
+      "for",
+      "til",
+      "på",
+      "med",
+      "min",
+      "mit",
+      "mine",
+      "sæt",
+      "marker",
+      "vis",
+      "åbn",
+      "fjern",
+      "opret",
+      "lav"
+    ]
+  },
+  "nl": {
+    "summaryLabels": {
+      "complete": "voltooid",
+      "noticeDate": "datum van kennisgeving",
+      "suggestedDate": "voorgestelde datum",
+      "completed": "voltooid",
+      "remaining": "over",
+      "keyDates": "belangrijke data",
+      "notSet": "niet ingesteld",
+      "none": "geen",
+      "notCalculated": "niet berekend"
+    },
+    "intents": {
+      "open": [
+        "openen",
+        "toon",
+        "ga naar",
+        "bekijk",
+        "start"
+      ],
+      "summary": [
+        "voortgang",
+        "overgebleven stappen",
+        "wat blijft over",
+        "status samenvatting",
+        "checklist samenvatten"
+      ],
+      "dateVerb": [
+        "datum instellen",
+        "datum wijzigen",
+        "datum invoeren",
+        "plannen",
+        "berekenen"
+      ],
+      "dateNoun": [
+        "datum",
+        "deadline",
+        "verzenddatum",
+        "kennisgevingsdatum",
+        "indieningsdatum"
+      ],
+      "markDone": [
+        "klaar markeren",
+        "afvinken",
+        "voltooid zetten",
+        "als gedaan markeren"
+      ],
+      "undo": [
+        "ongedaan maken",
+        "niet gedaan",
+        "terugdraaien",
+        "herstellen"
+      ],
+      "clear": [
+        "wissen",
+        "leegmaken",
+        "resetten",
+        "alles verwijderen"
+      ],
+      "checklist": [
+        "checklist",
+        "stappenlijst",
+        "taken",
+        "stappen",
+        "proces"
+      ],
+      "reminder": [
+        "herinnering",
+        "melding",
+        "alarm",
+        "notificatie"
+      ],
+      "create": [
+        "maken",
+        "instellen",
+        "aanmaken",
+        "plannen"
+      ],
+      "resource": [
+        "bron",
+        "officiële bron",
+        "link",
+        "hulplink"
+      ],
+      "privacy": [
+        "privacy",
+        "veiligheid",
+        "gegevens",
+        "toestemming"
+      ],
+      "link": [
+        "link openen",
+        "website openen",
+        "pagina openen"
+      ],
+      "capability": [
+        "wat kun je doen",
+        "mogelijkheden",
+        "helpen met",
+        "kun je"
+      ],
+      "question": [
+        "vraag",
+        "hoe",
+        "wat",
+        "wanneer",
+        "waar"
+      ],
+      "summaryPhrases": [
+        "wat blijft er over",
+        "volgende stap",
+        "voortgang bekijken",
+        "rest nog",
+        "volgende actie"
+      ],
+      "all": [
+        "alles",
+        "alle stappen",
+        "volledige lijst"
+      ]
+    },
+    "topics": {
+      "caseStatus": [
+        "zaakstatus",
+        "zaak volgen",
+        "ontvangstnummer",
+        "USCIS status",
+        "case status"
+      ],
+      "fees": [
+        "kosten",
+        "indieningskosten",
+        "betaling",
+        "tarieven",
+        "fee"
+      ],
+      "rfe": [
+        "RFE",
+        "aanvullend bewijs",
+        "verzoek om bewijs",
+        "reactietermijn"
+      ],
+      "biometrics": [
+        "biometrie",
+        "afspraak",
+        "vingerafdrukken",
+        "biometrische afspraak"
+      ],
+      "address": [
+        "adreswijziging",
+        "verhuizing",
+        "nieuw adres",
+        "adres bijwerken"
+      ],
+      "processing": [
+        "verwerkingstijd",
+        "doorlooptijd",
+        "wachttijd",
+        "processing time"
+      ],
+      "scams": [
+        "oplichting",
+        "fraude",
+        "immigratie-oplichting",
+        "nepadviseur"
+      ],
+      "tps": [
+        "TPS-verlenging",
+        "TPS herregistratie",
+        "TPS checklist",
+        "TPS formulier"
+      ],
+      "ead": [
+        "werkvergunning",
+        "EAD",
+        "I-765",
+        "werkautorisatie"
+      ],
+      "travel": [
+        "reisdocument",
+        "reistoestemming",
+        "I-131",
+        "advance parole"
+      ],
+      "legal": [
+        "juridische hulp",
+        "advocaat",
+        "erkende vertegenwoordiger",
+        "lawyer"
+      ],
+      "forms": [
+        "formulieren",
+        "USCIS formulier",
+        "aanvraagformulier",
+        "instructies"
+      ],
+      "visitorVisa": [
+        "bezoekersvisum",
+        "toeristenvisum",
+        "visum voor bezoek",
+        "ambassade",
+        "consulaat"
+      ]
+    },
+    "flowAliases": {
+      "tps": [
+        "TPS-verlenging",
+        "TPS herregistratie",
+        "TPS renewal"
+      ],
+      "ead": [
+        "werkvergunning",
+        "EAD",
+        "I-765",
+        "work permit"
+      ],
+      "travel": [
+        "reistoestemming",
+        "advance parole",
+        "reisdocument",
+        "I-131"
+      ]
+    },
+    "stopWords": [
+      "de",
+      "het",
+      "een",
+      "en",
+      "of",
+      "voor",
+      "van",
+      "mijn",
+      "je",
+      "jouw",
+      "alstublieft",
+      "svp",
+      "als",
+      "ik",
+      "kan",
+      "wil",
+      "hoe",
+      "wat",
+      "waar",
+      "wanneer"
+    ]
+  },
+  "et": {
+    "summaryLabels": {
+      "complete": "Valmis",
+      "noticeDate": "Teate kuupäev",
+      "suggestedDate": "Soovitatud kuupäev",
+      "completed": "Tehtud",
+      "remaining": "Järele jäänud",
+      "keyDates": "Olulised kuupäevad",
+      "notSet": "Määramata",
+      "none": "Puudub",
+      "notCalculated": "Arvutamata"
+    },
+    "intents": {
+      "open": [
+        "ava",
+        "avaaeg",
+        "ava protsess",
+        "avatud kontrollnimekiri"
+      ],
+      "summary": [
+        "kokkuvõte",
+        "edenemine",
+        "mis on tehtud",
+        "mis on jäänud"
+      ],
+      "dateVerb": [
+        "määra kuupäev",
+        "sea kuupäev",
+        "muuda kuupäeva"
+      ],
+      "dateNoun": [
+        "teate kuupäev",
+        "tähtaja kuupäev",
+        "postituskuupäev"
+      ],
+      "markDone": [
+        "märgi tehtuks",
+        "tee tehtuks",
+        "lõpetatud"
+      ],
+      "undo": [
+        "tühista tehtuks",
+        "märgi tegemata",
+        "võta tagasi"
+      ],
+      "clear": [
+        "puhasta",
+        "kustuta edenemine",
+        "tühjenda"
+      ],
+      "checklist": [
+        "kontrollnimekiri",
+        "sammud",
+        "ülesanded"
+      ],
+      "reminder": [
+        "meeldetuletus",
+        "teavitus",
+        "häire"
+      ],
+      "create": [
+        "loo meeldetuletus",
+        "lisa teavitus",
+        "sea alarm"
+      ],
+      "resource": [
+        "ametlik link",
+        "USCIS link",
+        "allikas"
+      ],
+      "privacy": [
+        "privaatsus",
+        "andmekaitse",
+        "ohutus"
+      ],
+      "link": [
+        "ava link",
+        "ava ametlik leht",
+        "veebileht"
+      ],
+      "capability": [
+        "mida saad teha",
+        "võimalused",
+        "abivõimalused"
+      ],
+      "question": [
+        "küsimus",
+        "küsi abi",
+        "aita mind"
+      ],
+      "summaryPhrases": [
+        "mis on alles",
+        "järgmine samm",
+        "edenemine kokku"
+      ],
+      "all": [
+        "kõik",
+        "kogu",
+        "kõik sammud"
+      ]
+    },
+    "topics": {
+      "caseStatus": [
+        "juhtumi staatus",
+        "case status",
+        "kviitungi staatus"
+      ],
+      "fees": [
+        "tasu",
+        "esitustasu",
+        "USCIS tasud"
+      ],
+      "rfe": [
+        "RFE",
+        "täiendav tõend",
+        "tõendamistaotlus"
+      ],
+      "biometrics": [
+        "biomeetria",
+        "sõrmejäljed",
+        "kohtumisteade"
+      ],
+      "address": [
+        "aadressi muutus",
+        "kolimine",
+        "aadressi uuendus"
+      ],
+      "processing": [
+        "töötlemisaeg",
+        "kui kaua kestab",
+        "ootamise aeg"
+      ],
+      "scams": [
+        "pettus",
+        "immigratsioonipettus",
+        "võltsabi"
+      ],
+      "tps": [
+        "TPS",
+        "TPS pikendamine",
+        "TPS uuendamine"
+      ],
+      "ead": [
+        "EAD",
+        "tööluba",
+        "Form I-765"
+      ],
+      "travel": [
+        "reisiloa taotlus",
+        "advance parole",
+        "reisidokument"
+      ],
+      "legal": [
+        "õigusabi",
+        "advokaat",
+        "DOJ akrediteeritud"
+      ],
+      "forms": [
+        "vormid",
+        "USCIS vormid",
+        "taotlusvorm"
+      ],
+      "visitorVisa": [
+        "turistiviisa",
+        "külalisviisa",
+        "USA-sse külastama",
+        "saatkond või konsulaat"
+      ]
+    },
+    "flowAliases": {
+      "tps": [
+        "TPS pikendamine",
+        "TPS uuendamine",
+        "TPS taotlus"
+      ],
+      "ead": [
+        "tööluba",
+        "EAD",
+        "Form I-765"
+      ],
+      "travel": [
+        "reisiluba",
+        "advance parole",
+        "Form I-131"
+      ]
+    },
+    "stopWords": [
+      "palun",
+      "aitäh",
+      "kas sa",
+      "kas",
+      "mulle",
+      "siin",
+      "see",
+      "seejärel",
+      "siis",
+      "mingi",
+      "oma",
+      "minu",
+      "veel",
+      "lihtsalt"
+    ]
+  },
+  "de": {
+    "summaryLabels": {
+      "complete": "abgeschlossen",
+      "noticeDate": "Mitteilungsdatum",
+      "suggestedDate": "Vorgeschlagenes Datum",
+      "completed": "erledigt",
+      "remaining": "verbleibend",
+      "keyDates": "Wichtige Termine",
+      "notSet": "nicht gesetzt",
+      "none": "keine",
+      "notCalculated": "nicht berechnet"
+    },
+    "intents": {
+      "open": [
+        "öffnen",
+        "starten",
+        "anzeigen",
+        "aufmachen"
+      ],
+      "summary": [
+        "Fortschritt",
+        "Stand",
+        "Übersicht",
+        "was bleibt"
+      ],
+      "dateVerb": [
+        "setzen",
+        "eintragen",
+        "ändern",
+        "aktualisieren"
+      ],
+      "dateNoun": [
+        "Datum",
+        "Termin",
+        "Mitteilungsdatum"
+      ],
+      "markDone": [
+        "erledigt markieren",
+        "abhaken",
+        "als erledigt",
+        "fertig"
+      ],
+      "undo": [
+        "rückgängig",
+        "wieder offen",
+        "als offen",
+        "zurück"
+      ],
+      "clear": [
+        "löschen",
+        "entfernen",
+        "zurücksetzen",
+        "leeren"
+      ],
+      "checklist": [
+        "Checkliste",
+        "Aufgaben",
+        "Schritte",
+        "Plan"
+      ],
+      "reminder": [
+        "Erinnerung",
+        "Hinweis",
+        "Benachrichtigung",
+        "Alarm"
+      ],
+      "create": [
+        "erstellen",
+        "anlegen",
+        "einrichten",
+        "planen"
+      ],
+      "resource": [
+        "Ressource",
+        "Link",
+        "offizielle Quelle",
+        "Hilfe"
+      ],
+      "privacy": [
+        "Datenschutz",
+        "Sicherheit",
+        "Privatsphäre",
+        "Daten"
+      ],
+      "link": [
+        "Link",
+        "Verweis",
+        "Seite",
+        "öffnen"
+      ],
+      "capability": [
+        "kann",
+        "machst du",
+        "hilfst du",
+        "funktion"
+      ],
+      "question": [
+        "was",
+        "wie",
+        "wann",
+        "warum"
+      ],
+      "summaryPhrases": [
+        "was bleibt",
+        "nächster Schritt",
+        "Fortschritt",
+        "was ist noch offen"
+      ],
+      "all": [
+        "alles",
+        "alle Schritte",
+        "gesamte Checkliste",
+        "vollständig"
+      ]
+    },
+    "topics": {
+      "caseStatus": [
+        "Fallstatus",
+        "USCIS-Status",
+        "Status prüfen",
+        "Bearbeitungsstand"
+      ],
+      "fees": [
+        "Gebühren",
+        "Einreichungsgebühren",
+        "Zahlung",
+        "aktuelle Gebühr"
+      ],
+      "rfe": [
+        "RFE",
+        "Nachforderung",
+        "Anfrage nach Belegen",
+        "Beleganforderung"
+      ],
+      "biometrics": [
+        "Biometrics",
+        "Termin",
+        "Fingerabdrücke",
+        "Foto und Unterschrift"
+      ],
+      "address": [
+        "Adressänderung",
+        "Adresse ändern",
+        "umgezogen",
+        "neue Adresse"
+      ],
+      "processing": [
+        "Bearbeitungszeiten",
+        "Verarbeitungsdauer",
+        "Wartezeit",
+        "Zeit bis Entscheidung"
+      ],
+      "scams": [
+        "Betrug",
+        "Abzocke",
+        "Fake-Anwalt",
+        "Immigrationsbetrug"
+      ],
+      "tps": [
+        "TPS",
+        "TPS-Verlängerung",
+        "TPS erneuern",
+        "Neu-Registrierung"
+      ],
+      "ead": [
+        "EAD",
+        "Arbeitserlaubnis",
+        "Arbeitsgenehmigung",
+        "I-765"
+      ],
+      "travel": [
+        "Reisegenehmigung",
+        "Advance Parole",
+        "I-131",
+        "Reisen"
+      ],
+      "legal": [
+        "Rechtsberatung",
+        "Anwalt",
+        "rechtliche Hilfe",
+        "qualifizierte Vertretung"
+      ],
+      "forms": [
+        "Formulare",
+        "Formular",
+        "Antrag",
+        "USCIS-Formular"
+      ],
+      "visitorVisa": [
+        "Besuch in den USA",
+        "Besuchervisum",
+        "Touristenvisum",
+        "Botschaft und Konsulat"
+      ]
+    },
+    "flowAliases": {
+      "tps": [
+        "TPS-Verlängerung",
+        "TPS erneuern",
+        "TPS-Checkliste",
+        "TPS-Neu-Registrierung"
+      ],
+      "ead": [
+        "EAD",
+        "Arbeitserlaubnis",
+        "I-765",
+        "Arbeitsgenehmigung"
+      ],
+      "travel": [
+        "Reisegenehmigung",
+        "Advance Parole",
+        "I-131",
+        "Reiseerlaubnis"
+      ]
+    },
+    "stopWords": [
+      "bitte",
+      "mal",
+      "doch",
+      "denn",
+      "eigentlich",
+      "einfach",
+      "nur",
+      "mir",
+      "mein",
+      "meine",
+      "mich",
+      "der",
+      "die",
+      "das",
+      "zu",
+      "zum",
+      "zur"
+    ]
+  },
+  "fi": {
+    "summaryLabels": {
+      "complete": "valmis",
+      "noticeDate": "ilmoituspäivä",
+      "suggestedDate": "ehdotettu päivä",
+      "completed": "valmiit",
+      "remaining": "jäljellä",
+      "keyDates": "tärkeät päivät",
+      "notSet": "ei asetettu",
+      "none": "ei mitään",
+      "notCalculated": "ei laskettu"
+    },
+    "intents": {
+      "open": [
+        "avaa",
+        "avaa prosessi",
+        "avaa tarkistuslista",
+        "näytä prosessi"
+      ],
+      "summary": [
+        "edistyminen",
+        "tarkistuslistan tila",
+        "mitä on jäljellä",
+        "mitä on tehty"
+      ],
+      "dateVerb": [
+        "aseta päivämäärä",
+        "anna päivä",
+        "vaihda päivämäärä",
+        "tallenna päivämäärä"
+      ],
+      "dateNoun": [
+        "päivämäärä",
+        "päivä",
+        "määräpäivä",
+        "ilmoituspäivä"
+      ],
+      "markDone": [
+        "merkitse tehdyksi",
+        "rastita tehty",
+        "valmis",
+        "tee valmiiksi"
+      ],
+      "undo": [
+        "kumoa",
+        "merkitse tekemättömäksi",
+        "poista tehty",
+        "palauta"
+      ],
+      "clear": [
+        "tyhjennä",
+        "poista kaikki",
+        "nollaa",
+        "tyhjennä edistyminen"
+      ],
+      "checklist": [
+        "tarkistuslista",
+        "vaiheet",
+        "tehtävät",
+        "lista"
+      ],
+      "reminder": [
+        "muistutus",
+        "hälytys",
+        "ilmoitus",
+        "muistuta"
+      ],
+      "create": [
+        "luo",
+        "lisää",
+        "aseta",
+        "ajasta"
+      ],
+      "resource": [
+        "resurssit",
+        "viralliset linkit",
+        "USCIS-linkit",
+        "ohjeet"
+      ],
+      "privacy": [
+        "tietosuoja",
+        "yksityisyys",
+        "turva",
+        "suojaus"
+      ],
+      "link": [
+        "avaa linkki",
+        "avaa sivu",
+        "virallinen sivu",
+        "linkki"
+      ],
+      "capability": [
+        "mitä voit tehdä",
+        "auttaminen",
+        "toiminnot",
+        "kyvyt"
+      ],
+      "question": [
+        "miten",
+        "mikä",
+        "milloin",
+        "voinko"
+      ],
+      "summaryPhrases": [
+        "mitä on jäljellä",
+        "mikä seuraavaksi",
+        "kuinka pitkällä",
+        "edistyminen nyt"
+      ],
+      "all": [
+        "kaikki",
+        "kaikki vaiheet",
+        "täysi lista",
+        "koko tarkistuslista"
+      ]
+    },
+    "topics": {
+      "caseStatus": [
+        "asian tila",
+        "kuittinumero",
+        "case status",
+        "seuraa asiaa"
+      ],
+      "fees": [
+        "maksut",
+        "jättömaksu",
+        "hakemusmaksu",
+        "current filing fees"
+      ],
+      "rfe": [
+        "RFE",
+        "lisäselvityspyyntö",
+        "pyydetyt todisteet",
+        "vastausaika"
+      ],
+      "biometrics": [
+        "biometria",
+        "sormenjäljet",
+        "ajanvaraus",
+        "biometrics"
+      ],
+      "address": [
+        "osoitteenmuutos",
+        "muutto",
+        "osoite USCIS:lle",
+        "address change"
+      ],
+      "processing": [
+        "käsittelyajat",
+        "arvioitu aika",
+        "processing times",
+        "odotusaika"
+      ],
+      "scams": [
+        "huijaukset",
+        "petokset",
+        "varoitusmerkit",
+        "authorized representatives"
+      ],
+      "tps": [
+        "TPS-uusinta",
+        "TPS renew",
+        "uudelleenrekisteröinti",
+        "TPS"
+      ],
+      "ead": [
+        "EAD",
+        "työlupa",
+        "I-765",
+        "work permit"
+      ],
+      "travel": [
+        "matkustuslupa",
+        "advance parole",
+        "I-131",
+        "matkustaminen"
+      ],
+      "legal": [
+        "oikeusapu",
+        "asianajaja",
+        "pätevä edustaja",
+        "legal help"
+      ],
+      "forms": [
+        "lomakkeet",
+        "USCIS-lomake",
+        "ohjeet",
+        "form instructions"
+      ],
+      "visitorVisa": [
+        "vierailijaviisa",
+        "turistiviisa",
+        "vierailu Yhdysvaltoihin",
+        "lähetystö ja konsulaatti"
+      ]
+    },
+    "flowAliases": {
+      "tps": [
+        "TPS-uusinta",
+        "TPS renew",
+        "uudelleenrekisteröinti",
+        "TPS hakemus"
+      ],
+      "ead": [
+        "EAD",
+        "työlupa",
+        "I-765",
+        "work permit renewal"
+      ],
+      "travel": [
+        "matkustuslupa",
+        "advance parole",
+        "I-131",
+        "travel authorization"
+      ]
+    },
+    "stopWords": [
+      "aja",
+      "avaa",
+      "näytä",
+      "kerro",
+      "mikä",
+      "miten",
+      "voisitko",
+      "ole hyvä",
+      "kiitos",
+      "sitten",
+      "nyt",
+      "tänään",
+      "tässä",
+      "tuo"
+    ]
+  },
+  "el": {
+    "summaryLabels": {
+      "complete": "Ολοκληρωμένο",
+      "noticeDate": "Ημερομηνία ειδοποίησης",
+      "suggestedDate": "Προτεινόμενη ημερομηνία",
+      "completed": "Ολοκληρώθηκε",
+      "remaining": "Απομένουν",
+      "keyDates": "Βασικές ημερομηνίες",
+      "notSet": "Δεν έχει οριστεί",
+      "none": "Κανένα",
+      "notCalculated": "Δεν έχει υπολογιστεί"
+    },
+    "intents": {
+      "open": [
+        "άνοιγμα",
+        "άνοιξε",
+        "ανοίξτε"
+      ],
+      "summary": [
+        "πρόοδος λίστας",
+        "τι απομένει",
+        "τι έχει μείνει",
+        "επόμενο βήμα",
+        "σύνοψη προόδου"
+      ],
+      "dateVerb": [
+        "όρισε ημερομηνία",
+        "ρύθμισε ημερομηνία",
+        "αλλαγή ημερομηνίας"
+      ],
+      "dateNoun": [
+        "ημερομηνία",
+        "προθεσμία",
+        "ειδοποίηση",
+        "ειδοποίησης"
+      ],
+      "markDone": [
+        "ολοκληρώθηκε",
+        "τελείωσε",
+        "σημείωσε ως έτοιμο"
+      ],
+      "undo": [
+        "αναιρέστε",
+        "σήκωσε",
+        "μην ολοκληρωμένο"
+      ],
+      "clear": [
+        "καθάρισε",
+        "διαγραφή",
+        "αφαίρεση"
+      ],
+      "checklist": [
+        "λίστα ελέγχου",
+        "checklist",
+        "βήματα"
+      ],
+      "reminder": [
+        "υπενθύμιση",
+        "ειδοποίηση",
+        "alert"
+      ],
+      "create": [
+        "δημιουργία",
+        "φτιάξε",
+        "όρισε"
+      ],
+      "resource": [
+        "επίσημος σύνδεσμος",
+        "USCIS σύνδεσμος",
+        "πηγή"
+      ],
+      "privacy": [
+        "απόρρητο",
+        "ιδιωτικότητα",
+        "ασφάλεια δεδομένων"
+      ],
+      "link": [
+        "άνοιξε σύνδεσμο",
+        "επίσημος σύνδεσμος",
+        "βρες σύνδεσμο"
+      ],
+      "capability": [
+        "τι μπορείς",
+        "βοήθειά σου",
+        "τι κάνεις"
+      ],
+      "question": [
+        "πώς",
+        "τι",
+        "πότε"
+      ],
+      "summaryPhrases": [
+        "τι απομένει",
+        "επόμενο βήμα",
+        "πρόοδος μέχρι τώρα"
+      ],
+      "all": [
+        "όλα",
+        "ολόκληρη λίστα",
+        "όλα τα βήματα"
+      ]
+    },
+    "topics": {
+      "caseStatus": [
+        "κατάσταση υπόθεσης",
+        "έλεγχος υπόθεσης",
+        "USCIS status"
+      ],
+      "fees": [
+        "τέλη υποβολής",
+        "χρεώσεις USCIS",
+        "πόσο κοστίζει"
+      ],
+      "rfe": [
+        "RFE",
+        "αίτημα αποδείξεων",
+        "επιστολή αποδείξεων"
+      ],
+      "biometrics": [
+        "βιομετρικά",
+        "ραντεβού βιομετρικών",
+        "δακτυλικά αποτυπώματα"
+      ],
+      "address": [
+        "αλλαγή διεύθυνσης",
+        "μετακόμιση USCIS",
+        "ενημέρωση διεύθυνσης"
+      ],
+      "processing": [
+        "χρόνοι επεξεργασίας",
+        "πόσο αργεί",
+        "εκτιμώμενος χρόνος"
+      ],
+      "scams": [
+        "απάτες μετανάστευσης",
+        "απατεώνες",
+        "ψεύτικη βοήθεια"
+      ],
+      "tps": [
+        "TPS ανανέωση",
+        "ανανέωση TPS",
+        "παράθυρο εγγραφής"
+      ],
+      "ead": [
+        "EAD",
+        "άδεια εργασίας",
+        "I-765"
+      ],
+      "travel": [
+        "ταξιδιωτική άδεια",
+        "advance parole",
+        "I-131"
+      ],
+      "legal": [
+        "νομική βοήθεια",
+        "δικηγόρος μετανάστευσης",
+        "εξουσιοδοτημένος εκπρόσωπος"
+      ],
+      "forms": [
+        "φόρμες USCIS",
+        "έντυπα",
+        "οδηγίες φόρμας"
+      ],
+      "visitorVisa": [
+        "τουριστική βίζα ΗΠΑ",
+        "βίζα επισκέπτη",
+        "πρεσβεία",
+        "προξενείο",
+        "visitor visa"
+      ]
+    },
+    "flowAliases": {
+      "tps": [
+        "TPS",
+        "ανανέωση TPS",
+        "επαναεγγραφή TPS"
+      ],
+      "ead": [
+        "EAD",
+        "άδεια εργασίας",
+        "I-765"
+      ],
+      "travel": [
+        "ταξιδιωτική άδεια",
+        "advance parole",
+        "I-131"
+      ]
+    },
+    "stopWords": [
+      "το",
+      "η",
+      "να",
+      "μου",
+      "για",
+      "σε",
+      "παρακαλώ",
+      "βήμα",
+      "λίγο",
+      "θέλω",
+      "ξανά",
+      "τώρα"
+    ]
+  },
+  "hu": {
+    "summaryLabels": {
+      "complete": "kész",
+      "noticeDate": "értesítés dátuma",
+      "suggestedDate": "javasolt dátum",
+      "completed": "kész",
+      "remaining": "hátralévő",
+      "keyDates": "fontos dátumok",
+      "notSet": "nincs beállítva",
+      "none": "nincs",
+      "notCalculated": "nincs kiszámítva"
+    },
+    "intents": {
+      "open": [
+        "megnyitás",
+        "nyisd meg",
+        "nyitás",
+        "utasd meg"
+      ],
+      "summary": [
+        "összegzés",
+        "haladás",
+        "mi van hátra",
+        "mi a következő"
+      ],
+      "dateVerb": [
+        "dátum beállítása",
+        "állítsd be a dátumot",
+        "dátum megadása"
+      ],
+      "dateNoun": [
+        "dátum",
+        "határidő",
+        "értesítés dátuma"
+      ],
+      "markDone": [
+        "készre jelölés",
+        "pipáld ki",
+        "elkészült"
+      ],
+      "undo": [
+        "visszavonás",
+        "visszajelölés",
+        "ne legyen kész"
+      ],
+      "clear": [
+        "törlés",
+        "töröld az egészet",
+        "nullázás"
+      ],
+      "checklist": [
+        "ellenőrzőlista",
+        "lista",
+        "teendők"
+      ],
+      "reminder": [
+        "emlékeztető",
+        "riasztás",
+        "figyelmeztetés"
+      ],
+      "create": [
+        "létrehozás",
+        "hozz létre",
+        "készíts"
+      ],
+      "resource": [
+        "forrás",
+        "hivatalos link",
+        "segítség"
+      ],
+      "privacy": [
+        "adatvédelem",
+        "biztonság",
+        "hozzájárulás"
+      ],
+      "link": [
+        "link",
+        "hivatkozás",
+        "weboldal"
+      ],
+      "capability": [
+        "mit tudsz",
+        "miben segítesz",
+        "funkciók"
+      ],
+      "question": [
+        "kérdés",
+        "hogyan",
+        "mit jelent"
+      ],
+      "summaryPhrases": [
+        "mi maradt",
+        "mi a következő lépés",
+        "mennyi van hátra",
+        "haladás állása"
+      ],
+      "all": [
+        "minden",
+        "az összes",
+        "teljes"
+      ]
+    },
+    "topics": {
+      "caseStatus": [
+        "ügy státusza",
+        "case status",
+        "ügy állapota"
+      ],
+      "fees": [
+        "beadási díjak",
+        "díjak",
+        "USCIS díj"
+      ],
+      "rfe": [
+        "RFE",
+        "kiegészítő bizonyíték kérése",
+        "további bizonyíték"
+      ],
+      "biometrics": [
+        "biometria",
+        "ujjlenyomat",
+        "biometrikus időpont"
+      ],
+      "address": [
+        "címváltozás",
+        "új cím",
+        "cím frissítése"
+      ],
+      "processing": [
+        "feldolgozási idő",
+        "ügyintézési idő",
+        "processing time"
+      ],
+      "scams": [
+        "csalások",
+        "scam",
+        "átverés"
+      ],
+      "tps": [
+        "TPS megújítása",
+        "TPS újraregisztráció",
+        "TPS hosszabbítás"
+      ],
+      "ead": [
+        "EAD",
+        "munkavállalási engedély",
+        "I-765"
+      ],
+      "travel": [
+        "utazási engedély",
+        "advance parole",
+        "I-131"
+      ],
+      "legal": [
+        "jogi segítség",
+        "ügyvéd",
+        "jogász"
+      ],
+      "forms": [
+        "űrlapok",
+        "formanyomtatványok",
+        "USCIS formák"
+      ],
+      "visitorVisa": [
+        "látogatás az Egyesült Államokba",
+        "turista vízum",
+        "látogatói vízum",
+        "nagykövetség",
+        "konzulátus"
+      ]
+    },
+    "flowAliases": {
+      "tps": [
+        "TPS megújítás",
+        "TPS újraregisztráció",
+        "TPS hosszabbítás"
+      ],
+      "ead": [
+        "EAD megújítás",
+        "munkavállalási engedély",
+        "I-765"
+      ],
+      "travel": [
+        "utazási engedély",
+        "advance parole",
+        "I-131"
+      ]
+    },
+    "stopWords": [
+      "a",
+      "az",
+      "és",
+      "is",
+      "még",
+      "kérem",
+      "kérlek",
+      "szóval",
+      "akkor",
+      "ez",
+      "azt"
+    ]
+  },
+  "ga": {
+    "summaryLabels": {
+      "complete": "críochnaithe",
+      "noticeDate": "dáta an fhógra",
+      "suggestedDate": "dáta molta",
+      "completed": "críochnaithe",
+      "remaining": "fágtha",
+      "keyDates": "príomhdhátaí",
+      "notSet": "níl socraithe",
+      "none": "gan aon cheann",
+      "notCalculated": "níor ríomhadh"
+    },
+    "intents": {
+      "open": [
+        "oscail",
+        "oscail an",
+        "téigh go",
+        "show",
+        "display"
+      ],
+      "summary": [
+        "cad atá fágtha",
+        "cé mhéad atá déanta",
+        "cad atá fágtha fós"
+      ],
+      "dateVerb": [
+        "socraigh an dáta",
+        "athraigh an dáta",
+        "nuashonraigh an dáta"
+      ],
+      "dateNoun": [
+        "dáta an fhógra",
+        "dáta comhdaithe",
+        "dáta tosaigh"
+      ],
+      "markDone": [
+        "mar dhéanta",
+        "críochnaigh",
+        "cuir tic le"
+      ],
+      "undo": [
+        "cuir ar ais",
+        "cealaigh déanta",
+        "déan neamhaird"
+      ],
+      "clear": [
+        "glan",
+        "bain",
+        "scrios"
+      ],
+      "checklist": [
+        "seicliosta",
+        "céimeanna",
+        "tascanna"
+      ],
+      "reminder": [
+        "meabhrúchán",
+        "foláireamh",
+        "cuimhneachán"
+      ],
+      "create": [
+        "cruthaigh",
+        "socraigh",
+        "cuir ar bun"
+      ],
+      "resource": [
+        "acmhainn",
+        "nasc oifigiúil",
+        "cabhair"
+      ],
+      "privacy": [
+        "príobháideacht",
+        "sonraí",
+        "cead"
+      ],
+      "link": [
+        "nasc",
+        "leathanach",
+        "URL"
+      ],
+      "capability": [
+        "cad is féidir leat a dhéanamh",
+        "cén chabhair atá agat",
+        "cad a dhéanann tú"
+      ],
+      "question": [
+        "conas a",
+        "cad é",
+        "ar cheart dom"
+      ],
+      "summaryPhrases": [
+        "fágtha",
+        "céard atá le déanamh",
+        "dul chun cinn"
+      ],
+      "all": [
+        "gach ceann",
+        "uile cheann",
+        "gach céim"
+      ]
+    },
+    "topics": {
+      "caseStatus": [
+        "stádas cás",
+        "seiceáil cás",
+        "uimhir admhála"
+      ],
+      "fees": [
+        "táillí",
+        "táille comhdaithe",
+        "íocaíocht"
+      ],
+      "rfe": [
+        "RFE",
+        "iarratas ar fhianaise",
+        "fógra breise"
+      ],
+      "biometrics": [
+        "bithmhéadracht",
+        "coinne méarloirg",
+        "bithshonraí"
+      ],
+      "address": [
+        "athrú seolta",
+        "nuashonraigh seoladh",
+        "bogadh"
+      ],
+      "processing": [
+        "am próiseála",
+        "cé chomh fada",
+        "fanacht"
+      ],
+      "scams": [
+        "camscéimeanna",
+        "scam inimirce",
+        "comhairle falsa"
+      ],
+      "tps": [
+        "TPS",
+        "athnuachan TPS",
+        "athchlárú TPS"
+      ],
+      "ead": [
+        "EAD",
+        "cead oibre",
+        "I-765"
+      ],
+      "travel": [
+        "údarú taistil",
+        "taisteal",
+        "fágáil na Stát Aontaithe"
+      ],
+      "legal": [
+        "cabhair dhlíthiúil",
+        "aturnae",
+        "ionadaí DOJ"
+      ],
+      "forms": [
+        "foirmeacha",
+        "foirm USCIS",
+        "instriúidí foirme"
+      ],
+      "visitorVisa": [
+        "víosa cuairte",
+        "cuairt ar na Stáit Aontaithe",
+        "consalacht",
+        "ambasáid"
+      ]
+    },
+    "flowAliases": {
+      "tps": [
+        "athnuachan TPS",
+        "TPS re-registration",
+        "athchlárú TPS"
+      ],
+      "ead": [
+        "EAD",
+        "cead oibre",
+        "I-765"
+      ],
+      "travel": [
+        "údarú taistil",
+        "advance parole",
+        "I-131"
+      ]
+    },
+    "stopWords": [
+      "an",
+      "na",
+      "do",
+      "le",
+      "ar",
+      "agus",
+      "cuir",
+      "socraigh",
+      "déan",
+      "is",
+      "mé",
+      "mo",
+      "a",
+      "the",
+      "an ceann"
+    ]
+  },
+  "lv": {
+    "summaryLabels": {
+      "complete": [
+        "pabeigts",
+        "izpildīts",
+        "gatavs"
+      ],
+      "noticeDate": [
+        "paziņojuma datums",
+        "paziņojuma diena",
+        "saņemšanas datums"
+      ],
+      "suggestedDate": [
+        "ieteiktais datums",
+        "aprēķinātais datums",
+        "nosūtīšanas datums"
+      ],
+      "completed": [
+        "pabeigti",
+        "izdarīti",
+        "atzīmēti"
+      ],
+      "remaining": [
+        "atlikušais",
+        "vēl jāizdara",
+        "nepabeigtais"
+      ],
+      "keyDates": [
+        "svarīgie datumi",
+        "galvenie datumi",
+        "termiņi"
+      ],
+      "notSet": [
+        "nav iestatīts",
+        "vēl nav",
+        "nav noteikts"
+      ],
+      "none": [
+        "nav",
+        "nekas",
+        "nulle"
+      ],
+      "notCalculated": [
+        "nav aprēķināts",
+        "vēl nav aprēķināts",
+        "neaprēķināts"
+      ]
+    },
+    "intents": {
+      "open": [
+        "atvērt",
+        "atver",
+        "atveriet",
+        "atvērt procesu",
+        "atvērt sadaļu"
+      ],
+      "summary": [
+        "kāds progress",
+        "kas atlikis",
+        "kas jau pabeigts",
+        "kā iet",
+        "man progress"
+      ],
+      "dateVerb": [
+        "iestatīt datumu",
+        "mainīt datumu",
+        "ievadīt datumu",
+        "noteikt datumu"
+      ],
+      "dateNoun": [
+        "datums",
+        "termiņš",
+        "paziņojuma datums",
+        "nosūtīšanas datums"
+      ],
+      "markDone": [
+        "atzīmēt pabeigtu",
+        "atzīmēt izdarītu",
+        "pabeigt soli",
+        "atzīmēt kā gatavu"
+      ],
+      "undo": [
+        "noņemt atzīmi",
+        "atzīmēt kā nepabeigtu",
+        "atsaukt pabeigšanu"
+      ],
+      "clear": [
+        "notīrīt",
+        "dzēst visu",
+        "noņemt visus",
+        "atiestatīt"
+      ],
+      "checklist": [
+        "kontrolsaraksts",
+        "soļi",
+        "uzdevumi",
+        "darāmais saraksts"
+      ],
+      "reminder": [
+        "atgādinājums",
+        "paziņojums",
+        "brīdinājums",
+        "atcerēšanās"
+      ],
+      "create": [
+        "izveidot",
+        "pievienot",
+        "iestatīt",
+        "sagatavot"
+      ],
+      "resource": [
+        "resursi",
+        "oficiālās saites",
+        "veidlapas",
+        "palīdzība"
+      ],
+      "privacy": [
+        "privātums",
+        "drošība",
+        "konfidencialitāte",
+        "dati"
+      ],
+      "link": [
+        "saite",
+        "atvērt saiti",
+        "oficiālā saite"
+      ],
+      "capability": [
+        "ko vari darīt",
+        "ko tu proti",
+        "palīdzības iespējas"
+      ],
+      "question": [
+        "kā",
+        "ko man darīt",
+        "vai vari palīdzēt"
+      ],
+      "summaryPhrases": [
+        "kas vēl atlicis",
+        "nākamais solis",
+        "progresa kopsavilkums"
+      ],
+      "all": [
+        "visi",
+        "viss",
+        "visus soļus"
+      ]
+    },
+    "topics": {
+      "caseStatus": [
+        "lietas statuss",
+        "pārbaudīt statusu",
+        "kvīts numurs",
+        "USCIS statuss"
+      ],
+      "fees": [
+        "iesniegšanas maksa",
+        "aktuālā maksa",
+        "cik jāmaksā",
+        "maksas lapa"
+      ],
+      "rfe": [
+        "RFE",
+        "papildu pierādījumi",
+        "pieprasījums pēc pierādījumiem",
+        "atbilde uz RFE"
+      ],
+      "biometrics": [
+        "biometrija",
+        "pirkstu nospiedumi",
+        "pieraksts",
+        "biometriskā vizīte"
+      ],
+      "address": [
+        "adreses maiņa",
+        "mainīt adresi",
+        "pārvācos",
+        "USCIS adrese"
+      ],
+      "processing": [
+        "apstrādes laiki",
+        "gaidīšanas laiks",
+        "cik ilgi",
+        "procesa laiks"
+      ],
+      "scams": [
+        "krāpniecība",
+        "krāpnieki",
+        "izvairīties no krāpšanas",
+        "imigrācijas krāpniecība"
+      ],
+      "tps": [
+        "TPS",
+        "TPS atjaunošana",
+        "TPS pieteikums",
+        "TPS termiņi"
+      ],
+      "ead": [
+        "EAD",
+        "darba atļauja",
+        "I-765",
+        "darba karte"
+      ],
+      "travel": [
+        "ceļošana",
+        "ceļošanas atļauja",
+        "I-131",
+        "advance parole"
+      ],
+      "legal": [
+        "juridiskā palīdzība",
+        "advokāts",
+        "juridiskas konsultācijas",
+        "DOJ pārstāvis"
+      ],
+      "forms": [
+        "veidlapas",
+        "USCIS veidlapa",
+        "norādījumi",
+        "pieteikuma forma"
+      ],
+      "visitorVisa": [
+        "viesu vīza",
+        "tūristu vīza",
+        "apmeklēt ASV",
+        "vēstniecība un konsulāts"
+      ]
+    },
+    "flowAliases": {
+      "tps": [
+        "TPS atjaunošana",
+        "TPS pagarināšana",
+        "TPS atjaunošanas process"
+      ],
+      "ead": [
+        "EAD atjaunošana",
+        "darba atļauja",
+        "I-765"
+      ],
+      "travel": [
+        "ceļošanas atļauja",
+        "advance parole",
+        "I-131"
+      ]
+    },
+    "stopWords": [
+      "lūdzu",
+      "vai vari",
+      "man vajag",
+      "es gribu",
+      "kā",
+      "ko",
+      "par",
+      "uz",
+      "to",
+      "šo",
+      "tas",
+      "man"
+    ]
+  },
+  "lt": {
+    "summaryLabels": {
+      "complete": "Atlikta",
+      "noticeDate": "Pranešimo data",
+      "suggestedDate": "Siūloma data",
+      "completed": "Atlikta",
+      "remaining": "Liko",
+      "keyDates": "Svarbios datos",
+      "notSet": "Nenustatyta",
+      "none": "Nėra",
+      "notCalculated": "Neapskaičiuota"
+    },
+    "intents": {
+      "open": [
+        "atidaryti",
+        "rodyti procesą",
+        "peržiūrėti kontrolinį sąrašą"
+      ],
+      "summary": [
+        "kas liko",
+        "pažangos santrauka",
+        "kas atlikta"
+      ],
+      "dateVerb": [
+        "nustatyti datą",
+        "keisti datą",
+        "įrašyti datą"
+      ],
+      "dateNoun": [
+        "data",
+        "pranešimo data",
+        "termino data"
+      ],
+      "markDone": [
+        "pažymėti atlikta",
+        "uždėti varnelę",
+        "žymėti baigta"
+      ],
+      "undo": [
+        "atžymėti",
+        "pašalinti varneles",
+        "žymėti neatlikta"
+      ],
+      "clear": [
+        "išvalyti",
+        "ištrinti pažangą",
+        "nuvalyti sąrašą"
+      ],
+      "checklist": [
+        "kontrolinis sąrašas",
+        "žingsniai",
+        "užduotys"
+      ],
+      "reminder": [
+        "priminimas",
+        "įspėjimas",
+        "pranešimas"
+      ],
+      "create": [
+        "sukurti",
+        "nustatyti",
+        "užprogramuoti"
+      ],
+      "resource": [
+        "oficiali nuoroda",
+        "USCIS puslapis",
+        "ištekliai"
+      ],
+      "privacy": [
+        "privatumas",
+        "sauga",
+        "duomenų privatumas"
+      ],
+      "link": [
+        "atidaryti nuorodą",
+        "atverti puslapį",
+        "eiti į svetainę"
+      ],
+      "capability": [
+        "ką gali",
+        "pagalbos galimybės",
+        "funkcijos"
+      ],
+      "question": [
+        "kaip",
+        "kas yra",
+        "kada"
+      ],
+      "summaryPhrases": [
+        "Kas liko atlikti",
+        "Kitas žingsnis",
+        "Pažanga iki šiol"
+      ],
+      "all": [
+        "visi",
+        "viskas",
+        "visus"
+      ]
+    },
+    "topics": {
+      "caseStatus": [
+        "bylos būsena",
+        "bylos patikra",
+        "USCIS statusas"
+      ],
+      "fees": [
+        "mokesčiai",
+        "pateikimo mokestis",
+        "dabartiniai mokesčiai"
+      ],
+      "rfe": [
+        "RFE",
+        "papildomų įrodymų prašymas",
+        "užklausa dėl įrodymų"
+      ],
+      "biometrics": [
+        "biometrija",
+        "biometrinis vizitas",
+        "pirštų atspaudai"
+      ],
+      "address": [
+        "adreso keitimas",
+        "persikėlimas",
+        "naujas adresas"
+      ],
+      "processing": [
+        "nagrinėjimo laikas",
+        "apdorojimo laikas",
+        "trukmė"
+      ],
+      "scams": [
+        "sukčiavimas",
+        "apgavystės",
+        "netikri konsultantai"
+      ],
+      "tps": [
+        "TPS",
+        "TPS pratęsimas",
+        "TPS atnaujinimas"
+      ],
+      "ead": [
+        "EAD",
+        "darbo leidimas",
+        "darbo autorizacija"
+      ],
+      "travel": [
+        "kelionės leidimas",
+        "I-131",
+        "kelionės dokumentas"
+      ],
+      "legal": [
+        "teisinė pagalba",
+        "advokatas",
+        "akredituotas atstovas"
+      ],
+      "forms": [
+        "formos",
+        "USCIS formos",
+        "pildymo instrukcijos"
+      ],
+      "visitorVisa": [
+        "turisto viza",
+        "vizitas į JAV",
+        "ambasada ir konsulatas"
+      ]
+    },
+    "flowAliases": {
+      "tps": [
+        "TPS pratęsimas",
+        "TPS atnaujinimas",
+        "TPS pakartotinis registravimas"
+      ],
+      "ead": [
+        "EAD",
+        "darbo leidimas",
+        "darbo autorizacija"
+      ],
+      "travel": [
+        "kelionės leidimas",
+        "I-131",
+        "advance parole"
+      ]
+    },
+    "stopWords": [
+      "kaip",
+      "ir",
+      "ar",
+      "bet",
+      "man",
+      "prašau",
+      "gal",
+      "galite",
+      "padėkite",
+      "nustatyti",
+      "pažymėti",
+      "rodyti",
+      "atidaryti",
+      "mano",
+      "ši",
+      "tas",
+      "dabar"
+    ]
+  },
+  "mt": {
+    "summaryLabels": {
+      "complete": "komplut",
+      "noticeDate": "data tan-notifika",
+      "suggestedDate": "data suġġerita",
+      "completed": "imwettaq",
+      "remaining": "fadal",
+      "keyDates": "dati ewlenin",
+      "notSet": "mhux issettjata",
+      "none": "l-ebda",
+      "notCalculated": "mhux ikkalkulata"
+    },
+    "intents": {
+      "open": [
+        "iftaħ",
+        "iftaħ il-proċess",
+        "mur għall-proċess"
+      ],
+      "summary": [
+        "sommarju",
+        "progress tal-lista",
+        "x’fadal"
+      ],
+      "dateVerb": [
+        "issettja data",
+        "ibdel id-data",
+        "aġġorna d-data"
+      ],
+      "dateNoun": [
+        "data tan-notifika",
+        "data tal-posta",
+        "data importanti"
+      ],
+      "markDone": [
+        "immarka bħala magħmul",
+        "immarka lest",
+        "agħmel pass"
+      ],
+      "undo": [
+        "neħħi l-marka",
+        "immarka mhux magħmul",
+        "irkupra pass"
+      ],
+      "clear": [
+        "neħħi kollox",
+        "naddaf il-progress",
+        "iċċara l-lista"
+      ],
+      "checklist": [
+        "lista ta’ kontroll",
+        "passi tal-lista",
+        "kontroll tal-passi"
+      ],
+      "reminder": [
+        "tfakkira",
+        "twissija",
+        "notifika"
+      ],
+      "create": [
+        "oħloq tfakkira",
+        "skeda twissija",
+        "żid tfakkira"
+      ],
+      "resource": [
+        "riżorsi uffiċjali",
+        "links uffiċjali",
+        "għajnuna uffiċjali"
+      ],
+      "privacy": [
+        "privatezza",
+        "sigurtà",
+        "użu tad-dejta"
+      ],
+      "link": [
+        "iftaħ link",
+        "link uffiċjali",
+        "riżorsa"
+      ],
+      "capability": [
+        "x’tista’ tagħmel",
+        "għajnuna",
+        "funzjonijiet"
+      ],
+      "question": [
+        "għandi mistoqsija",
+        "għidli",
+        "spjegali"
+      ],
+      "summaryPhrases": [
+        "x’fadal",
+        "li jmiss",
+        "progress",
+        "punt li jmiss"
+      ],
+      "all": [
+        "kollha",
+        "il-passi kollha",
+        "kollox"
+      ]
+    },
+    "topics": {
+      "caseStatus": [
+        "status tal-każ",
+        "verifika tal-każ",
+        "numru tar-riċevuta"
+      ],
+      "fees": [
+        "miżati tal-preżentazzjoni",
+        "miżati kurrenti",
+        "ħlas tal-USCIS"
+      ],
+      "rfe": [
+        "RFE",
+        "talba għal prova",
+        "żieda ta’ evidenza"
+      ],
+      "biometrics": [
+        "bijometriċi",
+        "appuntament tal-bijometriċi",
+        "notifika tal-bijometriċi"
+      ],
+      "address": [
+        "bidla tal-indirizz",
+        "aġġorna l-indirizz",
+        "indirizz tal-USCIS"
+      ],
+      "processing": [
+        "ħinijiet tal-ipproċessar",
+        "stima ta’ ħin",
+        "proċessar tal-każ"
+      ],
+      "scams": [
+        "scams tal-immigrazzjoni",
+        "frodi",
+        "pariri mhux awtorizzati"
+      ],
+      "tps": [
+        "TPS",
+        "tiġdid TPS",
+        "reġistrazzjoni mill-ġdid TPS"
+      ],
+      "ead": [
+        "EAD",
+        "permess tax-xogħol",
+        "Form I-765"
+      ],
+      "travel": [
+        "ivvjaġġar",
+        "awtorizzazzjoni għall-ivvjaġġar",
+        "Form I-131"
+      ],
+      "legal": [
+        "għajnuna legali",
+        "avukat kwalifikat",
+        "rappreżentant akkreditat"
+      ],
+      "forms": [
+        "formoli tal-USCIS",
+        "istruzzjonijiet tal-formola",
+        "paġna uffiċjali"
+      ],
+      "visitorVisa": [
+        "viża ta’ żjara",
+        "viża turistika",
+        "ambaxxata u konsulat"
+      ]
+    },
+    "flowAliases": {
+      "tps": [
+        "tiġdid TPS",
+        "reġistrazzjoni mill-ġdid TPS",
+        "TPS renewal"
+      ],
+      "ead": [
+        "EAD",
+        "permess tax-xogħol",
+        "Form I-765"
+      ],
+      "travel": [
+        "awtorizzazzjoni għall-ivvjaġġar",
+        "advance parole",
+        "Form I-131"
+      ]
+    },
+    "stopWords": [
+      "jekk jogħġbok",
+      "għidli",
+      "nistax",
+      "nista",
+      "il",
+      "l-",
+      "dak",
+      "din",
+      "dan",
+      "għall",
+      "ta",
+      "tal",
+      "u",
+      "biex",
+      "fuq",
+      "hekk"
+    ]
+  },
+  "pl": {
+    "summaryLabels": {
+      "complete": "ukończono",
+      "noticeDate": "data z powiadomienia",
+      "suggestedDate": "sugerowana data",
+      "completed": "wykonano",
+      "remaining": "pozostało",
+      "keyDates": "ważne daty",
+      "notSet": "nieustawiona",
+      "none": "brak",
+      "notCalculated": "nieobliczone"
+    },
+    "intents": {
+      "open": [
+        "otwórz",
+        "uruchom",
+        "pokaż"
+      ],
+      "summary": [
+        "podsumowanie",
+        "postęp",
+        "co zostało"
+      ],
+      "dateVerb": [
+        "ustaw datę",
+        "zmień datę",
+        "zapisz datę"
+      ],
+      "dateNoun": [
+        "data",
+        "termin",
+        "powiadomienie"
+      ],
+      "markDone": [
+        "zrobione",
+        "ukończone",
+        "odznacz"
+      ],
+      "undo": [
+        "cofnij",
+        "niezrobione",
+        "przywróć"
+      ],
+      "clear": [
+        "wyczyść",
+        "usuń wszystko",
+        "zresetuj"
+      ],
+      "checklist": [
+        "lista kontrolna",
+        "zadania",
+        "kroki"
+      ],
+      "reminder": [
+        "przypomnienie",
+        "alert",
+        "powiadomienie"
+      ],
+      "create": [
+        "utwórz",
+        "dodaj",
+        "ustaw"
+      ],
+      "resource": [
+        "zasoby",
+        "oficjalne linki",
+        "pomoc"
+      ],
+      "privacy": [
+        "prywatność",
+        "bezpieczeństwo",
+        "zgoda"
+      ],
+      "link": [
+        "link",
+        "odnośnik",
+        "strona"
+      ],
+      "capability": [
+        "co umiesz",
+        "funkcje",
+        "możliwości"
+      ],
+      "question": [
+        "jak",
+        "co",
+        "czy"
+      ],
+      "summaryPhrases": [
+        "co zostało",
+        "co dalej",
+        "jaki postęp"
+      ],
+      "all": [
+        "wszystkie",
+        "całość",
+        "pełna lista"
+      ]
+    },
+    "topics": {
+      "caseStatus": [
+        "status sprawy USCIS",
+        "sprawdzenie sprawy",
+        "numer potwierdzenia"
+      ],
+      "fees": [
+        "opłaty USCIS",
+        "aktualne opłaty",
+        "ile zapłacić"
+      ],
+      "rfe": [
+        "RFE",
+        "wezwanie do uzupełnienia",
+        "prośba o dowody"
+      ],
+      "biometrics": [
+        "biometria",
+        "odciski palców",
+        "wizyta biomeryczna"
+      ],
+      "address": [
+        "zmiana adresu",
+        "aktualizacja adresu",
+        "przeprowadzka"
+      ],
+      "processing": [
+        "czas rozpatrywania",
+        "terminy USCIS",
+        "czas oczekiwania"
+      ],
+      "scams": [
+        "oszustwa imigracyjne",
+        "fałszywy prawnik",
+        "wyłudzenie"
+      ],
+      "tps": [
+        "TPS",
+        "odnowienie TPS",
+        "rejestracja TPS"
+      ],
+      "ead": [
+        "EAD",
+        "pozwolenie na pracę",
+        "I-765"
+      ],
+      "travel": [
+        "autoryzacja podróży",
+        "advance parole",
+        "I-131"
+      ],
+      "legal": [
+        "pomoc prawna",
+        "adwokat",
+        "przedstawiciel DOJ"
+      ],
+      "forms": [
+        "formularze USCIS",
+        "instrukcje formularza",
+        "oficjalny formularz"
+      ],
+      "visitorVisa": [
+        "wiza turystyczna USA",
+        "wiza dla gości",
+        "konsulat USA",
+        "ambasada USA",
+        "odwiedziny w USA"
+      ]
+    },
+    "flowAliases": {
+      "tps": [
+        "odnowienie TPS",
+        "TPS renewal",
+        "rejestracja TPS"
+      ],
+      "ead": [
+        "EAD",
+        "pozwolenie na pracę",
+        "I-765"
+      ],
+      "travel": [
+        "autoryzacja podróży",
+        "advance parole",
+        "I-131"
+      ]
+    },
+    "stopWords": [
+      "proszę",
+      "czy",
+      "mi",
+      "mnie",
+      "możesz",
+      "powiedz",
+      "pokaż",
+      "dla",
+      "na",
+      "w",
+      "z",
+      "do",
+      "o",
+      "ten",
+      "ta",
+      "te",
+      "jak"
+    ]
+  },
+  "ro": {
+    "summaryLabels": {
+      "complete": "finalizat",
+      "noticeDate": "data notificării",
+      "suggestedDate": "data recomandată",
+      "completed": "finalizate",
+      "remaining": "rămase",
+      "keyDates": "date-cheie",
+      "notSet": "nesetat",
+      "none": "niciuna",
+      "notCalculated": "necalculat"
+    },
+    "intents": {
+      "open": [
+        "deschide",
+        "arată",
+        "deschideți"
+      ],
+      "summary": [
+        "rezumat",
+        "progres",
+        "ce a rămas"
+      ],
+      "dateVerb": [
+        "setează data",
+        "schimbă data",
+        "actualizează data"
+      ],
+      "dateNoun": [
+        "data notificării",
+        "data de depunere",
+        "data limită"
+      ],
+      "markDone": [
+        "marchează finalizat",
+        "bifează",
+        "gata"
+      ],
+      "undo": [
+        "anulează",
+        "nebifat",
+        "înapoi"
+      ],
+      "clear": [
+        "șterge",
+        "resetează",
+        "goleşte"
+      ],
+      "checklist": [
+        "listă de verificare",
+        "pași",
+        "sarcini"
+      ],
+      "reminder": [
+        "memento",
+        "alertă",
+        "notificare"
+      ],
+      "create": [
+        "creează",
+        "setează",
+        "programează"
+      ],
+      "resource": [
+        "resurse",
+        "linkuri oficiale",
+        "ajutor oficial"
+      ],
+      "privacy": [
+        "confidențialitate",
+        "siguranță",
+        "date"
+      ],
+      "link": [
+        "link",
+        "deschide linkul",
+        "site oficial"
+      ],
+      "capability": [
+        "ce poți face",
+        "capacități",
+        "ajutor"
+      ],
+      "question": [
+        "cum",
+        "ce",
+        "întrebare"
+      ],
+      "summaryPhrases": [
+        "ce a rămas",
+        "următorul pas",
+        "progresul meu"
+      ],
+      "all": [
+        "tot",
+        "toate",
+        "întreg"
+      ]
+    },
+    "topics": {
+      "caseStatus": [
+        "stadiul cazului",
+        "verificare caz USCIS",
+        "număr de primire"
+      ],
+      "fees": [
+        "taxe USCIS",
+        "taxa de depunere",
+        "cât costă"
+      ],
+      "rfe": [
+        "RFE",
+        "solicitare de dovezi",
+        "cerere de probe"
+      ],
+      "biometrics": [
+        "biometrie",
+        "programare biometrie",
+        "amprentare"
+      ],
+      "address": [
+        "schimbare adresă",
+        "mutare adresă",
+        "actualizare adresă"
+      ],
+      "processing": [
+        "timp de procesare",
+        "durată procesare",
+        "cât durează"
+      ],
+      "scams": [
+        "escrocherii imigrare",
+        "fraude USCIS",
+        "evitări scam"
+      ],
+      "tps": [
+        "TPS",
+        "reînnoire TPS",
+        "reînregistrare TPS"
+      ],
+      "ead": [
+        "EAD",
+        "permis de muncă",
+        "Formularul I-765"
+      ],
+      "travel": [
+        "călătorie",
+        "autorizare de călătorie",
+        "Formularul I-131"
+      ],
+      "legal": [
+        "ajutor juridic",
+        "avocat imigrare",
+        "reprezentant acreditat"
+      ],
+      "forms": [
+        "formulare USCIS",
+        "instrucțiuni formular",
+        "formular oficial"
+      ],
+      "visitorVisa": [
+        "vizită în SUA",
+        "viză turist",
+        "viză vizitator",
+        "ambasadă",
+        "consulat"
+      ]
+    },
+    "flowAliases": {
+      "tps": [
+        "reînnoire TPS",
+        "TPS renewal",
+        "reînregistrare TPS"
+      ],
+      "ead": [
+        "EAD",
+        "permis de muncă",
+        "I-765"
+      ],
+      "travel": [
+        "autorizare de călătorie",
+        "advance parole",
+        "I-131"
+      ]
+    },
+    "stopWords": [
+      "te rog",
+      "vă rog",
+      "doar",
+      "acum",
+      "asta",
+      "acest",
+      "această",
+      "mai",
+      "mult",
+      "puțin",
+      "la",
+      "în",
+      "pe",
+      "pentru",
+      "despre"
+    ]
+  },
+  "sl": {
+    "summaryLabels": {
+      "complete": "končano",
+      "noticeDate": "datum obvestila",
+      "suggestedDate": "predlagani datum",
+      "completed": "opravljeno",
+      "remaining": "preostalo",
+      "keyDates": "ključni datumi",
+      "notSet": "ni nastavljeno",
+      "none": "brez",
+      "notCalculated": "ni izračunano"
+    },
+    "intents": {
+      "open": [
+        "odpri",
+        "pokaži",
+        "prikaži",
+        "odpri obrazec",
+        "odpri vir"
+      ],
+      "summary": [
+        "kaj je ostalo",
+        "napredek",
+        "kako napredujem",
+        "kaj še manjka"
+      ],
+      "dateVerb": [
+        "nastavi datum",
+        "posodobi datum",
+        "vnesi datum",
+        "shrani datum"
+      ],
+      "dateNoun": [
+        "datum",
+        "rok",
+        "obvestilo",
+        "predlagani datum"
+      ],
+      "markDone": [
+        "označi kot opravljeno",
+        "končano",
+        "obkljukaj",
+        "opravljeno"
+      ],
+      "undo": [
+        "prekliči",
+        "odznači",
+        "razveljavi",
+        "ni opravljeno"
+      ],
+      "clear": [
+        "počisti",
+        "izbriši",
+        "odstrani vse",
+        "ponastavi"
+      ],
+      "checklist": [
+        "kontrolni seznam",
+        "seznam korakov",
+        "naloge",
+        "moji koraki"
+      ],
+      "reminder": [
+        "opomnik",
+        "opozorilo",
+        "obvestilo",
+        "alarm"
+      ],
+      "create": [
+        "ustvari",
+        "nastavi",
+        "dodaj",
+        "naredi"
+      ],
+      "resource": [
+        "uradni vir",
+        "povezava",
+        "obrazec",
+        "USCIS"
+      ],
+      "privacy": [
+        "zasebnost",
+        "varnost",
+        "varovanje podatkov",
+        "AI zasebnost"
+      ],
+      "link": [
+        "povezava",
+        "odpri povezavo",
+        "uradna stran",
+        "spletna stran"
+      ],
+      "capability": [
+        "kaj zmoreš",
+        "kaj lahko narediš",
+        "funkcije",
+        "pomoč"
+      ],
+      "question": [
+        "kako",
+        "zakaj",
+        "kaj",
+        "kdaj"
+      ],
+      "summaryPhrases": [
+        "kaj je ostalo",
+        "naslednji korak",
+        "napredek do zdaj",
+        "preostali koraki"
+      ],
+      "all": [
+        "vse",
+        "vsi koraki",
+        "celoten seznam",
+        "vse naloge"
+      ]
+    },
+    "topics": {
+      "caseStatus": [
+        "status zadeve",
+        "preveri status",
+        "USCIS status",
+        "število prejema"
+      ],
+      "fees": [
+        "pristojbine",
+        "stroški oddaje",
+        "trenutna pristojbina",
+        "plačilo obrazca"
+      ],
+      "rfe": [
+        "RFE",
+        "zahteva za dokazila",
+        "dodatni dokazi",
+        "odgovor na RFE"
+      ],
+      "biometrics": [
+        "biometrija",
+        "termin za prstne odtise",
+        "biometrično obvestilo",
+        "termin"
+      ],
+      "address": [
+        "sprememba naslova",
+        "posodobitev naslova",
+        "nov naslov",
+        "obvesti USCIS"
+      ],
+      "processing": [
+        "čas obdelave",
+        "koliko časa traja",
+        "obdelava prošnje",
+        "ocena časa"
+      ],
+      "scams": [
+        "prevara",
+        "imigracijska prevara",
+        "lažni odvetnik",
+        "sumljiva ponudba"
+      ],
+      "tps": [
+        "TPS podaljšanje",
+        "obnova TPS",
+        "TPS re-registracija",
+        "TPS rok"
+      ],
+      "ead": [
+        "EAD",
+        "delovno dovoljenje",
+        "Form I-765",
+        "vloga za delo"
+      ],
+      "travel": [
+        "dovoljenje za potovanje",
+        "advance parole",
+        "potovalni dokument",
+        "pred odhodom"
+      ],
+      "legal": [
+        "pravna pomoč",
+        "odvetnik",
+        "pravno svetovanje",
+        "kvalificiran zastopnik"
+      ],
+      "forms": [
+        "obrazci",
+        "navodila",
+        "uradni obrazec",
+        "USCIS obrazec"
+      ],
+      "visitorVisa": [
+        "turistični vizum za ZDA",
+        "obisk ZDA",
+        "vizum za obiskovalce",
+        "ameriško veleposlaništvo"
+      ]
+    },
+    "flowAliases": {
+      "tps": [
+        "TPS",
+        "obnova TPS",
+        "TPS podaljšanje",
+        "ponovna registracija TPS"
+      ],
+      "ead": [
+        "EAD",
+        "delovno dovoljenje",
+        "Form I-765",
+        "dovoljenje za delo"
+      ],
+      "travel": [
+        "travel authorization",
+        "advance parole",
+        "dovoljenje za potovanje",
+        "obrazec I-131"
+      ]
+    },
+    "stopWords": [
+      "prosim",
+      "mi",
+      "lahko",
+      "bi",
+      "rad",
+      "želim",
+      "kar",
+      "samo",
+      "pa",
+      "torej",
+      "no",
+      "hvala",
+      "hej"
+    ]
+  },
+  "sk": {
+    "summaryLabels": {
+      "complete": "Hotovo",
+      "noticeDate": "Dátum oznámenia",
+      "suggestedDate": "Navrhovaný dátum",
+      "completed": "Dokončené",
+      "remaining": "Zostáva",
+      "keyDates": "Dôležité dátumy",
+      "notSet": "Nie je nastavené",
+      "none": "Žiadne",
+      "notCalculated": "Nevypočítané"
+    },
+    "intents": {
+      "open": [
+        "otvoriť",
+        "zobraziť",
+        "spustiť",
+        "prejsť na"
+      ],
+      "summary": [
+        "stav kontrolného zoznamu",
+        "čo zostáva",
+        "pokrok úlohy",
+        "čo je hotové"
+      ],
+      "dateVerb": [
+        "nastaviť dátum",
+        "zmeniť dátum",
+        "uložiť dátum",
+        "zaznamenať dátum"
+      ],
+      "dateNoun": [
+        "dátum oznámenia",
+        "termín podania",
+        "navrhovaný dátum",
+        "dôležitý dátum"
+      ],
+      "markDone": [
+        "označiť ako hotové",
+        "zaškrtnúť krok",
+        "dokončiť úlohu",
+        "hotovo pri kroku"
+      ],
+      "undo": [
+        "odznačiť",
+        "vrátiť späť",
+        "nehotové",
+        "zrušiť hotové"
+      ],
+      "clear": [
+        "vymazať",
+        "odstrániť",
+        "resetovať",
+        "zmazať všetko"
+      ],
+      "checklist": [
+        "kontrolný zoznam",
+        "zoznam krokov",
+        "úlohy v procese",
+        "kontrola podania"
+      ],
+      "reminder": [
+        "pripomienka",
+        "upozornenie",
+        "upomienka",
+        "nastaviť upozornenie"
+      ],
+      "create": [
+        "vytvoriť",
+        "nastaviť",
+        "naplánovať",
+        "pridať"
+      ],
+      "resource": [
+        "oficiálny odkaz",
+        "USCIS zdroje",
+        "formuláre",
+        "právna pomoc"
+      ],
+      "privacy": [
+        "súkromie",
+        "ochrana údajov",
+        "nastavenia súkromia",
+        "bezpečnosť údajov"
+      ],
+      "link": [
+        "odkaz",
+        "stránka",
+        "oficiálny web",
+        "otvoriť link"
+      ],
+      "capability": [
+        "čo viete",
+        "možnosti aplikácie",
+        "ako pomôžete",
+        "čo dokážete"
+      ],
+      "question": [
+        "mám otázku",
+        "potrebujem pomoc",
+        "spýtam sa",
+        "pomôžte mi"
+      ],
+      "summaryPhrases": [
+        "čo zostáva",
+        "ďalší krok",
+        "postupuje sa",
+        "pokrok je hotový"
+      ],
+      "all": [
+        "všetko",
+        "všetky kroky",
+        "celý zoznam",
+        "vymazať všetko"
+      ]
+    },
+    "topics": {
+      "caseStatus": [
+        "stav prípadu USCIS",
+        "sledovanie prípadu",
+        "receipt number",
+        "aktualizácia stavu"
+      ],
+      "fees": [
+        "poplatky USCIS",
+        "aktuálny poplatok",
+        "poplatok za podanie",
+        "koľko zaplatiť"
+      ],
+      "rfe": [
+        "RFE",
+        "žiadosť o dôkazy",
+        "doplnenie podkladov",
+        "termín RFE"
+      ],
+      "biometrics": [
+        "biometrika",
+        "odtlačky prstov",
+        "termín biometriky",
+        "biometrické stretnutie"
+      ],
+      "address": [
+        "zmena adresy",
+        "hlásenie novej adresy",
+        "adresa USCIS",
+        "presťahovanie"
+      ],
+      "processing": [
+        "časy spracovania",
+        "ako dlho trvá",
+        "odhad spracovania",
+        "spracovanie prípadu"
+      ],
+      "scams": [
+        "imigračný podvod",
+        "podvodný poradca",
+        "neoprávnená pomoc",
+        "varovanie pred podvodom"
+      ],
+      "tps": [
+        "TPS obnova",
+        "obnovenie TPS",
+        "TPS podanie",
+        "TPS re-registrácia"
+      ],
+      "ead": [
+        "EAD",
+        "pracovné povolenie",
+        "I-765",
+        "obnovenie EAD"
+      ],
+      "travel": [
+        "cestovné povolenie",
+        "advance parole",
+        "I-131",
+        "cesta mimo USA"
+      ],
+      "legal": [
+        "právna pomoc",
+        "imigračný právnik",
+        "DOJ akreditovaný zástupca",
+        "právne poradenstvo"
+      ],
+      "forms": [
+        "formuláre USCIS",
+        "pokyny k formuláru",
+        "oficiálny formulár",
+        "I-765 I-131"
+      ],
+      "visitorVisa": [
+        "turistické vízum",
+        "návšteva USA",
+        "visitor visa",
+        "veľvyslanectvo konzulát"
+      ]
+    },
+    "flowAliases": {
+      "tps": [
+        "obnova TPS",
+        "TPS re-registrácia",
+        "obnovenie TPS",
+        "TPS podanie"
+      ],
+      "ead": [
+        "pracovné povolenie",
+        "EAD",
+        "I-765",
+        "obnovenie pracovného povolenia"
+      ],
+      "travel": [
+        "advance parole",
+        "cestovné povolenie",
+        "I-131",
+        "cestovná autorizácia"
+      ]
+    },
+    "stopWords": [
+      "prosím",
+      "si",
+      "mi",
+      "možem",
+      "môžete",
+      "ako",
+      "čo",
+      "kedy",
+      "kde",
+      "na",
+      "do",
+      "pre",
+      "tie",
+      "to",
+      "táto",
+      "tento"
+    ]
+  },
+  "sv": {
+    "summaryLabels": {
+      "complete": "klart",
+      "noticeDate": "meddelandedatum",
+      "suggestedDate": "föreslaget datum",
+      "completed": "slutfört",
+      "remaining": "återstår",
+      "keyDates": "viktiga datum",
+      "notSet": "inte inställt",
+      "none": "inga",
+      "notCalculated": "inte beräknat"
+    },
+    "intents": {
+      "open": [
+        "öppna",
+        "visa",
+        "öppna sidan",
+        "öppna resurs",
+        "öppna länk",
+        "gå till"
+      ],
+      "summary": [
+        "sammanfatta min checklista",
+        "hur långt har jag kommit",
+        "vad återstår",
+        "visa framdrift",
+        "status för checklistan",
+        "min utveckling"
+      ],
+      "dateVerb": [
+        "ställ in datum",
+        "ändra datum",
+        "uppdatera datum",
+        "sätt datum",
+        "ange datum",
+        "spara datum"
+      ],
+      "dateNoun": [
+        "datum",
+        "datumet",
+        "sista datum",
+        "meddelandedatum",
+        "postningsdatum",
+        "ansökningsdatum"
+      ],
+      "markDone": [
+        "markera klar",
+        "bocka av",
+        "klarmarkera",
+        "markera som gjort",
+        "klar på steg"
+      ],
+      "undo": [
+        "markera inte klar",
+        "ångra",
+        "avmarkera",
+        "sätt som ogjort",
+        "ta bort klar"
+      ],
+      "clear": [
+        "rensa",
+        "ta bort allt",
+        "nollställ",
+        "rensa checklista",
+        "töm",
+        "rensa steg"
+      ],
+      "checklist": [
+        "checklista",
+        "arbetslista",
+        "steglista",
+        "uppgiftslista",
+        "kontrollista"
+      ],
+      "reminder": [
+        "påminnelse",
+        "avisering",
+        "larm",
+        "notis",
+        "påminn mig"
+      ],
+      "create": [
+        "skapa",
+        "lägg till",
+        "ställ in",
+        "schemalägg",
+        "sätt upp"
+      ],
+      "resource": [
+        "resurs",
+        "officiell länk",
+        "blankett",
+        "instruktioner",
+        "hjälp"
+      ],
+      "privacy": [
+        "integritet",
+        "säkerhet",
+        "dataskydd",
+        "sekretess",
+        "privat"
+      ],
+      "link": [
+        "länk",
+        "webblänk",
+        "öppna länk",
+        "officiell sida",
+        "extern sida"
+      ],
+      "capability": [
+        "vad kan du göra",
+        "hjälp mig",
+        "funktioner",
+        "vad klarar du",
+        "assistentens möjligheter"
+      ],
+      "question": [
+        "hur",
+        "vad",
+        "när",
+        "var",
+        "varför",
+        "kan du"
+      ],
+      "summaryPhrases": [
+        "det som återstår",
+        "nästa steg",
+        "din framdrift",
+        "hur långt du kommit",
+        "vad som är kvar",
+        "fortsätt härifrån"
+      ],
+      "all": [
+        "allt",
+        "alla steg",
+        "hela listan",
+        "samtliga",
+        "hela checklista"
+      ]
+    },
+    "topics": {
+      "caseStatus": [
+        "ärendestatus",
+        "status för ärende",
+        "spåra ärende",
+        "USCIS status"
+      ],
+      "fees": [
+        "avgifter",
+        "ansökningsavgift",
+        "filingsavgift",
+        "betalning"
+      ],
+      "rfe": [
+        "RFE",
+        "begäran om bevis",
+        "bevisbegäran",
+        "request for evidence"
+      ],
+      "biometrics": [
+        "biometrics",
+        "biometrik",
+        "fingeravtryck",
+        "fotografering"
+      ],
+      "address": [
+        "adressändring",
+        "ändra adress",
+        "flytt",
+        "uppdatera adress"
+      ],
+      "processing": [
+        "handläggningstid",
+        "behandlingstid",
+        "processing time",
+        "väntetid"
+      ],
+      "scams": [
+        "bedrägeri",
+        "bluff",
+        "immigrationsbedrägeri",
+        "bedrägerivarning"
+      ],
+      "tps": [
+        "TPS",
+        "TPS-förnyelse",
+        "omregistrering TPS",
+        "TPS-ansökan"
+      ],
+      "ead": [
+        "EAD",
+        "arbetstillstånd",
+        "work permit",
+        "Form I-765"
+      ],
+      "travel": [
+        "reseåterresa",
+        "resehandling",
+        "advance parole",
+        "I-131"
+      ],
+      "legal": [
+        "juridisk hjälp",
+        "advokat",
+        "ombud",
+        "legal help"
+      ],
+      "forms": [
+        "blanketter",
+        "formulär",
+        "USCIS-formulär",
+        "ansökningsform"
+      ],
+      "visitorVisa": [
+        "besöka USA",
+        "turistvisum",
+        "besöksvisum",
+        "ambassad",
+        "konsulat"
+      ]
+    },
+    "flowAliases": {
+      "tps": [
+        "TPS",
+        "TPS-förnyelse",
+        "förnya TPS",
+        "TPS omregistrering"
+      ],
+      "ead": [
+        "EAD",
+        "arbetstillstånd",
+        "Form I-765",
+        "work permit"
+      ],
+      "travel": [
+        "reseåterresa",
+        "advance parole",
+        "reseauktorisation",
+        "Form I-131"
+      ]
+    },
+    "stopWords": [
+      "lägg",
+      "till",
+      "att",
+      "och",
+      "för",
+      "på",
+      "min",
+      "mitt",
+      "mina",
+      "den",
+      "det",
+      "de",
+      "visa",
+      "öppna",
+      "markera",
+      "som",
+      "klar",
+      "gjort",
+      "inte",
+      "nu"
+    ]
+  }
+}

@@ -2,3 +2,5 @@
 !Dockerfile
 !server/
 !server/**
+!data/
+!data/euLanguageSupport.json

@@ -6,6 +6,7 @@ ENV PORT=10000
 WORKDIR /app
 
 COPY server ./server
+COPY data/euLanguageSupport.json ./data/euLanguageSupport.json
 
 EXPOSE 10000
 

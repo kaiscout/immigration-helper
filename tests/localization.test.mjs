@@ -3,7 +3,11 @@ import fs from "node:fs";
 import test from "node:test";
 
 const readJson = (path) => JSON.parse(fs.readFileSync(new URL(path, import.meta.url), "utf8"));
-const supportedLanguages = ["en", "tr", "es", "zh", "hi", "fr", "ar", "bn", "ru", "pt", "it"];
+const supportedLanguages = [
+  "en", "tr", "es", "zh", "hi", "fr", "ar", "bn", "ru", "pt", "it",
+  "bg", "hr", "cs", "da", "nl", "et", "fi", "de", "el", "hu", "ga",
+  "lv", "lt", "mt", "pl", "ro", "sk", "sl", "sv"
+];
 
 const flattenKeys = (value, prefix = "", keys = []) => {
   Object.entries(value).forEach(([key, child]) => {
@@ -104,6 +108,25 @@ test("Every flow has content for all supported languages", () => {
     const flow = readJson(`../data/flows/${file}`);
     for (const language of supportedLanguages.filter((code) => code !== "en")) {
       assertLocalizedFields(flow, file, language);
+    }
+  }
+});
+
+test("Every added EU language has local AI command and retrieval support", () => {
+  const support = readJson("../data/euLanguageSupport.json");
+  const addedEuLanguages = supportedLanguages.slice(11);
+
+  for (const language of addedEuLanguages) {
+    assert.ok(support[language], `${language} must have shared AI support`);
+    assert.ok(support[language].summaryLabels, `${language} must have summary labels`);
+    for (const key of ["open", "summary", "markDone", "undo", "question"]) {
+      assert.ok(support[language].intents[key]?.length >= 3, `${language}.${key} needs intent phrases`);
+    }
+    for (const key of ["caseStatus", "fees", "scams", "ead", "travel", "visitorVisa"]) {
+      assert.ok(support[language].topics[key]?.length >= 3, `${language}.${key} needs topic phrases`);
+    }
+    for (const key of ["tps", "ead", "travel"]) {
+      assert.ok(support[language].flowAliases[key]?.length >= 3, `${language}.${key} needs flow aliases`);
     }
   }
 });

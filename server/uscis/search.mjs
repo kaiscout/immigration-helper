@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import zlib from "node:zlib";
 import { CORPUS_PATH, PACKAGED_CORPUS_PATH } from "./paths.mjs";
+import euLanguageSupport from "../../data/euLanguageSupport.json" with { type: "json" };
 
 export { PACKAGED_CORPUS_PATH };
 
@@ -11,7 +12,7 @@ const STOP_WORDS = new Set([
   "would", "you", "your"
 ]);
 
-const TOPIC_ALIASES = [
+const BASE_TOPIC_ALIASES = [
   {
     match: ["green card", "permanent resident", "residencia", "tarjeta verde", "cartão verde", "residente permanente", "carta verde", "residente permanente", "yeşil kart", "carte verte", "绿卡", "ग्रीन कार्ड", "البطاقة الخضراء", "গ্রিন কার্ড", "грин карта"],
     add: ["green", "card", "permanent", "resident", "adjustment", "status"]
@@ -89,8 +90,29 @@ const TOPIC_ALIASES = [
   }
 ];
 
+const GENERATED_TOPIC_CONFIG = {
+  caseStatus: { add: ["case", "status", "receipt", "number", "online"], prefer: ["/tools/checking-your-case-status-online"] },
+  fees: { add: ["fee", "filing", "payment", "g-1055"], prefer: ["/forms/filing-fees", "/g-1055"] },
+  rfe: { add: ["request", "evidence", "rfe", "response", "deadline"], prefer: ["/policy-manual/volume-1-part-e-chapter-6"] },
+  biometrics: { add: ["biometrics", "fingerprint", "appointment", "asc"], prefer: ["/preparing-for-your-biometric-services-appointment"] },
+  address: { add: ["change", "address", "ar-11", "moving"], prefer: ["/addresschange"] },
+  processing: { add: ["processing", "time", "delay", "case"] },
+  scams: { add: ["scam", "fraud", "avoid", "legal", "services"], prefer: ["/avoid-scams"] },
+  tps: { add: ["tps", "temporary", "protected", "status", "re-registration"] },
+  ead: { add: ["work", "permit", "employment", "authorization", "ead", "i-765"], prefer: ["/employment-authorization"] },
+  travel: { add: ["travel", "document", "advance", "parole", "i-131"] }
+};
+
+const TOPIC_ALIASES = [
+  ...BASE_TOPIC_ALIASES,
+  ...Object.entries(GENERATED_TOPIC_CONFIG).map(([key, config]) => ({
+    match: Object.values(euLanguageSupport).flatMap((language) => language?.topics?.[key] || []),
+    ...config
+  }))
+];
+
 const TRANSLATED_PAGE_SUFFIX =
-  /-(?:arabic|bengali|chinese|french|hindi|italian|portuguese|russian|spanish|tagalog|turkish)(?:$|\/)/;
+  /-(?:arabic|bengali|bulgarian|chinese|croatian|czech|danish|dutch|estonian|finnish|french|german|greek|hindi|hungarian|irish|italian|latvian|lithuanian|maltese|polish|portuguese|romanian|russian|slovak|slovenian|spanish|swedish|tagalog|turkish)(?:$|\/)/;
 
 function normalize(value) {
   return String(value || "")

@@ -15,6 +15,7 @@ export default function LanguageDropdown({ compact = false, buttonOnly = false, 
     () => LANGUAGES.find((item) => item.code === currentCode) || LANGUAGES[0],
     [currentCode]
   );
+  const languageName = (item) => item.nativeLabel || t(item.labelKey);
 
   const selectLanguage = async (code) => {
     await i18n.changeLanguage(code);
@@ -53,7 +54,7 @@ export default function LanguageDropdown({ compact = false, buttonOnly = false, 
               <Text style={styles.codeText}>{currentLanguage.shortLabel}</Text>
             </View>
             <Text style={styles.selectedText} numberOfLines={1}>
-              {t(currentLanguage.labelKey)}
+              {languageName(currentLanguage)}
             </Text>
           </View>
           <Ionicons name="chevron-down" size={20} color={COLORS.subtext} />
@@ -92,7 +93,7 @@ export default function LanguageDropdown({ compact = false, buttonOnly = false, 
                         </Text>
                       </View>
                       <Text style={[styles.optionText, active && styles.optionTextActive]}>
-                        {t(item.labelKey)}
+                        {languageName(item)}
                       </Text>
                     </View>
                     {active ? <Ionicons name="checkmark-circle" size={22} color={COLORS.primary} /> : null}

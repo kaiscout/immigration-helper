@@ -21,6 +21,11 @@ import {
   scoreTextMatch
 } from "../data/flowState";
 import { loadNotificationsAsync } from "../data/notificationService";
+import euLanguageSupport from "../data/euLanguageSupport.json";
+
+const EU_LANGUAGE_SUPPORT = Object.values(euLanguageSupport);
+const euSupportTerms = (section, key) =>
+  EU_LANGUAGE_SUPPORT.flatMap((language) => language?.[section]?.[key] || []);
 
 const SYSTEM_PROMPT = `
 You are Immigration Helper's U.S. immigration information assistant.
@@ -65,7 +70,8 @@ const VISITOR_VISA_TERMS = [
   "अमेरिका घूमने", "अमेरिका जाना", "विजिटर वीजा", "पर्यटक वीजा", "दूतावास", "वाणिज्य दूतावास",
   "زيارة الولايات المتحدة", "تأشيرة زيارة", "تأشيرة سياحية", "السياحة", "السفارة", "القنصلية",
   "যুক্তরাষ্ট্রে বেড়াতে", "আমেরিকা বেড়াতে", "ভিজিটর ভিসা", "পর্যটন ভিসা", "দূতাবাস", "কনস্যুলেট",
-  "посетить сша", "приехать в сша в гости", "гостевая виза", "туристическая виза", "туризм", "посольство", "консульство"
+  "посетить сша", "приехать в сша в гости", "гостевая виза", "туристическая виза", "туризм", "посольство", "консульство",
+  ...euSupportTerms("topics", "visitorVisa")
 ];
 const AI_MODEL = (process.env.EXPO_PUBLIC_OPENAI_MODEL || "gpt-5.4-mini").trim();
 const OPENAI_API_KEY = (process.env.EXPO_PUBLIC_OPENAI_API_KEY || "").trim();
@@ -351,7 +357,8 @@ const QUESTION_TERMS = [
   "क्या", "कौन", "कैसे", "कब", "क्यों", "कहाँ", "क्या मैं",
   "ماذا", "ما", "أي", "اي", "كيف", "متى", "لماذا", "أين", "اين", "هل",
   "কি", "কী", "কোন", "কিভাবে", "কখন", "কেন", "কোথায়", "আমি কি",
-  "что", "какой", "какая", "как", "когда", "почему", "где", "могу ли", "нужно ли"
+  "что", "какой", "какая", "как", "когда", "почему", "где", "могу ли", "нужно ли",
+  ...euSupportTerms("intents", "question")
 ];
 
 const SUMMARY_PHRASES = [
@@ -366,12 +373,14 @@ const SUMMARY_PHRASES = [
   "मेरे पास क्या", "क्या बाकी", "अगला कदम",
   "ما المتبقي", "الخطوة التالية", "ماذا أحتاج", "ماذا احتاج",
   "আমার কী বাকি", "আমার কি বাকি", "পরের ধাপ",
-  "что осталось", "что дальше", "что нужно"
+  "что осталось", "что дальше", "что нужно",
+  ...euSupportTerms("intents", "summaryPhrases")
 ];
 
 const ALL_TERMS = [
   "all", "everything", "todos", "todas", "todo", "tudo", "tutto", "tutti", "tutte", "hepsi", "tum", "tüm", "tout", "tous", "toutes",
-  "全部", "所有", "सभी", "सब", "كل", "সব", "সবগুলো", "все", "всё"
+  "全部", "所有", "सभी", "सब", "كل", "সব", "সবগুলো", "все", "всё",
+  ...euSupportTerms("intents", "all")
 ];
 
 const ACTION_INTENT_THRESHOLD = 4;
@@ -386,7 +395,8 @@ const hasAnyTerm = (normalized, terms, threshold = 1) =>
 const intentTerms = (key) => [
   ...(INTENT_TERMS[key] || []),
   ...(PORTUGUESE_INTENT_TERMS[key] || []),
-  ...(ITALIAN_INTENT_TERMS[key] || [])
+  ...(ITALIAN_INTENT_TERMS[key] || []),
+  ...euSupportTerms("intents", key)
 ];
 
 const ITALIAN_TOPIC_TERMS = {
@@ -539,7 +549,11 @@ const bestTopicKey = (question) => {
   let bestKey = "general";
   let bestScore = 0;
   Object.entries(topics).forEach(([key, terms]) => {
-    const score = scoreTerms(q, [...terms, ...(ITALIAN_TOPIC_TERMS[key] || [])]);
+    const score = scoreTerms(q, [
+      ...terms,
+      ...(ITALIAN_TOPIC_TERMS[key] || []),
+      ...euSupportTerms("topics", key)
+    ]);
     if (score > bestScore) {
       bestKey = key;
       bestScore = score;
@@ -572,7 +586,13 @@ function summaryLabels(lang) {
     fr: { complete: "terminé", noticeDate: "Date d’avis", suggestedDate: "Date suggérée", completed: "Terminé", remaining: "Restant", keyDates: "Dates clés", notSet: "non définie", none: "aucun", notCalculated: "pas encore calculées" },
     ar: { complete: "مكتمل", noticeDate: "تاريخ الإشعار", suggestedDate: "التاريخ المقترح", completed: "مكتمل", remaining: "متبقي", keyDates: "تواريخ مهمة", notSet: "غير محدد", none: "لا شيء", notCalculated: "لم تُحسب بعد" },
     bn: { complete: "সম্পন্ন", noticeDate: "নোটিশ তারিখ", suggestedDate: "প্রস্তাবিত তারিখ", completed: "সম্পন্ন", remaining: "বাকি", keyDates: "গুরুত্বপূর্ণ তারিখ", notSet: "সেট করা নেই", none: "কিছু নেই", notCalculated: "এখনও হিসাব হয়নি" },
-    ru: { complete: "выполнено", noticeDate: "Дата уведомления", suggestedDate: "Предлагаемая дата", completed: "Выполнено", remaining: "Осталось", keyDates: "Важные даты", notSet: "не задано", none: "нет", notCalculated: "еще не рассчитаны" }
+    ru: { complete: "выполнено", noticeDate: "Дата уведомления", suggestedDate: "Предлагаемая дата", completed: "Выполнено", remaining: "Осталось", keyDates: "Важные даты", notSet: "не задано", none: "нет", notCalculated: "еще не рассчитаны" },
+    ...Object.fromEntries(
+      Object.entries(euLanguageSupport).map(([language, support]) => [
+        language,
+        support.summaryLabels
+      ])
+    )
   };
   return labels[code] || labels.en;
 }
@@ -827,6 +847,18 @@ export default function AIAdvisorScreen({ navigation }) {
 
   const openOfficialLink = (question) => {
     const q = normalizeText(question);
+    const generatedTopics = [
+      ["caseStatus", OFFICIAL_LINKS.status],
+      ["processing", OFFICIAL_LINKS.processing],
+      ["fees", OFFICIAL_LINKS.fees],
+      ["address", OFFICIAL_LINKS.address],
+      ["legal", OFFICIAL_LINKS.legal],
+      ["scams", OFFICIAL_LINKS.scams],
+      ["forms", OFFICIAL_LINKS.forms]
+    ];
+    for (const [topic, url] of generatedTopics) {
+      if (hasAnyTerm(q, euSupportTerms("topics", topic))) return url;
+    }
     if (hasAnyTerm(q, ["case", "receipt", "status", "caso", "recibo", "estado", "stato del caso", "ricevuta", "durum", "makbuz", "dossier", "recu", "reçu", "案件", "收据", "状态", "केस", "रसीद", "स्थिति", "قضية", "إيصال", "حالة", "কেস", "রসিদ", "অবস্থা", "дело", "квитанц", "статус"])) return OFFICIAL_LINKS.status;
     if (hasAnyTerm(q, ["processing", "procesamiento", "processamento", "elaborazione", "islem", "işlem", "traitement", "处理", "प्रोसेसिंग", "معالجة", "প্রসেসিং", "обработ"])) return OFFICIAL_LINKS.processing;
     if (hasAnyTerm(q, ["fee", "cost", "payment", "tarifa", "costo", "pago", "taxa", "custo", "pagamento", "tariffa", "ucret", "ücret", "odeme", "ödeme", "frais", "费用", "付款", "फीस", "भुगतान", "رسوم", "دفع", "ফি", "পেমেন্ট", "сбор", "оплата"])) return OFFICIAL_LINKS.fees;

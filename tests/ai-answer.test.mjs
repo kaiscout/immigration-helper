@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import test from "node:test";
 import {
   buildLocalFallback,
@@ -379,21 +380,31 @@ test("falls back to English for an unsupported language code", () => {
 });
 
 test("routes visitor-visa questions in every supported language to State and CBP", () => {
-  const questions = [
-    "My uncle wants to visit the United States.",
-    "Amcam Amerika'yı ziyaret etmek istiyor.",
-    "Mi tío quiere visitar Estados Unidos.",
-    "我的叔叔想来美国旅游。",
-    "मेरे चाचा अमेरिका घूमने आना चाहते हैं।",
-    "Mon oncle veut visiter les États-Unis.",
-    "عمي يريد زيارة الولايات المتحدة.",
-    "আমার চাচা যুক্তরাষ্ট্রে বেড়াতে আসতে চান।",
-    "Мой дядя хочет приехать в США в гости.",
-    "Meu tio quer visitar os Estados Unidos."
-  ];
+  const support = JSON.parse(
+    fs.readFileSync(new URL("../data/euLanguageSupport.json", import.meta.url), "utf8")
+  );
+  const existingQuestions = {
+    en: "My uncle wants to visit the United States.",
+    tr: "Amcam Amerika'yı ziyaret etmek istiyor.",
+    es: "Mi tío quiere visitar Estados Unidos.",
+    zh: "我的叔叔想来美国旅游。",
+    hi: "मेरे चाचा अमेरिका घूमने आना चाहते हैं।",
+    fr: "Mon oncle veut visiter les États-Unis.",
+    ar: "عمي يريد زيارة الولايات المتحدة.",
+    bn: "আমার চাচা যুক্তরাষ্ট্রে বেড়াতে আসতে চান।",
+    ru: "Мой дядя хочет приехать в США в гости.",
+    pt: "Meu tio quer visitar os Estados Unidos.",
+    it: "Mio zio vuole visitare gli Stati Uniti."
+  };
 
-  for (const question of questions) {
-    assert.deepEqual(officialDomainsForQuestion(question), ["state.gov", "cbp.gov"]);
+  for (const code of Object.keys(SUPPORTED_AI_LANGUAGES)) {
+    const question = existingQuestions[code] || support[code]?.topics?.visitorVisa?.[0];
+    assert.ok(question, `${code} needs a visitor-visa routing phrase`);
+    assert.deepEqual(
+      officialDomainsForQuestion(question),
+      ["state.gov", "cbp.gov"],
+      `${code} should route visitor questions to State and CBP`
+    );
   }
 });
 

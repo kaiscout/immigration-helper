@@ -3,6 +3,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import eadFlow from "./flows/ead.json";
 import tpsFlow from "./flows/tps_renewal.json";
 import travelFlow from "./flows/travel_auth.json";
+import euLanguageSupport from "./euLanguageSupport.json";
+
+const EU_LANGUAGE_SUPPORT = Object.values(euLanguageSupport);
+const euFlowAliases = (flow) =>
+  EU_LANGUAGE_SUPPORT.flatMap((language) => language?.flowAliases?.[flow] || []);
 
 export const FLOWS = [
   {
@@ -20,7 +25,8 @@ export const FLOWS = [
       "अस्थायी संरक्षित स्थिति", "टीपीएस", "tps नवीनीकरण",
       "الحماية المؤقتة", "تجديد tps",
       "অস্থায়ী সুরক্ষিত অবস্থা", "টিপিএস", "tps নবায়ন",
-      "временный защищенный статус", "продление tps"
+      "временный защищенный статус", "продление tps",
+      ...euFlowAliases("tps")
     ],
     data: tpsFlow
   },
@@ -42,7 +48,8 @@ export const FLOWS = [
       "वर्क परमिट", "कार्य अनुमति",
       "تصريح العمل", "إذن العمل",
       "ওয়ার্ক পারমিট", "কাজের অনুমতি",
-      "разрешение на работу"
+      "разрешение на работу",
+      ...euFlowAliases("ead")
     ],
     data: eadFlow
   },
@@ -62,7 +69,8 @@ export const FLOWS = [
       "यात्रा अनुमति", "यात्रा परमिट",
       "تصريح السفر", "إذن السفر", "وثيقة سفر",
       "ভ্রমণ অনুমতি", "ভ্রমণ পারমিট",
-      "разрешение на поездку", "разрешение на путешествие"
+      "разрешение на поездку", "разрешение на путешествие",
+      ...euFlowAliases("travel")
     ],
     data: travelFlow
   }
@@ -250,7 +258,8 @@ export const findStepByText = (flow, text, lang = "en") => {
     "autorizacao",
     "un", "una", "il", "lo", "la", "i", "gli", "le", "e", "o", "di", "del",
     "della", "dei", "delle", "per", "mio", "mia", "segna", "segnare", "completa",
-    "completato", "deseleziona", "rimuovi", "mancante", "tutti", "lavoro", "viaggio"
+    "completato", "deseleziona", "rimuovi", "mancante", "tutti", "lavoro", "viaggio",
+    ...EU_LANGUAGE_SUPPORT.flatMap((language) => language.stopWords || [])
   ]);
   const queryTokens = q.split(" ").filter((token) => token.length > 2 && !stopWords.has(token));
 

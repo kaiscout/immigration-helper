@@ -1,4 +1,10 @@
 import { searchCorpus } from "../uscis/search.mjs";
+import euLanguageSupport from "../../data/euLanguageSupport.json" with { type: "json" };
+import euLocalCopy from "./eu-local-copy.json" with { type: "json" };
+
+const EU_LANGUAGE_SUPPORT = Object.values(euLanguageSupport);
+const euSupportTerms = (section, key) =>
+  EU_LANGUAGE_SUPPORT.flatMap((language) => language?.[section]?.[key] || []);
 
 export const SYSTEM_PROMPT = `
 You are Immigration Helper's U.S. immigration information assistant.
@@ -62,7 +68,8 @@ const VISITOR_VISA_TERMS = [
   "अमेरिका घूमने", "अमेरिका जाना", "विजिटर वीजा", "पर्यटक वीजा", "दूतावास", "वाणिज्य दूतावास",
   "زيارة الولايات المتحدة", "تأشيرة زيارة", "تأشيرة سياحية", "السياحة", "السفارة", "القنصلية",
   "যুক্তরাষ্ট্রে বেড়াতে", "আমেরিকা বেড়াতে", "ভিজিটর ভিসা", "পর্যটন ভিসা", "দূতাবাস", "কনস্যুলেট",
-  "посетить сша", "приехать в сша в гости", "гостевая виза", "туристическая виза", "туризм", "посольство", "консульство"
+  "посетить сша", "приехать в сша в гости", "гостевая виза", "туристическая виза", "туризм", "посольство", "консульство",
+  ...euSupportTerms("topics", "visitorVisa")
 ];
 
 const normalizeForRouting = (value) =>
@@ -147,7 +154,8 @@ const LOCAL_COPY = {
     sourceLanguage: "Этот фрагмент USCIS приведен на английском языке:",
     verify: "Точный ответ может зависеть от вашей формы, категории и уведомления. Сверьтесь со связанной страницей USCIS и соблюдайте срок и инструкции, указанные в вашем уведомлении.",
     missing: "Не удалось подтвердить надежный ответ в сохраненных материалах USCIS. Перед дальнейшими действиями проверьте актуальные инструкции USCIS для вашей формы или уведомления."
-  }
+  },
+  ...euLocalCopy
 };
 
 export const SUPPORTED_AI_LANGUAGES = Object.freeze({
@@ -161,7 +169,26 @@ export const SUPPORTED_AI_LANGUAGES = Object.freeze({
   bn: "Bengali",
   ru: "Russian",
   pt: "Portuguese",
-  it: "Italian"
+  it: "Italian",
+  bg: "Bulgarian",
+  hr: "Croatian",
+  cs: "Czech",
+  da: "Danish",
+  nl: "Dutch",
+  et: "Estonian",
+  fi: "Finnish",
+  de: "German",
+  el: "Greek",
+  hu: "Hungarian",
+  ga: "Irish",
+  lv: "Latvian",
+  lt: "Lithuanian",
+  mt: "Maltese",
+  pl: "Polish",
+  ro: "Romanian",
+  sk: "Slovak",
+  sl: "Slovenian",
+  sv: "Swedish"
 });
 
 const normalizeLanguage = (language) =>
