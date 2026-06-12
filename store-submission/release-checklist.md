@@ -21,10 +21,11 @@
 - [x] Add privacy policy URL to App Store Connect.
 - [x] Add support URL to App Store Connect.
 - [ ] Update App Privacy questionnaire for online AI user content.
+- [x] Prepare required iPhone screenshots at `1242 x 2688`.
 - [ ] Upload required screenshots.
 - [x] Add age rating.
 - [x] Add review notes from `store-submission/review-notes.md`.
-- [ ] Build production iOS binary with `eas build --platform ios --profile production`.
+- [x] Build production iOS binary with `eas build --platform ios --profile production`.
 - [ ] Submit with EAS or manually through App Store Connect.
 
 ## Before Google Play Submission
