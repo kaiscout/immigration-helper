@@ -3,7 +3,7 @@ import fs from "node:fs";
 import test from "node:test";
 
 const readJson = (path) => JSON.parse(fs.readFileSync(new URL(path, import.meta.url), "utf8"));
-const supportedLanguages = ["en", "tr", "es", "zh", "hi", "fr", "ar", "bn", "ru", "pt"];
+const supportedLanguages = ["en", "tr", "es", "zh", "hi", "fr", "ar", "bn", "ru", "pt", "it"];
 
 const flattenKeys = (value, prefix = "", keys = []) => {
   Object.entries(value).forEach(([key, child]) => {
@@ -77,9 +77,25 @@ test("Portuguese is registered in the language picker and i18n resources", () =>
   assert.match(i18nSource, /pt:\s*\{\s*translation:\s*pt\s*\}/);
 });
 
+test("Italian is registered in the language picker and i18n resources", () => {
+  const languageSource = fs.readFileSync(new URL("../i18n/languages.js", import.meta.url), "utf8");
+  const i18nSource = fs.readFileSync(new URL("../i18n/index.js", import.meta.url), "utf8");
+
+  assert.match(languageSource, /code:\s*"it"/);
+  assert.match(languageSource, /labelKey:\s*"common\.italian"/);
+  assert.match(i18nSource, /import it from "\.\/it\.json"/);
+  assert.match(i18nSource, /it:\s*\{\s*translation:\s*it\s*\}/);
+});
+
 test("Every English flow label, title, detail, and note has Portuguese text", () => {
   for (const file of ["ead.json", "tps_renewal.json", "travel_auth.json"]) {
     assertLocalizedFields(readJson(`../data/flows/${file}`), file, "pt");
+  }
+});
+
+test("Every English flow label, title, detail, and note has Italian text", () => {
+  for (const file of ["ead.json", "tps_renewal.json", "travel_auth.json"]) {
+    assertLocalizedFields(readJson(`../data/flows/${file}`), file, "it");
   }
 });
 

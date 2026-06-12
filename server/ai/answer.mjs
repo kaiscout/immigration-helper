@@ -57,6 +57,7 @@ const VISITOR_VISA_TERMS = [
   "visitar estados unidos", "visa de visitante", "visa de turista", "turismo", "embajada", "consulado",
   "visiter les etats unis", "visiter les états unis", "visa de visiteur", "visa touristique", "tourisme", "ambassade", "consulat",
   "visitar os estados unidos", "visto de visitante", "visto de turista", "turismo", "embaixada", "consulado",
+  "visitare gli stati uniti", "visitare l america", "visto turistico", "visto per visitatori", "turismo", "ambasciata", "consolato",
   "访问美国", "来美国旅游", "去美国旅游", "访客签证", "旅游签证", "美国大使馆", "美国领事馆",
   "अमेरिका घूमने", "अमेरिका जाना", "विजिटर वीजा", "पर्यटक वीजा", "दूतावास", "वाणिज्य दूतावास",
   "زيارة الولايات المتحدة", "تأشيرة زيارة", "تأشيرة سياحية", "السياحة", "السفارة", "القنصلية",
@@ -104,6 +105,12 @@ const LOCAL_COPY = {
     sourceLanguage: "O trecho do USCIS está em inglês:",
     verify: "Como a resposta exata pode depender do seu formulário, categoria e aviso, confira a página do USCIS indicada e siga qualquer prazo ou instrução impressa no seu aviso.",
     missing: "Não consegui confirmar uma resposta confiável nas páginas salvas do USCIS. Confira as instruções atuais do USCIS para seu formulário ou aviso antes de agir."
+  },
+  it: {
+    intro: "Ecco le indicazioni ufficiali USCIS più pertinenti che ho trovato:",
+    sourceLanguage: "Il seguente passaggio USCIS è in inglese:",
+    verify: "Poiché la risposta esatta può dipendere dal modulo, dalla categoria e dall'avviso, confrontala con la pagina USCIS collegata e segui ogni scadenza o istruzione riportata sull'avviso.",
+    missing: "Non sono riuscito a verificare una risposta affidabile nelle pagine USCIS salvate. Prima di agire, controlla le istruzioni USCIS aggiornate relative al tuo modulo o avviso."
   },
   fr: {
     intro: "Voici l’information officielle de l’USCIS la plus pertinente que j’ai trouvée :",
@@ -153,7 +160,8 @@ export const SUPPORTED_AI_LANGUAGES = Object.freeze({
   ar: "Modern Standard Arabic",
   bn: "Bengali",
   ru: "Russian",
-  pt: "Portuguese"
+  pt: "Portuguese",
+  it: "Italian"
 });
 
 const normalizeLanguage = (language) =>

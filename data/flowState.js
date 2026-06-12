@@ -15,6 +15,7 @@ export const FLOWS = [
       "statut de protection temporaire", "renouvellement tps",
       "status de protecao temporaria", "status de proteção temporária",
       "renovacao do tps", "renovação do tps", "novo registro do tps",
+      "status di protezione temporanea", "rinnovo tps", "rinnovo del tps",
       "临时保护身份", "tps 续期", "tps续期",
       "अस्थायी संरक्षित स्थिति", "टीपीएस", "tps नवीनीकरण",
       "الحماية المؤقتة", "تجديد tps",
@@ -35,6 +36,8 @@ export const FLOWS = [
       "autorizacao de trabalho", "autorização de trabalho", "permissao de trabalho",
       "permissão de trabalho", "documento de autorizacao de emprego",
       "documento de autorização de emprego", "formulario i-765", "formulário i-765",
+      "permesso di lavoro", "autorizzazione al lavoro", "documento di autorizzazione al lavoro",
+      "modulo i-765",
       "工作许可", "工作授权",
       "वर्क परमिट", "कार्य अनुमति",
       "تصريح العمل", "إذن العمل",
@@ -54,6 +57,7 @@ export const FLOWS = [
       "autorisation de voyage", "permis de voyage",
       "autorizacao de viagem", "autorização de viagem", "documento de viagem",
       "permissao para viajar", "permissão para viajar", "formulario i-131", "formulário i-131",
+      "autorizzazione al viaggio", "permesso di viaggio", "documento di viaggio", "modulo i-131",
       "旅行授权", "旅行许可", "回美纸",
       "यात्रा अनुमति", "यात्रा परमिट",
       "تصريح السفر", "إذن السفر", "وثيقة سفر",
@@ -243,7 +247,10 @@ export const findStepByText = (flow, text, lang = "en") => {
     "um", "uma", "os", "as", "e", "ou", "de", "do", "da", "dos", "das", "para",
     "por", "meu", "minha", "marcar", "marque", "concluir", "concluido",
     "desmarcar", "remover", "pendente", "todos", "todas", "trabalho", "viagem",
-    "autorizacao"
+    "autorizacao",
+    "un", "una", "il", "lo", "la", "i", "gli", "le", "e", "o", "di", "del",
+    "della", "dei", "delle", "per", "mio", "mia", "segna", "segnare", "completa",
+    "completato", "deseleziona", "rimuovi", "mancante", "tutti", "lavoro", "viaggio"
   ]);
   const queryTokens = q.split(" ").filter((token) => token.length > 2 && !stopWords.has(token));
 

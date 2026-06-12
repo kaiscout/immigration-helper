@@ -8,7 +8,7 @@ Suggested review path:
 
 1. Open the app.
 2. Complete onboarding.
-3. Choose a language: English, Turkish, Spanish, Portuguese, Mandarin Chinese, Hindi, French, Modern Standard Arabic, Bengali, or Russian.
+3. Choose a language: English, Turkish, Spanish, Portuguese, Italian, Mandarin Chinese, Hindi, French, Modern Standard Arabic, Bengali, or Russian.
 4. Open TPS Renewal, Work Permit, or Travel Authorization.
 5. Enter a sample date such as `2026-07-01`.
 6. Tap Save to see suggested key dates.

@@ -94,7 +94,8 @@ test("expands supported-language immigration terms for English USCIS retrieval",
 
   for (const question of [
     "¿Cómo solicito un permiso de trabajo?",
-    "Como solicito uma autorização de trabalho?"
+    "Como solicito uma autorização de trabalho?",
+    "Come posso richiedere un permesso di lavoro?"
   ]) {
     assert.equal(searchCorpus(index, question, 1)[0]?.title, "Employment Authorization");
   }
@@ -113,7 +114,8 @@ test("recognizes natural address-change phrasing across supported languages", ()
     "Comment changer mon adresse auprès de USCIS?",
     "كيف أغير عنواني؟",
     "Как изменить адрес в USCIS?",
-    "Como posso mudar meu endereço no USCIS?"
+    "Como posso mudar meu endereço no USCIS?",
+    "Come posso cambiare il mio indirizzo con USCIS?"
   ]) {
     assert.equal(searchCorpus(index, question, 1)[0]?.title, "How to Change Your Address");
   }

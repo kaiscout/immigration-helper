@@ -61,6 +61,21 @@ test("local corpus fallback uses the requested language framing", () => {
   assert.match(result.output_text, /trecho do USCIS está em inglês/i);
 });
 
+test("local corpus fallback uses Italian framing", () => {
+  const result = buildLocalFallback(
+    "Come posso cambiare il mio indirizzo?",
+    "it-IT",
+    [{
+      title: records[0].title,
+      url: records[0].url,
+      excerpt: records[0].chunks[0]
+    }]
+  );
+
+  assert.match(result.output_text, /indicazioni ufficiali USCIS/i);
+  assert.match(result.output_text, /passaggio USCIS è in inglese/i);
+});
+
 test("sends retrieved USCIS passages to the model and keeps official sources", async () => {
   let requestBody;
   const answer = createAnswerService({
@@ -278,7 +293,8 @@ test("maps paragraph citations correctly across every supported writing system",
     ar: "ابدأ بالتعليمات الرسمية.",
     bn: "সরকারি নির্দেশনা দিয়ে শুরু করুন।",
     ru: "Начните с официальных инструкций.",
-    pt: "Comece pelas instruções oficiais."
+    pt: "Comece pelas instruções oficiais.",
+    it: "Inizia dalle istruzioni ufficiali."
   };
 
   for (const [code, sentence] of Object.entries(samples)) {

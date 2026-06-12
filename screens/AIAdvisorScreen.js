@@ -60,6 +60,7 @@ const VISITOR_VISA_TERMS = [
   "visitar estados unidos", "visa de visitante", "visa de turista", "turismo", "embajada", "consulado",
   "visiter les etats unis", "visiter les états unis", "visa de visiteur", "visa touristique", "tourisme", "ambassade", "consulat",
   "visitar os estados unidos", "visto de visitante", "visto de turista", "turismo", "embaixada", "consulado",
+  "visitare gli stati uniti", "visitare l america", "visto turistico", "visto per visitatori", "turismo", "ambasciata", "consolato",
   "访问美国", "来美国旅游", "去美国旅游", "访客签证", "旅游签证", "美国大使馆", "美国领事馆",
   "अमेरिका घूमने", "अमेरिका जाना", "विजिटर वीजा", "पर्यटक वीजा", "दूतावास", "वाणिज्य दूतावास",
   "زيارة الولايات المتحدة", "تأشيرة زيارة", "تأشيرة سياحية", "السياحة", "السفارة", "القنصلية",
@@ -303,10 +304,47 @@ const PORTUGUESE_INTENT_TERMS = {
   ]
 };
 
+const ITALIAN_INTENT_TERMS = {
+  open: ["aprire", "apri", "vai a", "portami", "mostrare", "mostra", "visualizzare", "vedere"],
+  summary: [
+    "progresso", "stato", "manca", "mancano", "rimanente", "riepilogo", "mostra",
+    "elenco", "prossimo passo", "cosa manca", "cosa devo fare", "cosa ho completato"
+  ],
+  dateVerb: [
+    "impostare", "imposta", "salvare", "salva", "cambiare", "modificare", "aggiornare",
+    "inserire", "inserisci", "ricevuto", "ricevuta", "arrivato", "datato"
+  ],
+  dateNoun: [
+    "data", "avviso", "ricezione", "data dell avviso", "data di ricezione", "scadenza",
+    "termine"
+  ],
+  markDone: [
+    "segnare", "segna", "completare", "completa", "finire", "finito", "completato",
+    "fatto", "pronto", "ho già fatto", "ho fatto", "ho ricevuto", "ho inviato"
+  ],
+  undo: [
+    "deselezionare", "deseleziona", "annullare", "incompleto", "non completato",
+    "non ancora", "rimuovere il segno", "non ho fatto"
+  ],
+  clear: ["cancellare", "azzera", "reimpostare", "ricominciare", "eliminare i progressi"],
+  checklist: ["lista", "checklist", "progresso", "passi", "attività", "cose da fare"],
+  reminder: ["ricordare", "promemoria", "notifica", "avviso", "ricordami", "avvisami"],
+  create: ["impostare", "programmare", "creare", "aggiungere", "inserire"],
+  resource: ["risorsa", "ufficiale", "uscis", "pagina di aiuto", "guida"],
+  privacy: ["privacy", "sicurezza", "dati", "privato"],
+  link: [
+    "link", "sito", "pagina", "modulo", "caso", "tariffa", "stato", "elaborazione"
+  ],
+  capability: [
+    "cosa puoi fare", "come puoi aiutarmi", "comandi", "cosa sai fare"
+  ]
+};
+
 const QUESTION_TERMS = [
   "what", "which", "how", "when", "why", "where", "can i", "do i", "did i", "have i", "am i", "should i",
   "que", "qué", "cual", "cuál", "como", "cómo", "cuando", "cuándo", "por que", "por qué", "porque",
   "o que", "qual", "como", "quando", "por que", "porque", "onde", "posso", "devo",
+  "cosa", "quale", "come", "quando", "perche", "perché", "dove", "posso", "devo",
   "ne", "hangi", "nasil", "nasıl", "ne zaman", "neden", "nerede", "yapabilir miyim",
   "quoi", "quel", "quelle", "comment", "quand", "pourquoi", "ou", "où", "puis je", "dois je",
   "什么", "哪些", "怎么", "如何", "何时", "什么时候", "为什么", "哪里", "可以吗",
@@ -320,6 +358,8 @@ const SUMMARY_PHRASES = [
   "what have i", "where am i", "what is next", "what's next", "what do i need",
   "que me falta", "qué me falta", "que sigue", "qué sigue", "que necesito", "qué necesito",
   "o que falta", "qual o próximo passo", "o que preciso", "onde estou", "o que concluí",
+  "cosa manca", "qual è il prossimo passo", "qual e il prossimo passo", "cosa devo fare",
+  "a che punto sono", "cosa ho completato",
   "neredeyim", "bende ne var", "ne kaldi", "ne kaldı", "sirada ne", "sırada ne",
   "ou en suis", "où en suis", "que reste", "prochaine etape", "prochaine étape",
   "我还剩", "下一步", "我需要什么",
@@ -330,7 +370,7 @@ const SUMMARY_PHRASES = [
 ];
 
 const ALL_TERMS = [
-  "all", "everything", "todos", "todas", "todo", "tudo", "hepsi", "tum", "tüm", "tout", "tous", "toutes",
+  "all", "everything", "todos", "todas", "todo", "tudo", "tutto", "tutti", "tutte", "hepsi", "tum", "tüm", "tout", "tous", "toutes",
   "全部", "所有", "सभी", "सब", "كل", "সব", "সবগুলো", "все", "всё"
 ];
 
@@ -345,8 +385,22 @@ const hasAnyTerm = (normalized, terms, threshold = 1) =>
 
 const intentTerms = (key) => [
   ...(INTENT_TERMS[key] || []),
-  ...(PORTUGUESE_INTENT_TERMS[key] || [])
+  ...(PORTUGUESE_INTENT_TERMS[key] || []),
+  ...(ITALIAN_INTENT_TERMS[key] || [])
 ];
+
+const ITALIAN_TOPIC_TERMS = {
+  caseStatus: ["stato del caso", "ricevuta", "numero di ricevuta", "la mia domanda", "pratica"],
+  fees: ["tariffa", "tariffe", "costo", "pagamento", "quanto costa"],
+  rfe: ["richiesta di prove", "richiesta di documenti", "altri documenti", "prove aggiuntive"],
+  biometrics: ["dati biometrici", "biometria", "impronte digitali", "appuntamento"],
+  address: ["indirizzo", "cambiare indirizzo", "mi sono trasferito", "nuovo indirizzo"],
+  processing: ["tempo di elaborazione", "quanto tempo", "ritardo", "attesa"],
+  scams: ["truffa", "frode", "falso avvocato", "garanzia di approvazione"],
+  tps: ["tps", "status di protezione temporanea", "rinnovo tps"],
+  ead: ["ead", "permesso di lavoro", "autorizzazione al lavoro", "modulo i 765"],
+  travel: ["autorizzazione al viaggio", "advance parole", "documento di viaggio", "modulo i 131"]
+};
 
 const intentSnapshot = (text) => {
   const q = normalizeText(text);
@@ -485,7 +539,7 @@ const bestTopicKey = (question) => {
   let bestKey = "general";
   let bestScore = 0;
   Object.entries(topics).forEach(([key, terms]) => {
-    const score = scoreTerms(q, terms);
+    const score = scoreTerms(q, [...terms, ...(ITALIAN_TOPIC_TERMS[key] || [])]);
     if (score > bestScore) {
       bestKey = key;
       bestScore = score;
@@ -512,6 +566,7 @@ function summaryLabels(lang) {
     tr: { complete: "tamamlandı", noticeDate: "Bildirim tarihi", suggestedDate: "Önerilen tarih", completed: "Tamamlanan", remaining: "Kalan", keyDates: "Önemli tarihler", notSet: "ayarlanmadı", none: "yok", notCalculated: "henüz hesaplanmadı" },
     es: { complete: "completo", noticeDate: "Fecha de aviso", suggestedDate: "Fecha sugerida", completed: "Completado", remaining: "Restante", keyDates: "Fechas clave", notSet: "no configurada", none: "ninguno", notCalculated: "aún no calculadas" },
     pt: { complete: "concluídos", noticeDate: "Data do aviso", suggestedDate: "Data sugerida", completed: "Concluído", remaining: "Pendente", keyDates: "Datas importantes", notSet: "não definida", none: "nenhum", notCalculated: "ainda não calculadas" },
+    it: { complete: "completati", noticeDate: "Data dell'avviso", suggestedDate: "Data suggerita", completed: "Completati", remaining: "Rimanenti", keyDates: "Date importanti", notSet: "non impostata", none: "nessuno", notCalculated: "non ancora calcolate" },
     zh: { complete: "完成", noticeDate: "通知日期", suggestedDate: "建议日期", completed: "已完成", remaining: "剩余", keyDates: "重要日期", notSet: "未设置", none: "无", notCalculated: "尚未计算" },
     hi: { complete: "पूरा", noticeDate: "नोटिस तारीख", suggestedDate: "सुझाई गई तारीख", completed: "पूरा", remaining: "बाकी", keyDates: "मुख्य तारीखें", notSet: "सेट नहीं", none: "कोई नहीं", notCalculated: "अभी गणना नहीं हुई" },
     fr: { complete: "terminé", noticeDate: "Date d’avis", suggestedDate: "Date suggérée", completed: "Terminé", remaining: "Restant", keyDates: "Dates clés", notSet: "non définie", none: "aucun", notCalculated: "pas encore calculées" },
@@ -772,13 +827,13 @@ export default function AIAdvisorScreen({ navigation }) {
 
   const openOfficialLink = (question) => {
     const q = normalizeText(question);
-    if (hasAnyTerm(q, ["case", "receipt", "status", "caso", "recibo", "estado", "durum", "makbuz", "dossier", "recu", "reçu", "案件", "收据", "状态", "केस", "रसीद", "स्थिति", "قضية", "إيصال", "حالة", "কেস", "রসিদ", "অবস্থা", "дело", "квитанц", "статус"])) return OFFICIAL_LINKS.status;
-    if (hasAnyTerm(q, ["processing", "procesamiento", "processamento", "islem", "işlem", "traitement", "处理", "प्रोसेसिंग", "معالجة", "প্রসেসিং", "обработ"])) return OFFICIAL_LINKS.processing;
-    if (hasAnyTerm(q, ["fee", "cost", "payment", "tarifa", "costo", "pago", "taxa", "custo", "pagamento", "ucret", "ücret", "odeme", "ödeme", "frais", "费用", "付款", "फीस", "भुगतान", "رسوم", "دفع", "ফি", "পেমেন্ট", "сбор", "оплата"])) return OFFICIAL_LINKS.fees;
-    if (hasAnyTerm(q, ["address", "move", "ar 11", "direccion", "dirección", "mudanza", "endereço", "mudar", "adres", "adresse", "地址", "पता", "عنوان", "ঠিকানা", "адрес"])) return OFFICIAL_LINKS.address;
-    if (hasAnyTerm(q, ["legal", "lawyer", "attorney", "ayuda legal", "abogado", "jurídico", "advogado", "hukuki", "avukat", "juridique", "avocat", "法律", "律师", "कानूनी", "वकील", "قانوني", "محامي", "আইনি", "আইনজীবী", "юрид", "адвокат"])) return OFFICIAL_LINKS.legal;
-    if (hasAnyTerm(q, ["scam", "fraud", "notario", "estafa", "fraude", "golpe", "dolandirici", "dolandırıcı", "arnaque", "诈骗", "धोखाधड़ी", "احتيال", "প্রতারণা", "мошеннич"])) return OFFICIAL_LINKS.scams;
-    if (hasAnyTerm(q, ["form", "formulario", "formulário", "form", "formulaire", "表格", "फॉर्म", "نموذج", "ফর্ম", "форма"])) return OFFICIAL_LINKS.forms;
+    if (hasAnyTerm(q, ["case", "receipt", "status", "caso", "recibo", "estado", "stato del caso", "ricevuta", "durum", "makbuz", "dossier", "recu", "reçu", "案件", "收据", "状态", "केस", "रसीद", "स्थिति", "قضية", "إيصال", "حالة", "কেস", "রসিদ", "অবস্থা", "дело", "квитанц", "статус"])) return OFFICIAL_LINKS.status;
+    if (hasAnyTerm(q, ["processing", "procesamiento", "processamento", "elaborazione", "islem", "işlem", "traitement", "处理", "प्रोसेसिंग", "معالجة", "প্রসেসিং", "обработ"])) return OFFICIAL_LINKS.processing;
+    if (hasAnyTerm(q, ["fee", "cost", "payment", "tarifa", "costo", "pago", "taxa", "custo", "pagamento", "tariffa", "ucret", "ücret", "odeme", "ödeme", "frais", "费用", "付款", "फीस", "भुगतान", "رسوم", "دفع", "ফি", "পেমেন্ট", "сбор", "оплата"])) return OFFICIAL_LINKS.fees;
+    if (hasAnyTerm(q, ["address", "move", "ar 11", "direccion", "dirección", "mudanza", "endereço", "mudar", "indirizzo", "trasferito", "adres", "adresse", "地址", "पता", "عنوان", "ঠিকানা", "адрес"])) return OFFICIAL_LINKS.address;
+    if (hasAnyTerm(q, ["legal", "lawyer", "attorney", "ayuda legal", "abogado", "jurídico", "advogado", "assistenza legale", "avvocato", "hukuki", "avukat", "juridique", "avocat", "法律", "律师", "कानूनी", "वकील", "قانوني", "محامي", "আইনি", "আইনজীবী", "юрид", "адвокат"])) return OFFICIAL_LINKS.legal;
+    if (hasAnyTerm(q, ["scam", "fraud", "notario", "estafa", "fraude", "golpe", "truffa", "frode", "dolandirici", "dolandırıcı", "arnaque", "诈骗", "धोखाधड़ी", "احتيال", "প্রতারণা", "мошеннич"])) return OFFICIAL_LINKS.scams;
+    if (hasAnyTerm(q, ["form", "formulario", "formulário", "modulo", "formulaire", "表格", "फॉर्म", "نموذج", "ফর্ম", "форма"])) return OFFICIAL_LINKS.forms;
     return OFFICIAL_LINKS.uscis;
   };
 

@@ -27,7 +27,7 @@ Features:
 - Privacy-first design with checklist progress stored on your device
 - AI Helper with official-source citations for general immigration questions
 - Optional, consent-based checklist context for personalized organization help
-- English, Turkish, Spanish, Portuguese, Mandarin Chinese, Hindi, French, Modern Standard Arabic, Bengali, and Russian support
+- English, Turkish, Spanish, Portuguese, Italian, Mandarin Chinese, Hindi, French, Modern Standard Arabic, Bengali, and Russian support
 
 Important: Immigration Helper is independent and is not affiliated with USCIS, DHS, or any government agency. The app provides general information and organization tools only. It does not provide legal advice, does not determine eligibility, and does not replace official USCIS instructions or help from a qualified attorney or DOJ-accredited representative.
 

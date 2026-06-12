@@ -18,6 +18,7 @@
       "label_bn": "প্রস্তাবিত মেইলিং তারিখ",
       "label_ru": "Предлагаемая дата отправки",
       "label_pt": "Data de envio sugerida",
+      "label_it": "Data di spedizione suggerita",
       "anchor": "notice_date",
       "offsetDays": 60
     },
@@ -33,6 +34,7 @@
       "label_bn": "EAD স্বয়ংক্রিয় এক্সটেনশন শেষ",
       "label_ru": "Автопродление EAD заканчивается",
       "label_pt": "Fim da extensão automática do EAD",
+      "label_it": "Fine dell'estensione automatica EAD",
       "anchor": "notice_date",
       "offsetDays": 540
     },
@@ -48,6 +50,7 @@
       "label_bn": "রসিদ না এলে ফলো-আপ করুন",
       "label_ru": "Проверить, если нет квитанции",
       "label_pt": "Acompanhar se o recibo não chegar",
+      "label_it": "Controlla se non arriva la ricevuta",
       "anchor": "notice_date",
       "offsetDays": 90
     }
@@ -66,6 +69,7 @@
       "title_bn": "Form I-765 (EAD)",
       "title_ru": "Форма I-765 (EAD)",
       "title_pt": "Formulário I-765 (EAD)",
+      "title_it": "Modulo I-765 (EAD)",
       "url": "https://www.uscis.gov/i-765"
     }
   ],
@@ -81,6 +85,7 @@
       "label_bn": "Form I-765 অফিসিয়াল পেজ",
       "label_ru": "Официальная страница Form I-765",
       "label_pt": "Página oficial do Formulário I-765",
+      "label_it": "Pagina ufficiale del modulo I-765",
       "url": "https://www.uscis.gov/i-765"
     },
     {
@@ -94,6 +99,7 @@
       "label_bn": "বর্তমান ফাইলিং ফি",
       "label_ru": "Текущие сборы",
       "label_pt": "Taxas de envio atuais",
+      "label_it": "Tariffe di presentazione attuali",
       "url": "https://www.uscis.gov/g-1055"
     }
   ],
@@ -110,6 +116,7 @@
       "title_bn": "যোগ্যতা ক্যাটেগরি দেখুন",
       "title_ru": "Проверьте категорию права",
       "title_pt": "Verifique a categoria de elegibilidade",
+      "title_it": "Controlla la categoria di idoneità",
       "details_en": "Confirm your I-765 category in official USCIS instructions.",
       "details_tr": "I-765 kategorinizi resmi USCIS talimatlarinda dogrulayin.",
       "details_es": "Confirma tu categoria I-765 en las instrucciones oficiales de USCIS.",
@@ -119,7 +126,8 @@
       "details_ar": "أكد فئة I-765 الخاصة بك في تعليمات USCIS الرسمية.",
       "details_bn": "অফিসিয়াল USCIS নির্দেশনায় আপনার I-765 ক্যাটেগরি নিশ্চিত করুন।",
       "details_ru": "Подтвердите вашу категорию I-765 в официальных инструкциях USCIS.",
-      "details_pt": "Confirme sua categoria do I-765 nas instruções oficiais do USCIS."
+      "details_pt": "Confirme sua categoria do I-765 nas instruções oficiais do USCIS.",
+      "details_it": "Conferma la tua categoria I-765 nelle istruzioni ufficiali USCIS."
     },
     {
       "id": "ead_2",
@@ -133,6 +141,7 @@
       "title_bn": "নথি জোগাড় করুন",
       "title_ru": "Соберите документы",
       "title_pt": "Reúna os documentos",
+      "title_it": "Raccogli i documenti",
       "details_en": "Prepare ID, photos, prior EADs, notices, and supporting documents.",
       "details_tr": "Kimlik, foto, onceki EAD, bildirim ve destek belgelerini hazirlayin.",
       "details_es": "Prepara ID, fotos, EAD anteriores, avisos y documentos de apoyo.",
@@ -142,7 +151,8 @@
       "details_ar": "حضّر الهوية والصور وبطاقات EAD السابقة والإشعارات والمستندات الداعمة.",
       "details_bn": "ID, ছবি, আগের EAD, নোটিশ ও সহায়ক নথি প্রস্তুত করুন।",
       "details_ru": "Подготовьте ID, фото, предыдущие EAD, уведомления и подтверждающие документы.",
-      "details_pt": "Prepare identificação, fotos, EADs anteriores, avisos e documentos de apoio."
+      "details_pt": "Prepare identificação, fotos, EADs anteriores, avisos e documentos de apoio.",
+      "details_it": "Prepara documento d'identità, foto, EAD precedenti, avvisi e documenti di supporto."
     },
     {
       "id": "ead_3",
@@ -156,6 +166,7 @@
       "title_bn": "ফি ও কপি পর্যালোচনা করুন",
       "title_ru": "Проверьте сборы и копии",
       "title_pt": "Revise as taxas e as cópias",
+      "title_it": "Controlla tariffe e copie",
       "details_en": "Check current fees and keep a copy of the packet before sending.",
       "details_tr": "Guncel ucretleri kontrol edin ve gondermeden once dosyanin kopyasini saklayin.",
       "details_es": "Verifica tarifas actuales y guarda una copia del paquete antes de enviar.",
@@ -165,7 +176,8 @@
       "details_ar": "تحقق من الرسوم الحالية واحتفظ بنسخة من الملف قبل الإرسال.",
       "details_bn": "বর্তমান ফি দেখুন এবং পাঠানোর আগে প্যাকেটের কপি রাখুন।",
       "details_ru": "Проверьте текущие сборы и сохраните копию пакета перед отправкой.",
-      "details_pt": "Confira as taxas atuais e guarde uma cópia do pacote antes de enviar."
+      "details_pt": "Confira as taxas atuais e guarde uma cópia do pacote antes de enviar.",
+      "details_it": "Controlla le tariffe attuali e conserva una copia del fascicolo prima di inviarlo."
     }
   ]
 }
