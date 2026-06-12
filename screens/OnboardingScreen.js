@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTranslation } from "react-i18next";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
 import LanguageDropdown from "../components/LanguageDropdown";
@@ -11,14 +11,18 @@ export default function OnboardingScreen({ navigation }) {
   const { t } = useTranslation();
 
   const finish = async () => {
-    await AsyncStorage.setItem(ONBOARDING_KEY, "true");
-    navigation.replace("Home");
+    try {
+      await AsyncStorage.setItem(ONBOARDING_KEY, "true");
+      navigation.replace("Home");
+    } catch {
+      Alert.alert(t("alerts.saveErrorTitle"), t("alerts.saveErrorBody"));
+    }
   };
 
   const points = [
-    { icon: "checkmark-done-outline", title: t("onboarding.organizeTitle"), body: t("onboarding.organizeBody") },
-    { icon: "alarm-outline", title: t("onboarding.remindersTitle"), body: t("onboarding.remindersBody") },
-    { icon: "shield-checkmark-outline", title: t("onboarding.safetyTitle"), body: t("onboarding.safetyBody") }
+    { key: "organize", icon: "checkmark-done-outline", title: t("onboarding.organizeTitle"), body: t("onboarding.organizeBody") },
+    { key: "reminders", icon: "alarm-outline", title: t("onboarding.remindersTitle"), body: t("onboarding.remindersBody") },
+    { key: "safety", icon: "shield-checkmark-outline", title: t("onboarding.safetyTitle"), body: t("onboarding.safetyBody") }
   ];
 
   return (
@@ -46,7 +50,7 @@ export default function OnboardingScreen({ navigation }) {
       </View>
 
       {points.map((item) => (
-        <View key={item.title} style={styles.point}>
+        <View key={item.key} style={styles.point}>
           <View style={styles.pointIcon}>
             <Ionicons name={item.icon} size={21} color={COLORS.primary} />
           </View>
@@ -62,7 +66,12 @@ export default function OnboardingScreen({ navigation }) {
         <Text style={styles.noticeText}>{t("onboarding.notice")}</Text>
       </View>
 
-      <TouchableOpacity style={styles.primaryBtn} onPress={finish}>
+      <TouchableOpacity
+        style={styles.primaryBtn}
+        onPress={finish}
+        accessibilityRole="button"
+        accessibilityLabel={t("onboarding.cta")}
+      >
         <Text style={styles.primaryText}>{t("onboarding.cta")}</Text>
         <Ionicons name="arrow-forward" size={18} color={COLORS.primaryTextOn} />
       </TouchableOpacity>

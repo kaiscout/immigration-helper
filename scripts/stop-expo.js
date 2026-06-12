@@ -20,7 +20,7 @@ for (const port of ports) {
   for (const pid of pids) {
     const command = run(`ps -p ${pid} -o command=`);
     const isThisExpo =
-      command.includes("expo start") &&
+      (command.includes("expo start") || command.includes("expo/bin/cli start")) &&
       command.includes(projectRoot);
 
     if (!isThisExpo) continue;

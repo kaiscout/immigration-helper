@@ -95,35 +95,23 @@ export const pickLocalized = (obj, base, lang = "en") => {
   return obj?.[`${base}_${code}`] ?? obj?.[`${base}_en`] ?? obj?.[base] ?? "";
 };
 
-export const computeDueDate = (flow, noticeDate) => {
+export const computeDueDate = (_flow, noticeDate) => {
   if (!noticeDate) return "";
   const base = new Date(noticeDate);
   if (isNaN(base.getTime())) return "";
-
-  const offset = Number(flow?.deadlineLogic?.offsetDays ?? 0);
-  if (!offset) return "";
-
-  return formatYMD(new Date(base.getTime() + offset * 24 * 60 * 60 * 1000));
+  return formatYMD(base);
 };
 
-export const computeKeyDates = (flow, noticeDate, lang = "en") => {
+export const computeKeyDates = (_flow, noticeDate) => {
   if (!noticeDate) return [];
   const base = new Date(noticeDate);
   if (isNaN(base.getTime())) return [];
 
-  if (Array.isArray(flow?.calculators) && flow.calculators.length > 0) {
-    return flow.calculators.map((calc) => {
-      const days = Number(calc.offsetDays || 0);
-      return {
-        id: calc.id || `calc_${days}`,
-        label: pickLocalized(calc, "label", lang),
-        iso: formatYMD(new Date(base.getTime() + days * 24 * 60 * 60 * 1000))
-      };
-    });
-  }
-
-  const dueDate = computeDueDate(flow, noticeDate);
-  return dueDate ? [{ id: "computed_due", label: "Suggested mailing date", iso: dueDate }] : [];
+  return [
+    { id: "reminder_30", labelKey: "flow.reminder30", iso: formatYMD(new Date(base.getTime() - 30 * 24 * 60 * 60 * 1000)) },
+    { id: "reminder_7", labelKey: "flow.reminder7", iso: formatYMD(new Date(base.getTime() - 7 * 24 * 60 * 60 * 1000)) },
+    { id: "target_date", labelKey: "flow.reminderDue", iso: formatYMD(base) }
+  ];
 };
 
 export const loadFlowState = async (flow) => {

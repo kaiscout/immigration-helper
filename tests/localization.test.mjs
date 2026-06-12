@@ -21,6 +21,23 @@ const flattenKeys = (value, prefix = "", keys = []) => {
   return keys;
 };
 
+const flattenValues = (value, prefix = "", values = {}) => {
+  Object.entries(value).forEach(([key, child]) => {
+    const path = prefix ? `${prefix}.${key}` : key;
+    if (child && typeof child === "object" && !Array.isArray(child)) {
+      flattenValues(child, path, values);
+    } else {
+      values[path] = child;
+    }
+  });
+  return values;
+};
+
+const placeholders = (value) =>
+  [...String(value || "").matchAll(/\{\{\s*([^},\s]+)[^}]*\}\}/g)]
+    .map((match) => match[1])
+    .sort();
+
 const assertLocalizedFields = (value, location, language) => {
   if (Array.isArray(value)) {
     value.forEach((child, index) => assertLocalizedFields(child, `${location}[${index}]`, language));
@@ -58,6 +75,21 @@ test("All supported UI translations have exact English key parity", () => {
   for (const language of supportedLanguages.filter((code) => code !== "en")) {
     const translated = flattenKeys(readJson(`../i18n/${language}.json`)).sort();
     assert.deepEqual(translated, english, `${language}.json must match all English translation keys`);
+  }
+});
+
+test("Every translation preserves the English interpolation placeholders", () => {
+  const english = flattenValues(readJson("../i18n/en.json"));
+
+  for (const language of supportedLanguages.filter((code) => code !== "en")) {
+    const translated = flattenValues(readJson(`../i18n/${language}.json`));
+    for (const [key, value] of Object.entries(english)) {
+      assert.deepEqual(
+        placeholders(translated[key]),
+        placeholders(value),
+        `${language}.${key} must preserve interpolation placeholders`
+      );
+    }
   }
 });
 
@@ -109,6 +141,14 @@ test("Every flow has content for all supported languages", () => {
     for (const language of supportedLanguages.filter((code) => code !== "en")) {
       assertLocalizedFields(flow, file, language);
     }
+  }
+});
+
+test("Flows do not contain unsupported deadline calculators", () => {
+  for (const file of ["ead.json", "tps_renewal.json", "travel_auth.json"]) {
+    const flow = readJson(`../data/flows/${file}`);
+    assert.equal(flow.deadlineLogic, undefined, `${file} must not calculate a legal deadline`);
+    assert.equal(flow.calculators, undefined, `${file} must not contain fixed-offset legal calculators`);
   }
 });
 

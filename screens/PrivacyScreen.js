@@ -1,19 +1,25 @@
 import { useCallback, useEffect, useState } from "react";
-import { Alert, Linking, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
 import { PRIVACY_POINTS } from "../data/resources";
 import { loadAiConsent, revokeAiConsent, updateChecklistSharing } from "../data/aiConsent";
 import { OFFICIAL_LINKS } from "../constants/officialLinks";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
+import { openExternalLink } from "../data/externalLinks";
 
 export default function PrivacyScreen({ navigation }) {
   const { t } = useTranslation();
   const [consent, setConsent] = useState(undefined);
 
   const loadConsent = useCallback(async () => {
-    setConsent(await loadAiConsent());
-  }, []);
+    try {
+      setConsent(await loadAiConsent());
+    } catch {
+      Alert.alert(t("alerts.loadingErrorTitle"), t("alerts.loadingErrorBody"));
+      setConsent(null);
+    }
+  }, [t]);
 
   useEffect(() => {
     loadConsent();
@@ -22,8 +28,12 @@ export default function PrivacyScreen({ navigation }) {
   }, [navigation, loadConsent]);
 
   const changeChecklistSharing = async (value) => {
-    const next = await updateChecklistSharing(value);
-    setConsent(next);
+    try {
+      const next = await updateChecklistSharing(value);
+      setConsent(next);
+    } catch {
+      Alert.alert(t("alerts.saveErrorTitle"), t("alerts.saveErrorBody"));
+    }
   };
 
   const withdrawConsent = () => {
@@ -36,8 +46,12 @@ export default function PrivacyScreen({ navigation }) {
           text: t("privacy.revokeConfirm"),
           style: "destructive",
           onPress: async () => {
-            await revokeAiConsent();
-            setConsent(null);
+            try {
+              await revokeAiConsent();
+              setConsent(null);
+            } catch {
+              Alert.alert(t("alerts.saveErrorTitle"), t("alerts.saveErrorBody"));
+            }
           }
         }
       ]
@@ -104,7 +118,11 @@ export default function PrivacyScreen({ navigation }) {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.policyButton} onPress={() => Linking.openURL(OFFICIAL_LINKS.privacy)}>
+        <TouchableOpacity
+          style={styles.policyButton}
+          onPress={() => openExternalLink(OFFICIAL_LINKS.privacy, t)}
+          accessibilityRole="link"
+        >
           <Ionicons name="open-outline" size={16} color={COLORS.primary} />
           <Text style={styles.policyButtonText}>{t("privacy.policyLink")}</Text>
         </TouchableOpacity>

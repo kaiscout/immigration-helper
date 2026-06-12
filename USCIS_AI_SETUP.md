@@ -2,7 +2,7 @@
 
 The app now supports a server-side USCIS information assistant with two official-source layers:
 
-1. Live OpenAI web search restricted to `uscis.gov`.
+1. Live OpenAI web search restricted to official U.S. immigration agencies.
 2. A packaged local corpus produced from the current USCIS sitemap and searched passage by passage.
 
 The live search keeps answers current. The local corpus provides additional retrieval context and can later be uploaded to an OpenAI vector store.
@@ -13,7 +13,10 @@ Create a local `.env` file and set:
 
 ```bash
 OPENAI_API_KEY=your_server_side_key
-OPENAI_MODEL=gpt-4.1-mini
+OPENAI_MODEL=gpt-5.4-mini
+AI_PROXY_CLIENT_TOKEN=your_generated_app_access_token
+REQUIRE_AI_GENERATION=true
+REQUIRE_CLIENT_TOKEN=true
 PORT=8787
 ```
 
@@ -65,10 +68,11 @@ curl http://localhost:8787/health
 
 ## 4. Connect Expo
 
-In `.env`, set the public URL of the deployed server endpoint:
+In `.env`, set the public URL and matching app token for the deployed server:
 
 ```bash
-EXPO_PUBLIC_AI_PROXY_URL=https://your-api-domain.example/api/ai
+EXPO_PUBLIC_AI_PROXY_URL=https://immigration-helper-ai.onrender.com/api/ai
+EXPO_PUBLIC_AI_CLIENT_TOKEN=your_generated_app_access_token
 ```
 
 For a physical phone, `localhost` points to the phone, not the Mac. Use a deployed HTTPS endpoint or a secure development tunnel. Restart Expo after changing the value:
@@ -81,7 +85,8 @@ npm start
 
 - Deploy `server/index.mjs` behind HTTPS.
 - Restrict `ALLOWED_ORIGIN` where the hosting platform supports a stable web origin.
-- Add durable rate limiting and abuse monitoring at the hosting layer.
+- Keep the built-in rate limit enabled and add hosting-layer abuse monitoring
+  if traffic grows.
 - Keep `OPENAI_API_KEY` only in server-side secrets.
 - Schedule the resumable crawler periodically and review sitemap changes.
 - USCIS content is general information, not legal advice. The assistant is instructed to avoid eligibility decisions and guarantees.

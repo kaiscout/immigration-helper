@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, Linking, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
 import {
@@ -10,7 +10,8 @@ import {
   pickLocalized,
   saveFlowState
 } from "../data/flowState";
-import { loadNotificationsAsync } from "../data/notificationService";
+import { createNotificationTrigger, loadNotificationsAsync } from "../data/notificationService";
+import { openExternalLink } from "../data/externalLinks";
 
 const pad2 = (value) => String(value).padStart(2, "0");
 
@@ -31,7 +32,7 @@ const daysInMonth = (year, month) => {
 
 const yearOptions = () => {
   const current = new Date().getFullYear();
-  return Array.from({ length: 14 }, (_, idx) => String(current + 2 - idx));
+  return Array.from({ length: 21 }, (_, idx) => String(current + 10 - idx));
 };
 
 export default function FlowScreen({ route, navigation }) {
@@ -108,19 +109,23 @@ export default function FlowScreen({ route, navigation }) {
 
   useEffect(() => {
     (async () => {
-      const parsed = await loadFlowState(flow);
-      setNoticeDate(parsed.noticeDate || "");
-      setNoticeDraft(datePartsFromIso(parsed.noticeDate || ""));
-      setDueDate(parsed.dueDate || "");
-      setDone(parsed.done || {});
+      try {
+        const parsed = await loadFlowState(flow);
+        setNoticeDate(parsed.noticeDate || "");
+        setNoticeDraft(datePartsFromIso(parsed.noticeDate || ""));
+        setDueDate(parsed.dueDate || "");
+        setDone(parsed.done || {});
+      } catch {
+        Alert.alert(t("alerts.loadingErrorTitle"), t("alerts.loadingErrorBody"));
+      }
     })();
-  }, [flow]);
+  }, [flow, t]);
 
   const saveState = async (obj) => {
     await saveFlowState(flow, obj);
   };
 
-  const computeDue = () => {
+  const computeDue = async () => {
     if (!noticeDate) {
       Alert.alert(t("alerts.enterDateTitle"), t("alerts.enterDateBody"));
       return;
@@ -133,39 +138,52 @@ export default function FlowScreen({ route, navigation }) {
     }
 
     const iso = computeDueDate(flow, noticeDate);
-    setDueDate(iso);
-    saveState({ noticeDate, dueDate: iso, done });
+    try {
+      await saveState({ noticeDate, dueDate: iso, done });
+      setDueDate(iso);
+    } catch {
+      Alert.alert(t("alerts.saveErrorTitle"), t("alerts.saveErrorBody"));
+    }
   };
 
-  const toggleStep = (id) => {
+  const toggleStep = async (id) => {
     const newState = { ...done, [id]: !done[id] };
-    setDone(newState);
-    saveState({ noticeDate, dueDate, done: newState });
+    try {
+      await saveState({ noticeDate, dueDate, done: newState });
+      setDone(newState);
+    } catch {
+      Alert.alert(t("alerts.saveErrorTitle"), t("alerts.saveErrorBody"));
+    }
   };
 
   const ensureNotificationPermission = async () => {
-    const { environment, Notifications } = await loadNotificationsAsync();
+    try {
+      const { environment, Notifications } = await loadNotificationsAsync();
 
-    if (environment === "web") {
-      Alert.alert(t("alerts.webReminderTitle"), t("alerts.webReminderBody"));
+      if (environment === "web") {
+        Alert.alert(t("alerts.webReminderTitle"), t("alerts.webReminderBody"));
+        return null;
+      }
+
+      if (environment === "expoGo") {
+        Alert.alert(t("alerts.expoGoNotificationsTitle"), t("alerts.expoGoNotificationsBody"));
+        return null;
+      }
+
+      const current = await Notifications.getPermissionsAsync();
+      if (current.granted) return Notifications;
+
+      const requested = await Notifications.requestPermissionsAsync();
+      if (!requested.granted) {
+        Alert.alert(t("reminders.permissionTitle"), t("reminders.permissionBody"));
+        return null;
+      }
+
+      return Notifications;
+    } catch {
+      Alert.alert(t("alerts.reminderErrorTitle"), t("alerts.reminderErrorBody"));
       return null;
     }
-
-    if (environment === "expoGo") {
-      Alert.alert(t("alerts.expoGoNotificationsTitle"), t("alerts.expoGoNotificationsBody"));
-      return null;
-    }
-
-    const current = await Notifications.getPermissionsAsync();
-    if (current.granted) return Notifications;
-
-    const requested = await Notifications.requestPermissionsAsync();
-    if (!requested.granted) {
-      Alert.alert(t("reminders.permissionTitle"), t("reminders.permissionBody"));
-      return null;
-    }
-
-    return Notifications;
   };
 
   const setReminder = async (daysBefore = 0) => {
@@ -186,45 +204,57 @@ export default function FlowScreen({ route, navigation }) {
       return;
     }
 
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: t("notifications.mailingTitle"),
-        body: daysBefore ? `${t("notifications.beforeDue")} ${dueDate}` : dueDate
-      },
-      trigger: { type: "date", date: fire }
-    });
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: t("notifications.mailingTitle"),
+          body: daysBefore ? `${t("notifications.beforeDue")} ${dueDate}` : dueDate,
+          sound: "default"
+        },
+        trigger: createNotificationTrigger({ type: "date", date: fire })
+      });
 
-    Alert.alert("✅", `${t("notifications.reminderSet")} ${fire.toString()}`);
+      Alert.alert(
+        t("reminders.scheduledTitle"),
+        `${t("notifications.reminderSet")} ${fire.toLocaleString(lang)}`
+      );
+    } catch {
+      Alert.alert(t("alerts.reminderErrorTitle"), t("alerts.reminderErrorBody"));
+    }
   };
 
   const clearReminder = async () => {
-    const { environment, Notifications } = await loadNotificationsAsync();
+    try {
+      const { environment, Notifications } = await loadNotificationsAsync();
 
-    if (environment === "web") {
-      Alert.alert(t("alerts.webReminderTitle"), t("alerts.webReminderBody"));
-      return;
+      if (environment === "web") {
+        Alert.alert(t("alerts.webReminderTitle"), t("alerts.webReminderBody"));
+        return;
+      }
+
+      if (environment === "expoGo") {
+        Alert.alert(t("alerts.expoGoNotificationsTitle"), t("alerts.expoGoNotificationsBody"));
+        return;
+      }
+
+      await Notifications.cancelAllScheduledNotificationsAsync();
+      Alert.alert(t("notifications.clearedTitle"), t("notifications.clearedBody"));
+    } catch {
+      Alert.alert(t("alerts.reminderErrorTitle"), t("alerts.reminderErrorBody"));
     }
-
-    if (environment === "expoGo") {
-      Alert.alert(t("alerts.expoGoNotificationsTitle"), t("alerts.expoGoNotificationsBody"));
-      return;
-    }
-
-    await Notifications.cancelAllScheduledNotificationsAsync();
-    Alert.alert(t("notifications.clearedTitle"), t("notifications.clearedBody"));
   };
 
   const calcItems = useMemo(() => {
-    return computeKeyDates(flow, noticeDate, lang).map((item) => ({
+    return computeKeyDates(flow, noticeDate).map((item) => ({
       ...item,
-      label: item.id === "computed_due" ? t("flow.computedDue") : item.label
+      label: t(item.labelKey)
     }));
-  }, [noticeDate, flow, lang, t]);
+  }, [noticeDate, flow, t]);
 
   if (!flow) {
     return (
       <View style={styles.emptyWrap}>
-        <Text style={styles.h1}>Missing flow</Text>
+        <Text style={styles.h1}>{t("alerts.loadingErrorTitle")}</Text>
       </View>
     );
   }
@@ -280,11 +310,13 @@ export default function FlowScreen({ route, navigation }) {
           <TouchableOpacity
             style={styles.dateSelect}
             onPress={() => openPicker("month", t("flow.month"), monthOptions)}
+            accessibilityRole="button"
+            accessibilityLabel={t("flow.month")}
           >
             <Text style={styles.dateSelectLabel}>{t("flow.month")}</Text>
             <View style={styles.dateSelectValueRow}>
               <Text style={[styles.dateSelectValue, !noticeParts.month && styles.dateSelectPlaceholder]}>
-                {monthOptions.find((item) => item.value === noticeParts.month)?.label || t("flow.month")}
+                {monthOptions.find((item) => item.value === noticeParts.month)?.label || "--"}
               </Text>
               <Ionicons name="chevron-down" size={16} color={COLORS.subtext} />
             </View>
@@ -293,11 +325,13 @@ export default function FlowScreen({ route, navigation }) {
           <TouchableOpacity
             style={styles.dateSelect}
             onPress={() => openPicker("day", t("flow.day"), dayOptions)}
+            accessibilityRole="button"
+            accessibilityLabel={t("flow.day")}
           >
             <Text style={styles.dateSelectLabel}>{t("flow.day")}</Text>
             <View style={styles.dateSelectValueRow}>
               <Text style={[styles.dateSelectValue, !noticeParts.day && styles.dateSelectPlaceholder]}>
-                {noticeParts.day || t("flow.day")}
+                {noticeParts.day || "--"}
               </Text>
               <Ionicons name="chevron-down" size={16} color={COLORS.subtext} />
             </View>
@@ -306,11 +340,13 @@ export default function FlowScreen({ route, navigation }) {
           <TouchableOpacity
             style={styles.dateSelect}
             onPress={() => openPicker("year", t("flow.year"), years.map((value) => ({ value, label: value })))}
+            accessibilityRole="button"
+            accessibilityLabel={t("flow.year")}
           >
             <Text style={styles.dateSelectLabel}>{t("flow.year")}</Text>
             <View style={styles.dateSelectValueRow}>
               <Text style={[styles.dateSelectValue, !noticeParts.year && styles.dateSelectPlaceholder]}>
-                {noticeParts.year || t("flow.year")}
+                {noticeParts.year || "--"}
               </Text>
               <Ionicons name="chevron-down" size={16} color={COLORS.subtext} />
             </View>
@@ -322,8 +358,13 @@ export default function FlowScreen({ route, navigation }) {
           <Text style={styles.selectedDateValue}>{selectedDateText}</Text>
         </View>
 
+        <View style={styles.dateSafetyNote}>
+          <Ionicons name="information-circle-outline" size={18} color={COLORS.warning} />
+          <Text style={styles.dateSafetyText}>{t("flow.dateSafetyNote")}</Text>
+        </View>
+
         <TouchableOpacity style={styles.btn} onPress={computeDue}>
-          <Ionicons name="calculator-outline" size={19} color={COLORS.primaryTextOn} />
+          <Ionicons name="checkmark-circle-outline" size={19} color={COLORS.primaryTextOn} />
           <Text style={styles.btnText}>{t("common.save")}</Text>
         </TouchableOpacity>
       </View>
@@ -396,7 +437,8 @@ export default function FlowScreen({ route, navigation }) {
               <TouchableOpacity
                 key={`form-${f.id || f.url || idx}-${idx}`}
                 style={styles.linkBtn}
-                onPress={() => Linking.openURL(f.url)}
+                onPress={() => openExternalLink(f.url, t)}
+                accessibilityRole="link"
               >
                 <Ionicons name="document-text-outline" size={18} color={COLORS.primary} />
                 <Text style={styles.stepTitle}>{label}</Text>
@@ -414,7 +456,8 @@ export default function FlowScreen({ route, navigation }) {
             <TouchableOpacity
               key={`resource-${item.url || item.id || idx}-${idx}`}
               style={styles.linkBtn}
-              onPress={() => Linking.openURL(item.url)}
+              onPress={() => openExternalLink(item.url, t)}
+              accessibilityRole="link"
             >
               <Ionicons name="shield-checkmark-outline" size={18} color={COLORS.primary} />
               <Text style={styles.stepTitle}>{pick(item, "label")}</Text>
@@ -441,6 +484,9 @@ export default function FlowScreen({ route, navigation }) {
             key={`step-${step.id || idx}-${idx}`}
             style={[styles.step, doneFlag && styles.stepDone]}
             onPress={() => toggleStep(step.id)}
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: doneFlag }}
+            accessibilityLabel={title}
           >
             <View style={[styles.checkBox, doneFlag && styles.checkBoxDone]}>
               <Ionicons
@@ -473,7 +519,12 @@ export default function FlowScreen({ route, navigation }) {
           <View style={styles.pickerSheet}>
             <View style={styles.pickerHeader}>
               <Text style={styles.pickerTitle}>{picker?.title}</Text>
-              <TouchableOpacity style={styles.pickerClose} onPress={() => setPicker(null)}>
+              <TouchableOpacity
+                style={styles.pickerClose}
+                onPress={() => setPicker(null)}
+                accessibilityRole="button"
+                accessibilityLabel={t("common.close")}
+              >
                 <Ionicons name="close" size={20} color={COLORS.text} />
               </TouchableOpacity>
             </View>
@@ -509,7 +560,7 @@ const styles = StyleSheet.create({
     ...SHADOW.card
   },
   kicker: { color: COLORS.primary, fontSize: 12, fontWeight: "900", textTransform: "uppercase", letterSpacing: 0.8 },
-  h1: { fontSize: 30, fontWeight: "900", color: COLORS.text, marginTop: SPACING.xs, letterSpacing: -0.8 },
+  h1: { fontSize: 30, fontWeight: "900", color: COLORS.text, marginTop: SPACING.xs, letterSpacing: 0 },
   headerSub: { color: COLORS.subtext, marginTop: SPACING.sm, lineHeight: 20 },
   h2: { fontSize: 20, fontWeight: "900", color: COLORS.text, marginBottom: SPACING.md },
   progressTrack: {
@@ -622,6 +673,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     gap: SPACING.sm
+  },
+  dateSafetyNote: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 7,
+    marginTop: SPACING.md
+  },
+  dateSafetyText: {
+    flex: 1,
+    color: COLORS.subtext,
+    fontSize: 12,
+    lineHeight: 18
   },
   selectedDateLabel: { color: COLORS.subtext, fontSize: 12, fontWeight: "900" },
   selectedDateValue: { color: COLORS.text, fontWeight: "900" },

@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   buildLocalFallback,
   buildRetrievalQuery,
+  containsSensitiveIdentifier,
   createAnswerService,
   extractAnswerSections,
   extractOutputText,
@@ -109,6 +110,8 @@ test("sends retrieved USCIS passages to the model and keeps official sources", a
   assert.match(requestBody.input, /How to Change Your Address/);
   assert.match(requestBody.input, /TPS: 1\/5 complete/);
   assert.equal(requestBody.tool_choice, "required");
+  assert.equal(requestBody.max_output_tokens, 1_800);
+  assert.equal(requestBody.store, false);
   assert.deepEqual(requestBody.tools[0].filters.allowed_domains, OFFICIAL_IMMIGRATION_DOMAINS);
   assert.equal(result.body.output_text, "You can usually update it through your USCIS online account.");
   assert.equal(result.body.sources.length, 1);
@@ -133,7 +136,7 @@ test("falls back to the USCIS corpus when the model service fails", async () => 
   assert.match(result.body.output_text, /reschedule a biometric services appointment/i);
 });
 
-test("replaces irrelevant live citations with relevant USCIS corpus sources", async () => {
+test("preserves paragraph-level official citations returned by the model", async () => {
   const scamIndex = createCorpusIndex([{
     url: "https://www.uscis.gov/avoid-scams",
     title: "Avoid Scams",
@@ -170,9 +173,135 @@ test("replaces irrelevant live citations with relevant USCIS corpus sources", as
   });
 
   assert.deepEqual(result.body.sections[0].sources, [{
+    title: "Unrelated USCIS Policy",
+    url: "https://www.uscis.gov/policy-manual/volume-8-part-j-chapter-3"
+  }]);
+});
+
+test("does not attach a guessed source to an uncited generated paragraph", async () => {
+  const scamIndex = createCorpusIndex([{
+    url: "https://www.uscis.gov/avoid-scams",
+    title: "Avoid Scams",
+    description: "Official USCIS scam prevention guidance",
+    chunks: [
+      "Avoid immigration scams. Only attorneys and Department of Justice accredited representatives can give legal advice. Report suspected immigration scams through official government channels."
+    ]
+  }]);
+  const answer = createAnswerService({
+    corpusIndex: scamIndex,
+    apiKey: "test-key",
+    fetchImpl: async () => new Response(JSON.stringify({
+      output_text: "Only authorized legal service providers should give immigration legal advice.",
+      output: [{
+        type: "message",
+        content: [{
+          type: "output_text",
+          text: "Only authorized legal service providers should give immigration legal advice.",
+          annotations: []
+        }]
+      }]
+    }), { status: 200, headers: { "Content-Type": "application/json" } })
+  });
+
+  const result = await answer({
+    question: "How do I avoid immigration scams?",
+    language: "en"
+  });
+
+  assert.deepEqual(result.body.sections[0].sources, []);
+  assert.deepEqual(result.body.sources, [{
     title: "Avoid Scams",
     url: "https://www.uscis.gov/avoid-scams"
   }]);
+});
+
+test("rejects obvious sensitive identifiers before calling the model", async () => {
+  assert.equal(containsSensitiveIdentifier("My receipt is IOE1234567890"), true);
+  assert.equal(containsSensitiveIdentifier("My A-Number is A123456789"), true);
+  assert.equal(containsSensitiveIdentifier("Passport number: X12345678"), true);
+  assert.equal(containsSensitiveIdentifier("How do I find my receipt number?"), false);
+
+  let called = false;
+  const answer = createAnswerService({
+    corpusIndex: index,
+    apiKey: "test-key",
+    fetchImpl: async () => {
+      called = true;
+      return new Response("{}");
+    }
+  });
+  const result = await answer({
+    question: "Please check IOE1234567890",
+    language: "en"
+  });
+
+  assert.equal(result.status, 400);
+  assert.equal(result.body.error.code, "sensitive_identifier");
+  assert.equal(called, false);
+});
+
+test("rejects sensitive identifiers hidden in conversation context", async () => {
+  let called = false;
+  const answer = createAnswerService({
+    corpusIndex: index,
+    apiKey: "test-key",
+    fetchImpl: async () => {
+      called = true;
+      return new Response("{}");
+    }
+  });
+  const result = await answer({
+    question: "What should I do next?",
+    conversation: "User: My receipt is IOE1234567890",
+    language: "en"
+  });
+
+  assert.equal(result.status, 400);
+  assert.equal(result.body.error.code, "sensitive_identifier");
+  assert.equal(called, false);
+});
+
+test("retries a transient upstream failure once", async () => {
+  let calls = 0;
+  const answer = createAnswerService({
+    corpusIndex: index,
+    apiKey: "test-key",
+    fetchImpl: async () => {
+      calls += 1;
+      if (calls === 1) {
+        return new Response(JSON.stringify({ error: { message: "Try again." } }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" }
+        });
+      }
+      return new Response(JSON.stringify({
+        output_text: "Use the official USCIS address-change page.",
+        output: [{
+          type: "message",
+          content: [{
+            type: "output_text",
+            text: "Use the official USCIS address-change page.",
+            annotations: [{
+              type: "url_citation",
+              start_index: 0,
+              end_index: 43,
+              title: "Change Your Address",
+              url: "https://www.uscis.gov/addresschange"
+            }]
+          }]
+        }]
+      }), { status: 200, headers: { "Content-Type": "application/json" } });
+    }
+  });
+
+  const result = await answer({
+    question: "How do I change my address?",
+    language: "en"
+  });
+
+  assert.equal(calls, 2);
+  assert.equal(result.body.degraded, false);
+  assert.equal(result.body.grounded_on, "live_official_sources");
 });
 
 test("uses the previous user question only for short follow-up retrieval", () => {
@@ -210,6 +339,34 @@ test("keeps official immigration sources and filters unofficial citations", () =
     { title: "Visitor Visa", url: "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html" },
     { title: "I-94", url: "https://www.cbp.gov/travel/international-visitors/i-94" }
   ]);
+});
+
+test("filters translated duplicate source pages with mismatched language titles", () => {
+  const sources = extractSources({
+    output: [{
+      content: [{
+        annotations: [
+          {
+            url_citation: {
+              title: "د USCIS آنلاین حساب جوړولو څرنګوالي",
+              url: "https://www.uscis.gov/file-online/how-to-create-a-uscis-online-account-pashto-translation"
+            }
+          },
+          {
+            url_citation: {
+              title: "How to Create a USCIS Online Account",
+              url: "https://www.uscis.gov/file-online/how-to-create-a-uscis-online-account"
+            }
+          }
+        ]
+      }]
+    }]
+  });
+
+  assert.deepEqual(sources, [{
+    title: "How to Create a USCIS Online Account",
+    url: "https://www.uscis.gov/file-online/how-to-create-a-uscis-online-account"
+  }]);
 });
 
 test("extracts text from tool-assisted Responses API output", () => {

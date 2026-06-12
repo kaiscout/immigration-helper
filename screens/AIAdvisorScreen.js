@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Linking, Platform, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
@@ -20,36 +20,16 @@ import {
   saveFlowState,
   scoreTextMatch
 } from "../data/flowState";
-import { loadNotificationsAsync } from "../data/notificationService";
+import { createNotificationTrigger, loadNotificationsAsync } from "../data/notificationService";
+import { openExternalLink } from "../data/externalLinks";
 import euLanguageSupport from "../data/euLanguageSupport.json";
 
 const EU_LANGUAGE_SUPPORT = Object.values(euLanguageSupport);
 const euSupportTerms = (section, key) =>
   EU_LANGUAGE_SUPPORT.flatMap((language) => language?.[section]?.[key] || []);
 
-const SYSTEM_PROMPT = `
-You are Immigration Helper's U.S. immigration information assistant.
-Give every supported language the same reasoning quality, useful detail, conversational warmth, follow-up awareness, and task capability as English.
-Understand natural questions in the requested language without requiring English immigration terms or a specific phrasing.
-Keep every ordinary word in the requested language without accidentally mixing in another language or script, except official names, acronyms, and form numbers.
-Write naturally in the requested language, using its normal script, punctuation, phrasing, and sentence structure rather than translating English word for word.
-Use current official U.S. government sources and route the question to the agency that governs it: USCIS for immigration benefits, the Department of State for visas and consular processing, CBP for admission and I-94 matters, EOIR/DOJ for immigration court, and DOL for labor-certification matters.
-For visitor-visa questions from outside the United States, explain that the Department of State and the relevant U.S. embassy or consulate are the proper starting points, then provide useful official next steps.
-Do not provide legal advice, determine eligibility, predict approval, guarantee outcomes, or ask for sensitive identifiers.
-For case-specific or high-stakes decisions, recommend a licensed immigration attorney or DOJ-accredited representative.
-Use the provided checklist context only for organization and clearly treat it as user-provided information.
-Answer in the requested language.
-Sound like a calm, capable human assistant having a real conversation.
-Start with the direct answer, then explain useful details and next steps.
-Use natural everyday wording and contractions when appropriate. Be warm when the user sounds worried or confused.
-Do not sound like a policy manual, legal memo, chatbot script, or form letter.
-Avoid canned phrases, repetitive disclaimers, and unnecessary headings.
-Place an official citation immediately after each factual paragraph or list block it supports. Every factual paragraph or list block must have a relevant official citation. Do not collect citations in a bibliography at the end.
-Do not add raw citation tokens, manually written Markdown links, or decorative bold markers; the app displays citation annotations beneath the supported text.
-Keep answers concise, practical, and clear about dates, forms, fees, exceptions, and next steps.
-`;
-
-const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
+const CONFIGURED_AI_PROXY_URL = (process.env.EXPO_PUBLIC_AI_PROXY_URL || "").trim();
+const AI_PROXY_CLIENT_TOKEN = (process.env.EXPO_PUBLIC_AI_CLIENT_TOKEN || "").trim();
 const OFFICIAL_IMMIGRATION_DOMAINS = [
   "uscis.gov",
   "state.gov",
@@ -59,24 +39,6 @@ const OFFICIAL_IMMIGRATION_DOMAINS = [
   "justice.gov",
   "dol.gov"
 ];
-const VISITOR_VISA_TERMS = [
-  "visit the united states", "visit america", "visitor visa", "tourist visa", "tourism", "embassy", "consulate",
-  "abd yi ziyaret", "amerika yi ziyaret", "amerika yı ziyaret", "amerikayi ziyaret", "amerikayı ziyaret", "ziyaretci vizesi", "ziyaretçi vizesi", "turist vizesi", "buyukelcilik", "büyükelçilik", "konsolosluk",
-  "visitar estados unidos", "visa de visitante", "visa de turista", "turismo", "embajada", "consulado",
-  "visiter les etats unis", "visiter les états unis", "visa de visiteur", "visa touristique", "tourisme", "ambassade", "consulat",
-  "visitar os estados unidos", "visto de visitante", "visto de turista", "turismo", "embaixada", "consulado",
-  "visitare gli stati uniti", "visitare l america", "visto turistico", "visto per visitatori", "turismo", "ambasciata", "consolato",
-  "访问美国", "来美国旅游", "去美国旅游", "访客签证", "旅游签证", "美国大使馆", "美国领事馆",
-  "अमेरिका घूमने", "अमेरिका जाना", "विजिटर वीजा", "पर्यटक वीजा", "दूतावास", "वाणिज्य दूतावास",
-  "زيارة الولايات المتحدة", "تأشيرة زيارة", "تأشيرة سياحية", "السياحة", "السفارة", "القنصلية",
-  "যুক্তরাষ্ট্রে বেড়াতে", "আমেরিকা বেড়াতে", "ভিজিটর ভিসা", "পর্যটন ভিসা", "দূতাবাস", "কনস্যুলেট",
-  "посетить сша", "приехать в сша в гости", "гостевая виза", "туристическая виза", "туризм", "посольство", "консульство",
-  ...euSupportTerms("topics", "visitorVisa")
-];
-const AI_MODEL = (process.env.EXPO_PUBLIC_OPENAI_MODEL || "gpt-5.4-mini").trim();
-const OPENAI_API_KEY = (process.env.EXPO_PUBLIC_OPENAI_API_KEY || "").trim();
-const CONFIGURED_AI_PROXY_URL = (process.env.EXPO_PUBLIC_AI_PROXY_URL || "").trim();
-const AI_PROXY_CLIENT_TOKEN = (process.env.EXPO_PUBLIC_AI_CLIENT_TOKEN || "").trim();
 
 const developmentProxyUrl = () => {
   if (typeof __DEV__ === "undefined" || !__DEV__) return "";
@@ -94,18 +56,17 @@ const developmentProxyUrl = () => {
 };
 
 const AI_PROXY_URL = CONFIGURED_AI_PROXY_URL || developmentProxyUrl();
+const openEndedAiConfigured = Boolean(AI_PROXY_URL && AI_PROXY_CLIENT_TOKEN);
+const AI_REQUEST_TIMEOUT_MS = 90_000;
+const SENSITIVE_IDENTIFIER_PATTERNS = [
+  /\bA[-\s]?\d{7,9}\b/i,
+  /\b[A-Z]{3}\d{10}\b/i,
+  /\b\d{3}-\d{2}-\d{4}\b/,
+  /\b(?:\d[ -]*?){13,19}\b/
+];
 
-const isPlaceholderSecret = (value) =>
-  !value || /your[_-]?openai|your[_-]?api|replace|paste|example|placeholder/i.test(value);
-
-const openEndedAiConfigured = Boolean(AI_PROXY_URL || !isPlaceholderSecret(OPENAI_API_KEY));
-
-const officialDomainsForQuestion = (question) => {
-  const normalized = normalizeText(question);
-  return VISITOR_VISA_TERMS.some((term) => normalized.includes(normalizeText(term)))
-    ? ["state.gov", "cbp.gov"]
-    : OFFICIAL_IMMIGRATION_DOMAINS;
-};
+const containsSensitiveIdentifier = (value) =>
+  SENSITIVE_IDENTIFIER_PATTERNS.some((pattern) => pattern.test(String(value || "")));
 
 const INTENT_TERMS = {
   open: [
@@ -606,12 +567,12 @@ function buildFlowSummary(flow, state, lang, t) {
   const labels = summaryLabels(lang);
   const completed = progress.completed.map((step) => pickLocalized(step, "title", lang));
   const remaining = progress.remaining.map((step) => pickLocalized(step, "title", lang));
-  const dates = computeKeyDates(flow, state.noticeDate, lang).map((item) => `${item.label}: ${item.iso}`);
+  const dates = computeKeyDates(flow, state.noticeDate)
+    .map((item) => `${t(item.labelKey)}: ${item.iso}`);
 
   return [
     `${titleForFlow(flow, t)}: ${progress.completed.length}/${progress.total} ${labels.complete} (${progress.percent}%).`,
-    `${labels.noticeDate}: ${state.noticeDate || labels.notSet}.`,
-    `${labels.suggestedDate}: ${state.dueDate || labels.notSet}.`,
+    `${t("flow.computedDue")}: ${state.dueDate || labels.notSet}.`,
     `${labels.completed}: ${lineList(completed, labels)}.`,
     `${labels.remaining}: ${lineList(remaining, labels)}.`,
     dates.length ? `${labels.keyDates}: ${dates.join("; ")}.` : `${labels.keyDates}: ${labels.notCalculated}.`
@@ -649,6 +610,10 @@ function aiErrorMessage(status, data, t) {
 
   if (status === 429 || code === "insufficient_quota") {
     return t("ai.quotaIssue");
+  }
+
+  if (code === "sensitive_identifier") {
+    return t("privacy.consentSensitive");
   }
 
   return data?.error?.message || t("ai.requestFailed");
@@ -802,14 +767,21 @@ export default function AIAdvisorScreen({ navigation }) {
   ]);
 
   const loadScreenState = useCallback(async () => {
-    const [states, consent] = await Promise.all([
-      loadAllFlowStates(),
-      loadAiConsent()
-    ]);
-    setFlowStates(states);
-    setAiConsent(consent);
-    setConsentChecklist(consent?.shareChecklist === true);
-  }, []);
+    try {
+      const [states, consent] = await Promise.all([
+        loadAllFlowStates(),
+        loadAiConsent()
+      ]);
+      setFlowStates(states);
+      setAiConsent(consent);
+      setConsentChecklist(consent?.shareChecklist === true);
+    } catch {
+      setFlowStates({});
+      setAiConsent(null);
+      setConsentChecklist(false);
+      Alert.alert(t("alerts.loadingErrorTitle"), t("alerts.loadingErrorBody"));
+    }
+  }, [t]);
 
   useEffect(() => {
     loadScreenState();
@@ -822,10 +794,10 @@ export default function AIAdvisorScreen({ navigation }) {
   }, [messages, loading]);
 
   const prompts = [
-    t("ai.promptProgress"),
-    t("ai.promptTasks"),
-    t("ai.promptUscis"),
-    t("ai.promptScam")
+    { key: "progress", text: t("ai.promptProgress") },
+    { key: "tasks", text: t("ai.promptTasks") },
+    { key: "uscis", text: t("ai.promptUscis") },
+    { key: "scam", text: t("ai.promptScam") }
   ];
 
   const contextText = useMemo(() => buildAssistantContext(flowStates, lang, t), [flowStates, lang, t]);
@@ -835,8 +807,12 @@ export default function AIAdvisorScreen({ navigation }) {
   };
 
   const acceptAiConsent = async () => {
-    const consent = await saveAiConsent({ shareChecklist: consentChecklist });
-    setAiConsent(consent);
+    try {
+      const consent = await saveAiConsent({ shareChecklist: consentChecklist });
+      setAiConsent(consent);
+    } catch {
+      Alert.alert(t("alerts.saveErrorTitle"), t("alerts.saveErrorBody"));
+    }
   };
 
   const refreshAndSetStates = async () => {
@@ -870,28 +846,33 @@ export default function AIAdvisorScreen({ navigation }) {
   };
 
   const ensureNotificationPermission = async () => {
-    const { environment, Notifications } = await loadNotificationsAsync();
+    try {
+      const { environment, Notifications } = await loadNotificationsAsync();
 
-    if (environment === "web") {
-      Alert.alert(t("alerts.webReminderTitle"), t("alerts.webReminderBody"));
+      if (environment === "web") {
+        Alert.alert(t("alerts.webReminderTitle"), t("alerts.webReminderBody"));
+        return null;
+      }
+
+      if (environment === "expoGo") {
+        Alert.alert(t("alerts.expoGoNotificationsTitle"), t("alerts.expoGoNotificationsBody"));
+        return null;
+      }
+
+      const current = await Notifications.getPermissionsAsync();
+      if (current.granted) return Notifications;
+
+      const requested = await Notifications.requestPermissionsAsync();
+      if (!requested.granted) {
+        Alert.alert(t("reminders.permissionTitle"), t("reminders.permissionBody"));
+        return null;
+      }
+
+      return Notifications;
+    } catch {
+      Alert.alert(t("alerts.reminderErrorTitle"), t("alerts.reminderErrorBody"));
       return null;
     }
-
-    if (environment === "expoGo") {
-      Alert.alert(t("alerts.expoGoNotificationsTitle"), t("alerts.expoGoNotificationsBody"));
-      return null;
-    }
-
-    const current = await Notifications.getPermissionsAsync();
-    if (current.granted) return Notifications;
-
-    const requested = await Notifications.requestPermissionsAsync();
-    if (!requested.granted) {
-      Alert.alert(t("reminders.permissionTitle"), t("reminders.permissionBody"));
-      return null;
-    }
-
-    return Notifications;
   };
 
   const scheduleFlowReminder = async (flow, state, daysBefore) => {
@@ -908,18 +889,23 @@ export default function AIAdvisorScreen({ navigation }) {
       return t("alerts.pastDateBody");
     }
 
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: t("notifications.mailingTitle"),
-        body: daysBefore ? `${t("notifications.beforeDue")} ${state.dueDate}` : state.dueDate
-      },
-      trigger: { type: "date", date: fire }
-    });
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: t("notifications.mailingTitle"),
+          body: daysBefore ? `${t("notifications.beforeDue")} ${state.dueDate}` : state.dueDate,
+          sound: "default"
+        },
+        trigger: createNotificationTrigger({ type: "date", date: fire })
+      });
 
-    return t("ai.taskReminderSet", {
-      flow: titleForFlow(flow, t),
-      date: fire.toDateString()
-    });
+      return t("ai.taskReminderSet", {
+        flow: titleForFlow(flow, t),
+        date: fire.toLocaleDateString(lang)
+      });
+    } catch {
+      return t("alerts.reminderErrorBody");
+    }
   };
 
   const handleLocalTask = async (question) => {
@@ -960,8 +946,8 @@ export default function AIAdvisorScreen({ navigation }) {
 
       if (hasAnyTerm(q, intentTerms("link"))) {
         const url = openOfficialLink(question);
-        Linking.openURL(url);
-        return t("ai.taskOpenedLink");
+        const opened = await openExternalLink(url, t);
+        return opened ? t("ai.taskOpenedLink") : t("alerts.linkErrorBody");
       }
 
       if (hasAnyTerm(q, intentTerms("resource"))) {
@@ -996,14 +982,13 @@ export default function AIAdvisorScreen({ navigation }) {
     if (wantsDateQuery && flow) {
       const labels = summaryLabels(lang);
       const current = flowStates[flowKey] || {};
-      const dates = computeKeyDates(flow, current.noticeDate, lang)
-        .map((item) => `${item.label}: ${item.iso}`)
+      const dates = computeKeyDates(flow, current.noticeDate)
+        .map((item) => `${t(item.labelKey)}: ${item.iso}`)
         .join("\n");
 
       return [
         `${titleForFlow(flow, t)}:`,
-        `${labels.noticeDate}: ${current.noticeDate || labels.notSet}.`,
-        `${labels.suggestedDate}: ${current.dueDate || labels.notSet}.`,
+        `${t("flow.computedDue")}: ${current.dueDate || labels.notSet}.`,
         dates || `${labels.keyDates}: ${labels.notCalculated}.`
       ].join("\n");
     }
@@ -1023,7 +1008,9 @@ export default function AIAdvisorScreen({ navigation }) {
       });
       await refreshAndSetStates();
 
-      const dates = computeKeyDates(flow, date, lang).map((item) => `${item.label}: ${item.iso}`).join("\n");
+      const dates = computeKeyDates(flow, date)
+        .map((item) => `${t(item.labelKey)}: ${item.iso}`)
+        .join("\n");
       return `${t("ai.taskDateSaved", { flow: titleForFlow(flow, t), date })}\n${dates}`;
     }
 
@@ -1082,7 +1069,11 @@ export default function AIAdvisorScreen({ navigation }) {
 
   const sendMessage = async (preset) => {
     const question = (preset ?? input).trim();
-    if (!question) return;
+    if (!question || loading) return;
+    if (containsSensitiveIdentifier(question)) {
+      Alert.alert(t("ai.errorTitle"), t("privacy.consentSensitive"));
+      return;
+    }
 
     const userMessage = { role: "user", text: question };
     setMessages((current) => [...current, userMessage]);
@@ -1105,43 +1096,28 @@ export default function AIAdvisorScreen({ navigation }) {
         .map((msg) => `${msg.role === "user" ? "User" : "Assistant"}: ${msg.text}`)
         .join("\n");
 
-      const instructions = `${SYSTEM_PROMPT}\nRequested language code: ${i18n.language}.`;
       const sharedChecklistContext = aiConsent?.shareChecklist ? contextText : "";
-      const requestInput = `Recent conversation:\n${recentConversation}\n\nCurrent user question:\n${question}\n\nCurrent in-app checklist context:\n${sharedChecklistContext || "Not shared by user."}`;
-      const useProxy = Boolean(AI_PROXY_URL);
-      const requestBody = useProxy
-        ? {
-          model: AI_MODEL,
-          question,
-          conversation: recentConversation,
-          checklistContext: sharedChecklistContext,
-          language: i18n.language
-        }
-        : {
-          model: AI_MODEL,
-          instructions,
-          input: requestInput,
-          tools: [{
-            type: "web_search",
-            filters: { allowed_domains: officialDomainsForQuestion(question) }
-          }],
-          tool_choice: "required",
-          include: ["web_search_call.action.sources"],
-          store: false
-        };
-
-      const response = await fetch(useProxy ? AI_PROXY_URL : OPENAI_RESPONSES_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(useProxy
-            ? (AI_PROXY_CLIENT_TOKEN
-              ? { "X-Immigration-Helper-Token": AI_PROXY_CLIENT_TOKEN }
-              : {})
-            : { Authorization: `Bearer ${OPENAI_API_KEY}` })
-        },
-        body: JSON.stringify(requestBody)
-      });
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), AI_REQUEST_TIMEOUT_MS);
+      let response;
+      try {
+        response = await fetch(AI_PROXY_URL, {
+          method: "POST",
+          signal: controller.signal,
+          headers: {
+            "Content-Type": "application/json",
+            "X-Immigration-Helper-Token": AI_PROXY_CLIENT_TOKEN
+          },
+          body: JSON.stringify({
+            question,
+            conversation: recentConversation,
+            checklistContext: sharedChecklistContext,
+            language: i18n.language
+          })
+        });
+      } finally {
+        clearTimeout(timeout);
+      }
 
       const responseText = await response.text();
       let data = {};
@@ -1159,7 +1135,10 @@ export default function AIAdvisorScreen({ navigation }) {
 
       appendAssistant(answer, responseSources(data), responseSections(data));
     } catch (e) {
-      Alert.alert(t("ai.errorTitle"), String(e.message || e));
+      const message = e?.name === "AbortError"
+        ? t("ai.requestFailed")
+        : String(e?.message || e || t("ai.requestFailed"));
+      Alert.alert(t("ai.errorTitle"), message);
       appendAssistant(`${broadFallback(question, t)}\n\n${t("ai.requestFallback")}`);
     } finally {
       setLoading(false);
@@ -1235,7 +1214,11 @@ export default function AIAdvisorScreen({ navigation }) {
           <Text style={styles.consentSecondaryText}>{t("privacy.consentNotNow")}</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.policyLink} onPress={() => Linking.openURL(OFFICIAL_LINKS.privacy)}>
+        <TouchableOpacity
+          style={styles.policyLink}
+          onPress={() => openExternalLink(OFFICIAL_LINKS.privacy, t)}
+          accessibilityRole="link"
+        >
           <Ionicons name="open-outline" size={16} color={COLORS.primary} />
           <Text style={styles.policyLinkText}>{t("privacy.policyLink")}</Text>
         </TouchableOpacity>
@@ -1276,6 +1259,8 @@ export default function AIAdvisorScreen({ navigation }) {
               key={item.key}
               style={styles.progressCard}
               onPress={() => navigation.navigate("Flow", { flow: item.flow })}
+              accessibilityRole="button"
+              accessibilityLabel={item.title}
             >
               <Text style={styles.progressTitle}>{item.title}</Text>
               <Text style={styles.progressMeta}>
@@ -1290,8 +1275,15 @@ export default function AIAdvisorScreen({ navigation }) {
 
         <View style={styles.promptWrap}>
           {prompts.map((prompt) => (
-            <TouchableOpacity key={prompt} style={styles.promptChip} onPress={() => sendMessage(prompt)}>
-              <Text style={styles.promptText}>{prompt}</Text>
+            <TouchableOpacity
+              key={prompt.key}
+              style={[styles.promptChip, loading && styles.disabledControl]}
+              onPress={() => sendMessage(prompt.text)}
+              disabled={loading}
+              accessibilityRole="button"
+              accessibilityLabel={prompt.text}
+            >
+              <Text style={styles.promptText}>{prompt.text}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -1320,7 +1312,8 @@ export default function AIAdvisorScreen({ navigation }) {
                           <TouchableOpacity
                             key={`${source.url}-${sourceIndex}`}
                             style={[styles.answerSource, isRtl && styles.rtlRow]}
-                            onPress={() => Linking.openURL(source.url)}
+                            onPress={() => openExternalLink(source.url, t)}
+                            accessibilityRole="link"
                           >
                             <Ionicons name="open-outline" size={14} color={COLORS.primary} />
                             <Text
@@ -1353,7 +1346,8 @@ export default function AIAdvisorScreen({ navigation }) {
                   <TouchableOpacity
                     key={`${source.url}-${sourceIndex}`}
                     style={[styles.answerSource, isRtl && styles.rtlRow]}
-                    onPress={() => Linking.openURL(source.url)}
+                    onPress={() => openExternalLink(source.url, t)}
+                    accessibilityRole="link"
                   >
                     <Ionicons name="open-outline" size={14} color={COLORS.primary} />
                     <Text
@@ -1376,11 +1370,19 @@ export default function AIAdvisorScreen({ navigation }) {
         ) : null}
 
         <View style={styles.sourceRow}>
-          <TouchableOpacity style={styles.sourceBtn} onPress={() => Linking.openURL(OFFICIAL_LINKS.uscis)}>
+          <TouchableOpacity
+            style={styles.sourceBtn}
+            onPress={() => openExternalLink(OFFICIAL_LINKS.uscis, t)}
+            accessibilityRole="link"
+          >
             <Ionicons name="open-outline" size={16} color={COLORS.primary} />
             <Text style={styles.sourceText}>{t("ai.verifyUscis")}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.sourceBtn} onPress={() => Linking.openURL(OFFICIAL_LINKS.legal)}>
+          <TouchableOpacity
+            style={styles.sourceBtn}
+            onPress={() => openExternalLink(OFFICIAL_LINKS.legal, t)}
+            accessibilityRole="link"
+          >
             <Ionicons name="people-outline" size={16} color={COLORS.primary} />
             <Text style={styles.sourceText}>{t("resources.legalHelpTitle")}</Text>
           </TouchableOpacity>
@@ -1398,10 +1400,11 @@ export default function AIAdvisorScreen({ navigation }) {
           selectionColor={COLORS.primaryLight}
           multiline
           textAlignVertical="top"
+          maxLength={4000}
         />
 
         <TouchableOpacity
-          style={styles.sendBtn}
+          style={[styles.sendBtn, loading && styles.disabledControl]}
           onPress={() => sendMessage()}
           disabled={loading}
           accessibilityRole="button"
@@ -1657,5 +1660,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     alignItems: "center",
     justifyContent: "center"
-  }
+  },
+  disabledControl: { opacity: 0.5 }
 });

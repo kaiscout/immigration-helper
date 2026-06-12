@@ -1,19 +1,6 @@
-Immigration Helper upgrade files
+Immigration Helper project notes
 
-Replace these files in your project with the matching files in this zip:
-
-App.js
-package.json
-constants/theme.js
-screens/HomeScreen.js
-screens/FlowScreen.js
-screens/RemindersScreen.js
-screens/AIAdvisorScreen.js
-i18n/en.json
-i18n/tr.json
-i18n/es.json
-
-Then run:
+Install and run:
 npm install
 npm start
 
@@ -21,15 +8,18 @@ npm start
 8081 belongs to another project, it automatically selects the next available
 port without stopping the other project or asking an interactive question.
 
-AI setup:
+The app includes 30 interface languages. AI answers use the selected app
+language and cite supported official U.S. government sources directly beneath
+the relevant response sections.
+
+Local AI setup:
 The AI Helper can search the packaged USCIS corpus without an API key. This
 fallback returns the matching official passage and USCIS source.
 
 For custom, fully generated, human-like answers in every supported language:
 1. Create a new OpenAI API key at https://platform.openai.com/api-keys
 2. Copy .env.example to .env
-3. Add the key as a server-only secret:
-   OPENAI_API_KEY=your_openai_api_key_here
+3. Add the key as the server-only `OPENAI_API_KEY` value.
 4. Run:
    npm start
 
@@ -37,7 +27,7 @@ Or use the secure guided setup, which validates the key and writes the ignored
 `.env` file without displaying the key:
 npm run setup:ai-key
 
-Important: Never put a private key in EXPO_PUBLIC_OPENAI_API_KEY for a public
-build. Deploy `server/index.mjs` to a backend host with OPENAI_API_KEY stored
-there, then set:
-EXPO_PUBLIC_AI_PROXY_URL=https://your-backend.example.com/api/ai
+Important: Never put a private OpenAI key in an `EXPO_PUBLIC_` variable. The
+production app calls the Render service configured in `render.yaml`; Render
+stores the private OpenAI key. EAS stores only the public proxy URL and the app
+client token used for basic endpoint abuse deterrence.

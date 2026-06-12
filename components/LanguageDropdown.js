@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
 import { LANGUAGES } from "../i18n/languages";
@@ -18,9 +18,13 @@ export default function LanguageDropdown({ compact = false, buttonOnly = false, 
   const languageName = (item) => item.nativeLabel || t(item.labelKey);
 
   const selectLanguage = async (code) => {
-    await i18n.changeLanguage(code);
-    await savePreferredLanguage(code);
-    setOpen(false);
+    try {
+      await i18n.changeLanguage(code);
+      await savePreferredLanguage(code);
+      setOpen(false);
+    } catch {
+      Alert.alert(t("alerts.saveErrorTitle"), t("alerts.saveErrorBody"));
+    }
   };
 
   return (
@@ -68,7 +72,7 @@ export default function LanguageDropdown({ compact = false, buttonOnly = false, 
               <Text style={styles.menuTitle}>{t("common.language")}</Text>
               <TouchableOpacity
                 accessibilityRole="button"
-                accessibilityLabel="Close"
+                accessibilityLabel={t("common.close")}
                 style={styles.closeBtn}
                 onPress={() => setOpen(false)}
               >
@@ -85,6 +89,9 @@ export default function LanguageDropdown({ compact = false, buttonOnly = false, 
                     activeOpacity={0.85}
                     style={[styles.option, active && styles.optionActive]}
                     onPress={() => selectLanguage(item.code)}
+                    accessibilityRole="button"
+                    accessibilityLabel={languageName(item)}
+                    accessibilityState={{ selected: active }}
                   >
                     <View style={styles.optionLeft}>
                       <View style={[styles.optionBadge, active && styles.optionBadgeActive]}>

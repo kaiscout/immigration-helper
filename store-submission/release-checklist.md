@@ -21,12 +21,12 @@
 - [x] Add privacy policy URL to App Store Connect.
 - [x] Add support URL to App Store Connect.
 - [x] Update App Privacy questionnaire for online AI user content.
-- [x] Prepare required iPhone screenshots at `1242 x 2688`.
-- [x] Upload required screenshots.
+- [x] Prepare refreshed final iPhone screenshots at `1242 x 2688`.
+- [ ] Replace the previously uploaded screenshots with the refreshed files in `store-submission/screenshots/iphone-6.5/final`.
 - [x] Add age rating.
 - [x] Add review notes from `store-submission/review-notes.md`.
-- [x] Build production iOS binary with `eas build --platform ios --profile production`.
-- [x] Submit with EAS or manually through App Store Connect.
+- [ ] Build a fresh production iOS binary containing the final multilingual, AI, reminder, and target-date fixes with `eas build --platform ios --profile production`.
+- [ ] Select and submit that fresh build through App Store Connect.
 
 ## Before Google Play Submission
 

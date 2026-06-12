@@ -76,13 +76,16 @@ function serializeEnv(values) {
     "# Server-only OpenAI configuration. This file is ignored by Git.",
     `OPENAI_API_KEY=${values.OPENAI_API_KEY}`,
     `OPENAI_MODEL=${values.OPENAI_MODEL || model}`,
-    "USCIS_VECTOR_STORE_ID=",
-    "PORT=8787",
-    "ALLOWED_ORIGIN=*",
+    `USCIS_VECTOR_STORE_ID=${values.USCIS_VECTOR_STORE_ID || ""}`,
+    `AI_PROXY_CLIENT_TOKEN=${values.AI_PROXY_CLIENT_TOKEN || values.EXPO_PUBLIC_AI_CLIENT_TOKEN || ""}`,
+    `REQUIRE_AI_GENERATION=${values.REQUIRE_AI_GENERATION || "true"}`,
+    `REQUIRE_CLIENT_TOKEN=${values.REQUIRE_CLIENT_TOKEN || "true"}`,
+    `PORT=${values.PORT || "8787"}`,
+    `ALLOWED_ORIGIN=${values.ALLOWED_ORIGIN || "*"}`,
     "",
     "# Public production builds should point to the deployed backend.",
     `EXPO_PUBLIC_AI_PROXY_URL=${values.EXPO_PUBLIC_AI_PROXY_URL || ""}`,
-    `EXPO_PUBLIC_OPENAI_MODEL=${values.EXPO_PUBLIC_OPENAI_MODEL || model}`,
+    `EXPO_PUBLIC_AI_CLIENT_TOKEN=${values.EXPO_PUBLIC_AI_CLIENT_TOKEN || ""}`,
     ""
   ].join("\n");
 }

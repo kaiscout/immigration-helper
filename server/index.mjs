@@ -1,22 +1,35 @@
 import http from "node:http";
 import { timingSafeEqual } from "node:crypto";
-import { createAnswerService } from "./ai/answer.mjs";
+import { createAnswerService, SUPPORTED_AI_LANGUAGES } from "./ai/answer.mjs";
 import { createCorpusIndex, loadCorpus } from "./uscis/search.mjs";
 
+const SERVER_VERSION = "2026-06-12.2";
 const PORT = Number.parseInt(process.env.PORT || "8787", 10);
 const OPENAI_API_KEY = (process.env.OPENAI_API_KEY || "").trim();
 const OPENAI_MODEL = (process.env.OPENAI_MODEL || "gpt-5.4-mini").trim();
 const VECTOR_STORE_ID = (process.env.USCIS_VECTOR_STORE_ID || "").trim();
 const ALLOWED_ORIGIN = (process.env.ALLOWED_ORIGIN || "*").trim();
-const CLIENT_TOKEN = (process.env.AI_PROXY_CLIENT_TOKEN || "").trim();
+const CLIENT_TOKEN = (
+  process.env.AI_PROXY_CLIENT_TOKEN ||
+  (process.env.NODE_ENV !== "production" ? process.env.EXPO_PUBLIC_AI_CLIENT_TOKEN : "") ||
+  ""
+).trim();
 const REQUIRE_AI_GENERATION = process.env.REQUIRE_AI_GENERATION === "true";
+const REQUIRE_CLIENT_TOKEN = process.env.REQUIRE_CLIENT_TOKEN !== "false";
 const MAX_BODY_BYTES = 64 * 1024;
 const RATE_WINDOW_MS = 10 * 60 * 1000;
 const RATE_LIMIT = 30;
+const MAX_RATE_LIMIT_CLIENTS = 10_000;
 const requestLog = new Map();
+let rateLimitChecks = 0;
 
 if (REQUIRE_AI_GENERATION && !OPENAI_API_KEY) {
   throw new Error("OPENAI_API_KEY is required when REQUIRE_AI_GENERATION=true.");
+}
+if (REQUIRE_CLIENT_TOKEN && !CLIENT_TOKEN) {
+  throw new Error(
+    "AI_PROXY_CLIENT_TOKEN is required in production. Local development may use EXPO_PUBLIC_AI_CLIENT_TOKEN."
+  );
 }
 
 const corpus = loadCorpus();
@@ -34,7 +47,9 @@ function corsHeaders() {
     "Access-Control-Allow-Methods": "POST,OPTIONS",
     "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
     "Cache-Control": "no-store",
-    "Content-Type": "application/json; charset=utf-8"
+    "Content-Type": "application/json; charset=utf-8",
+    "Referrer-Policy": "no-referrer",
+    "X-Content-Type-Options": "nosniff"
   };
 }
 
@@ -61,6 +76,19 @@ function clientAddress(request) {
 
 function withinRateLimit(request) {
   const now = Date.now();
+  rateLimitChecks += 1;
+  if (rateLimitChecks % 100 === 0) {
+    for (const [key, timestamps] of requestLog) {
+      const recent = timestamps.filter((time) => now - time < RATE_WINDOW_MS);
+      if (recent.length) requestLog.set(key, recent);
+      else requestLog.delete(key);
+    }
+  }
+
+  while (requestLog.size >= MAX_RATE_LIMIT_CLIENTS) {
+    requestLog.delete(requestLog.keys().next().value);
+  }
+
   const address = clientAddress(request);
   const recent = (requestLog.get(address) || []).filter((time) => now - time < RATE_WINDOW_MS);
   if (recent.length >= RATE_LIMIT) return false;
@@ -93,7 +121,10 @@ const server = http.createServer(async (request, response) => {
       corpusPages: corpusIndex.pageCount,
       corpusChunks: corpusIndex.documents.length,
       aiGenerationConfigured: Boolean(OPENAI_API_KEY),
+      clientTokenRequired: REQUIRE_CLIENT_TOKEN,
       model: OPENAI_MODEL,
+      serverVersion: SERVER_VERSION,
+      supportedLanguages: Object.keys(SUPPORTED_AI_LANGUAGES).length,
       vectorStoreConfigured: Boolean(VECTOR_STORE_ID)
     });
     return;
@@ -106,6 +137,11 @@ const server = http.createServer(async (request, response) => {
 
   if (!authorized(request)) {
     sendJson(response, 401, { error: { message: "Unauthorized." } });
+    return;
+  }
+
+  if (!String(request.headers["content-type"] || "").toLowerCase().startsWith("application/json")) {
+    sendJson(response, 415, { error: { message: "Content-Type must be application/json." } });
     return;
   }
 
@@ -125,7 +161,12 @@ const server = http.createServer(async (request, response) => {
       sendJson(response, 413, { error: { message: "Request body is too large." } });
       return;
     }
-    sendJson(response, 400, { error: { message: error.message || "Invalid request." } });
+    if (error instanceof SyntaxError) {
+      sendJson(response, 400, { error: { message: "Invalid JSON request." } });
+      return;
+    }
+    console.error("AI request failed:", error?.message || error);
+    sendJson(response, 500, { error: { message: "The AI service could not answer right now." } });
   }
 });
 

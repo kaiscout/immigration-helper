@@ -42,13 +42,17 @@ export default function App() {
 
   useEffect(() => {
     (async () => {
-      const savedLanguage = await loadPreferredLanguage();
-      if (savedLanguage) {
-        await i18n.changeLanguage(savedLanguage);
-      }
+      try {
+        const savedLanguage = await loadPreferredLanguage();
+        if (savedLanguage) {
+          await i18n.changeLanguage(savedLanguage);
+        }
 
-      const seen = await AsyncStorage.getItem(ONBOARDING_KEY);
-      setInitialRoute(seen === "true" ? "Home" : "Onboarding");
+        const seen = await AsyncStorage.getItem(ONBOARDING_KEY);
+        setInitialRoute(seen === "true" ? "Home" : "Onboarding");
+      } catch {
+        setInitialRoute("Onboarding");
+      }
     })();
   }, []);
 

@@ -16,18 +16,18 @@ Organize immigration forms, key dates, reminders, and official USCIS resources i
 
 Immigration Helper helps you stay organized while preparing common immigration-related tasks such as TPS renewal, work authorization, and travel authorization.
 
-Use guided checklists, key-date calculators, local reminders, and official USCIS resource links to keep your next steps clear.
+Use guided checklists, user-selected target dates, local reminders, and official USCIS resource links to keep your next steps clear.
 
 Features:
 
 - Guided checklists for TPS renewal, EAD/work authorization, and travel authorization
-- Key-date helper for suggested mailing and follow-up dates
+- Target-date planner for dates copied from notices or current official instructions
 - Local notification reminders
 - Official USCIS links for forms, fees, case status, legal help, and scam prevention
 - Privacy-first design with checklist progress stored on your device
 - AI Helper with official-source citations for general immigration questions
 - Optional, consent-based checklist context for personalized organization help
-- English, Turkish, Spanish, Portuguese, Italian, Mandarin Chinese, Hindi, French, Modern Standard Arabic, Bengali, and Russian support
+- 30 supported languages, including English, Spanish, Turkish, Portuguese, Italian, French, German, Mandarin Chinese, Hindi, Modern Standard Arabic, Bengali, Russian, and all official EU languages
 
 Important: Immigration Helper is independent and is not affiliated with USCIS, DHS, or any government agency. The app provides general information and organization tools only. It does not provide legal advice, does not determine eligibility, and does not replace official USCIS instructions or help from a qualified attorney or DOJ-accredited representative.
 

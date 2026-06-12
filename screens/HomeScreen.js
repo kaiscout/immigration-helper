@@ -1,26 +1,15 @@
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
 import { OFFICIAL_LINKS } from "../constants/officialLinks";
+import { openExternalLink } from "../data/externalLinks";
+import eadFlow from "../data/flows/ead.json";
+import tpsFlow from "../data/flows/tps_renewal.json";
+import travelFlow from "../data/flows/travel_auth.json";
 
 export default function HomeScreen({ navigation }) {
   const { t } = useTranslation();
-  const [flows, setFlows] = useState(null);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const tps = require("../data/flows/tps_renewal.json");
-        const ead = require("../data/flows/ead.json");
-        const travel = require("../data/flows/travel_auth.json");
-        setFlows({ tps, ead, travel });
-      } catch (e) {
-        Alert.alert("Error", String(e));
-      }
-    })();
-  }, []);
 
   const processCards = [
     {
@@ -29,7 +18,7 @@ export default function HomeScreen({ navigation }) {
       subtitle: t("home.tpsSubtitle"),
       icon: "shield-checkmark-outline",
       badge: t("home.guided"),
-      flow: flows?.tps
+      flow: tpsFlow
     },
     {
       key: "ead",
@@ -37,7 +26,7 @@ export default function HomeScreen({ navigation }) {
       subtitle: t("home.eadSubtitle"),
       icon: "briefcase-outline",
       badge: t("home.documents"),
-      flow: flows?.ead
+      flow: eadFlow
     },
     {
       key: "travel",
@@ -45,7 +34,7 @@ export default function HomeScreen({ navigation }) {
       subtitle: t("home.travelSubtitle"),
       icon: "airplane-outline",
       badge: t("home.caution"),
-      flow: flows?.travel
+      flow: travelFlow
     }
   ];
 
@@ -56,16 +45,33 @@ export default function HomeScreen({ navigation }) {
           <View style={styles.heroIcon}>
             <Ionicons name="sparkles-outline" size={26} color={COLORS.primary} />
           </View>
-          <TouchableOpacity style={styles.safePill} onPress={() => navigation.navigate("Privacy")}>
+          <TouchableOpacity
+            style={styles.safePill}
+            onPress={() => navigation.navigate("Privacy")}
+            accessibilityRole="button"
+            accessibilityLabel={t("privacy.title")}
+          >
             <Ionicons name="lock-closed-outline" size={14} color={COLORS.success} />
             <Text style={styles.safePillText}>{t("home.privacyFirst")}</Text>
           </TouchableOpacity>
         </View>
-        <Text style={styles.appTitle}>{t("appTitle")}</Text>
+        <Text
+          style={styles.appTitle}
+          numberOfLines={3}
+          adjustsFontSizeToFit
+          minimumFontScale={0.72}
+        >
+          {t("appTitle")}
+        </Text>
         <Text style={styles.heroSubtitle}>{t("home.heroSubtitle")}</Text>
       </View>
 
-      <TouchableOpacity style={styles.aiCard} onPress={() => navigation.navigate("AIAdvisor")}>
+      <TouchableOpacity
+        style={styles.aiCard}
+        onPress={() => navigation.navigate("AIAdvisor")}
+        accessibilityRole="button"
+        accessibilityLabel={t("ai.title")}
+      >
         <View style={styles.aiLeft}>
           <View style={styles.aiIcon}>
             <Ionicons name="chatbubble-ellipses-outline" size={22} color={COLORS.primaryTextOn} />
@@ -79,12 +85,22 @@ export default function HomeScreen({ navigation }) {
       </TouchableOpacity>
 
       <View style={styles.quickGrid}>
-        <TouchableOpacity style={styles.quickCard} onPress={() => navigation.navigate("Reminders")}>
+        <TouchableOpacity
+          style={styles.quickCard}
+          onPress={() => navigation.navigate("Reminders")}
+          accessibilityRole="button"
+          accessibilityLabel={t("home.quickReminders")}
+        >
           <Ionicons name="alarm-outline" size={22} color={COLORS.primary} />
           <Text style={styles.quickTitle}>{t("home.quickReminders")}</Text>
           <Text style={styles.quickSub}>{t("home.quickRemindersSub")}</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.quickCard} onPress={() => navigation.navigate("Resources")}>
+        <TouchableOpacity
+          style={styles.quickCard}
+          onPress={() => navigation.navigate("Resources")}
+          accessibilityRole="button"
+          accessibilityLabel={t("home.quickResources")}
+        >
           <Ionicons name="library-outline" size={22} color={COLORS.primary} />
           <Text style={styles.quickTitle}>{t("home.quickResources")}</Text>
           <Text style={styles.quickSub}>{t("home.quickResourcesSub")}</Text>
@@ -98,9 +114,10 @@ export default function HomeScreen({ navigation }) {
       {processCards.map((card) => (
         <TouchableOpacity
           key={card.key}
-          style={[styles.card, !flows && styles.disabled]}
-          disabled={!flows}
+          style={styles.card}
           onPress={() => navigation.navigate("Flow", { flow: card.flow })}
+          accessibilityRole="button"
+          accessibilityLabel={card.title}
         >
           <View style={styles.cardIcon}>
             <Ionicons name={card.icon} size={24} color={COLORS.primary} />
@@ -120,11 +137,21 @@ export default function HomeScreen({ navigation }) {
       </View>
 
       <View style={styles.bottomLinks}>
-        <TouchableOpacity style={styles.bottomLink} onPress={() => navigation.navigate("Privacy")}>
+        <TouchableOpacity
+          style={styles.bottomLink}
+          onPress={() => navigation.navigate("Privacy")}
+          accessibilityRole="button"
+          accessibilityLabel={t("privacy.title")}
+        >
           <Ionicons name="lock-closed-outline" size={16} color={COLORS.subtext} />
           <Text style={styles.bottomLinkText}>{t("privacy.title")}</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.bottomLink} onPress={() => Linking.openURL(OFFICIAL_LINKS.scams)}>
+        <TouchableOpacity
+          style={styles.bottomLink}
+          onPress={() => openExternalLink(OFFICIAL_LINKS.scams, t)}
+          accessibilityRole="link"
+          accessibilityLabel={t("resources.scamsTitle")}
+        >
           <Ionicons name="alert-circle-outline" size={16} color={COLORS.subtext} />
           <Text style={styles.bottomLinkText}>{t("resources.scamsTitle")}</Text>
         </TouchableOpacity>
@@ -166,11 +193,11 @@ const styles = StyleSheet.create({
     borderColor: "#BBF7D0"
   },
   safePillText: { color: COLORS.success, fontWeight: "900", fontSize: 12 },
-  appTitle: { fontSize: 30, fontWeight: "900", color: COLORS.text, letterSpacing: -0.8 },
+  appTitle: { fontSize: 24, lineHeight: 30, fontWeight: "900", color: COLORS.text, letterSpacing: 0 },
   heroSubtitle: { marginTop: SPACING.sm, color: COLORS.subtext, fontSize: 15, lineHeight: 22 },
   sectionHeader: { marginTop: SPACING.sm },
   sectionTitle: { fontSize: 14, fontWeight: "800", color: COLORS.subtext, textTransform: "uppercase", letterSpacing: 0.8 },
-  title: { fontSize: 26, fontWeight: "900", color: COLORS.text, letterSpacing: -0.5 },
+  title: { fontSize: 26, fontWeight: "900", color: COLORS.text, letterSpacing: 0 },
   aiCard: {
     backgroundColor: COLORS.ai,
     padding: SPACING.lg,
@@ -232,7 +259,6 @@ const styles = StyleSheet.create({
   },
   cardTitle: { fontSize: 18, fontWeight: "900", color: COLORS.text },
   cardSub: { marginTop: 4, color: COLORS.subtext, fontSize: 13, lineHeight: 18 },
-  disabled: { opacity: 0.45 },
   disclaimerBox: { flexDirection: "row", gap: 8, alignItems: "flex-start", marginTop: SPACING.md },
   disclaimer: { color: COLORS.subtext, fontSize: 12, lineHeight: 18, flex: 1 },
   bottomLinks: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 10, marginTop: SPACING.sm },

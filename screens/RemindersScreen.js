@@ -3,7 +3,11 @@ import { useTranslation } from "react-i18next";
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
-import { getNotificationEnvironment, loadNotificationsAsync } from "../data/notificationService";
+import {
+  createNotificationTrigger,
+  getNotificationEnvironment,
+  loadNotificationsAsync
+} from "../data/notificationService";
 
 export default function RemindersScreen() {
   const { t } = useTranslation();
@@ -17,86 +21,112 @@ export default function RemindersScreen() {
         return;
       }
 
-      const { Notifications } = await loadNotificationsAsync();
-      const current = await Notifications.getPermissionsAsync();
-      setPermission(current.granted ? "granted" : "undetermined");
+      try {
+        const { Notifications } = await loadNotificationsAsync();
+        const current = await Notifications.getPermissionsAsync();
+        setPermission(current.granted ? "granted" : "undetermined");
+      } catch {
+        setPermission("undetermined");
+      }
     })();
   }, []);
 
   const ensurePermission = async () => {
-    const { environment, Notifications } = await loadNotificationsAsync();
+    try {
+      const { environment, Notifications } = await loadNotificationsAsync();
 
-    if (environment === "web") {
-      Alert.alert(t("alerts.webReminderTitle"), t("alerts.webReminderBody"));
-      return null;
-    }
+      if (environment === "web") {
+        Alert.alert(t("alerts.webReminderTitle"), t("alerts.webReminderBody"));
+        return null;
+      }
 
-    if (environment === "expoGo") {
-      Alert.alert(t("alerts.expoGoNotificationsTitle"), t("alerts.expoGoNotificationsBody"));
-      setPermission("expoGo");
-      return null;
-    }
+      if (environment === "expoGo") {
+        Alert.alert(t("alerts.expoGoNotificationsTitle"), t("alerts.expoGoNotificationsBody"));
+        setPermission("expoGo");
+        return null;
+      }
 
-    const current = await Notifications.getPermissionsAsync();
-    if (current.granted) {
-      setPermission("granted");
+      const current = await Notifications.getPermissionsAsync();
+      if (current.granted) {
+        setPermission("granted");
+        return Notifications;
+      }
+
+      const requested = await Notifications.requestPermissionsAsync();
+      setPermission(requested.granted ? "granted" : "denied");
+
+      if (!requested.granted) {
+        Alert.alert(t("reminders.permissionTitle"), t("reminders.permissionBody"));
+        return null;
+      }
+
       return Notifications;
-    }
-
-    const requested = await Notifications.requestPermissionsAsync();
-    setPermission(requested.granted ? "granted" : "denied");
-
-    if (!requested.granted) {
-      Alert.alert(t("reminders.permissionTitle"), t("reminders.permissionBody"));
+    } catch {
+      Alert.alert(t("alerts.reminderErrorTitle"), t("alerts.reminderErrorBody"));
       return null;
     }
-
-    return Notifications;
   };
 
   const testNotif = async () => {
     const Notifications = await ensurePermission();
     if (!Notifications) return;
 
-    await Notifications.scheduleNotificationAsync({
-      content: { title: t("reminders.testTitle"), body: t("reminders.testBody") },
-      trigger: { type: "timeInterval", seconds: 3, repeats: false }
-    });
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: t("reminders.testTitle"),
+          body: t("reminders.testBody"),
+          sound: "default"
+        },
+        trigger: createNotificationTrigger({ type: "timeInterval", seconds: 3, repeats: false })
+      });
 
-    Alert.alert(t("reminders.scheduledTitle"), t("reminders.scheduledBody"));
+      Alert.alert(t("reminders.scheduledTitle"), t("reminders.scheduledBody"));
+    } catch {
+      Alert.alert(t("alerts.reminderErrorTitle"), t("alerts.reminderErrorBody"));
+    }
   };
 
   const scheduleQuick = async (type, seconds) => {
     const Notifications = await ensurePermission();
     if (!Notifications) return;
 
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: t(`reminders.${type}Title`),
-        body: t(`reminders.${type}Body`)
-      },
-      trigger: { type: "timeInterval", seconds, repeats: false }
-    });
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: t(`reminders.${type}Title`),
+          body: t(`reminders.${type}Body`),
+          sound: "default"
+        },
+        trigger: createNotificationTrigger({ type: "timeInterval", seconds, repeats: false })
+      });
 
-    Alert.alert(t("reminders.scheduledTitle"), t("reminders.quickScheduled"));
+      Alert.alert(t("reminders.scheduledTitle"), t("reminders.quickScheduled"));
+    } catch {
+      Alert.alert(t("alerts.reminderErrorTitle"), t("alerts.reminderErrorBody"));
+    }
   };
 
   const clearAll = async () => {
-    const { environment, Notifications } = await loadNotificationsAsync();
+    try {
+      const { environment, Notifications } = await loadNotificationsAsync();
 
-    if (environment === "web") {
-      Alert.alert(t("alerts.webReminderTitle"), t("alerts.webReminderBody"));
-      return;
+      if (environment === "web") {
+        Alert.alert(t("alerts.webReminderTitle"), t("alerts.webReminderBody"));
+        return;
+      }
+
+      if (environment === "expoGo") {
+        Alert.alert(t("alerts.expoGoNotificationsTitle"), t("alerts.expoGoNotificationsBody"));
+        setPermission("expoGo");
+        return;
+      }
+
+      await Notifications.cancelAllScheduledNotificationsAsync();
+      Alert.alert(t("notifications.clearedTitle"), t("notifications.clearedBody"));
+    } catch {
+      Alert.alert(t("alerts.reminderErrorTitle"), t("alerts.reminderErrorBody"));
     }
-
-    if (environment === "expoGo") {
-      Alert.alert(t("alerts.expoGoNotificationsTitle"), t("alerts.expoGoNotificationsBody"));
-      setPermission("expoGo");
-      return;
-    }
-
-    await Notifications.cancelAllScheduledNotificationsAsync();
-    Alert.alert(t("notifications.clearedTitle"), t("notifications.clearedBody"));
   };
 
   const options = [

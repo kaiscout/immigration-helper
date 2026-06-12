@@ -8,10 +8,10 @@ Suggested review path:
 
 1. Open the app.
 2. Complete onboarding.
-3. Choose a language: English, Turkish, Spanish, Portuguese, Italian, Mandarin Chinese, Hindi, French, Modern Standard Arabic, Bengali, or Russian.
+3. Choose any of the 30 available languages. This includes English, Turkish, Spanish, Portuguese, Italian, Mandarin Chinese, Hindi, French, Modern Standard Arabic, Bengali, Russian, and all official EU languages.
 4. Open TPS Renewal, Work Permit, or Travel Authorization.
 5. Enter a sample date such as `2026-07-01`.
-6. Tap Save to see suggested key dates.
+6. Tap Save to see personal planning dates. The app does not calculate USCIS deadlines and tells users to verify dates against their notice or current official instructions.
 7. Open Resources to verify official links.
 8. Open Reminders and send a test notification.
 9. Open Privacy & Safety to review disclosures.

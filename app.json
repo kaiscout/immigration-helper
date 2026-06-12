@@ -27,6 +27,11 @@
       "package": "com.denizizci.immigrationhelper",
       "permissions": [
         "POST_NOTIFICATIONS"
+      ],
+      "blockedPermissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
       ]
     },
     "web": {
@@ -39,6 +44,14 @@
       }
     },
     "plugins": [
+      [
+        "expo-notifications",
+        {
+          "color": "#2563EB",
+          "defaultChannel": "immigration-reminders",
+          "enableBackgroundRemoteNotifications": false
+        }
+      ],
       [
         "expo-splash-screen",
         {

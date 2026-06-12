@@ -34,18 +34,22 @@ async function main() {
   const exampleEnv = parseEnv(examplePath);
   const read = (key) => process.env[key] || localEnv[key] || exampleEnv[key] || "";
   const serverApiKey = read("OPENAI_API_KEY").trim();
-  const clientApiKey = read("EXPO_PUBLIC_OPENAI_API_KEY").trim();
   const proxyUrl = read("EXPO_PUBLIC_AI_PROXY_URL").trim();
-  const model = read("EXPO_PUBLIC_OPENAI_MODEL").trim() || "gpt-5.4-mini";
+  const proxyToken = read("EXPO_PUBLIC_AI_CLIENT_TOKEN").trim();
+  const model = read("OPENAI_MODEL").trim() || "gpt-5.4-mini";
   const live = process.argv.includes("--live");
 
   if (proxyUrl) {
     console.log(`AI configured through proxy: ${proxyUrl}`);
     console.log("No client-side OpenAI key is required for the app bundle.");
+    if (!proxyToken) {
+      console.error("EXPO_PUBLIC_AI_CLIENT_TOKEN is missing.");
+      process.exit(1);
+    }
     return;
   }
 
-  const apiKey = !isPlaceholder(serverApiKey) ? serverApiKey : clientApiKey;
+  const apiKey = serverApiKey;
   if (isPlaceholder(apiKey)) {
     console.log("USCIS corpus fallback is ready and does not require an API key.");
     console.log("Fully generated multilingual answers are not configured yet.");
@@ -54,11 +58,7 @@ async function main() {
   }
 
   console.log(`OpenAI generation is configured. Model: ${model}`);
-  console.log(
-    !isPlaceholder(serverApiKey)
-      ? "The key is server-only and will not be bundled into the app."
-      : "Warning: EXPO_PUBLIC_OPENAI_API_KEY is visible in the client bundle. Use only for local testing."
-  );
+  console.log("The key is server-only and will not be bundled into the app.");
   console.log("Restart with npm start so the AI server reloads environment variables.");
 
   if (!live) return;
@@ -71,7 +71,8 @@ async function main() {
     },
     body: JSON.stringify({
       model,
-      input: "Reply with only: OK"
+      input: "Reply with only: OK",
+      store: false
     })
   });
 
@@ -81,7 +82,11 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`Live OpenAI test succeeded: ${data.output_text || "OK"}`);
+  const output = (data.output || [])
+    .flatMap((item) => item.content || [])
+    .find((item) => item.type === "output_text")
+    ?.text;
+  console.log(`Live OpenAI test succeeded: ${output || "OK"}`);
 }
 
 main().catch((error) => {

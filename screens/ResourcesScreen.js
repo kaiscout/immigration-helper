@@ -1,8 +1,9 @@
-import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
 import { OFFICIAL_RESOURCES } from "../data/resources";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
+import { openExternalLink } from "../data/externalLinks";
 
 export default function ResourcesScreen({ navigation }) {
   const { t } = useTranslation();
@@ -16,7 +17,13 @@ export default function ResourcesScreen({ navigation }) {
       </View>
 
       {OFFICIAL_RESOURCES.map((item) => (
-        <TouchableOpacity key={item.id} style={styles.resource} onPress={() => Linking.openURL(item.url)}>
+        <TouchableOpacity
+          key={item.id}
+          style={styles.resource}
+          onPress={() => openExternalLink(item.url, t)}
+          accessibilityRole="link"
+          accessibilityLabel={t(item.titleKey)}
+        >
           <View style={styles.iconBox}>
             <Ionicons name={item.icon} size={22} color={COLORS.primary} />
           </View>
@@ -28,7 +35,12 @@ export default function ResourcesScreen({ navigation }) {
         </TouchableOpacity>
       ))}
 
-      <TouchableOpacity style={styles.privacyBtn} onPress={() => navigation.navigate("Privacy")}>
+      <TouchableOpacity
+        style={styles.privacyBtn}
+        onPress={() => navigation.navigate("Privacy")}
+        accessibilityRole="button"
+        accessibilityLabel={t("privacy.title")}
+      >
         <Ionicons name="lock-closed-outline" size={18} color={COLORS.text} />
         <Text style={styles.privacyText}>{t("privacy.title")}</Text>
       </TouchableOpacity>
