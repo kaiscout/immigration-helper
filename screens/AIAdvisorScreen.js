@@ -68,6 +68,7 @@ const VISITOR_VISA_TERMS = [
 const AI_MODEL = (process.env.EXPO_PUBLIC_OPENAI_MODEL || "gpt-5.4-mini").trim();
 const OPENAI_API_KEY = (process.env.EXPO_PUBLIC_OPENAI_API_KEY || "").trim();
 const CONFIGURED_AI_PROXY_URL = (process.env.EXPO_PUBLIC_AI_PROXY_URL || "").trim();
+const AI_PROXY_CLIENT_TOKEN = (process.env.EXPO_PUBLIC_AI_CLIENT_TOKEN || "").trim();
 
 const developmentProxyUrl = () => {
   if (typeof __DEV__ === "undefined" || !__DEV__) return "";
@@ -1029,7 +1030,11 @@ export default function AIAdvisorScreen({ navigation }) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(useProxy ? {} : { Authorization: `Bearer ${OPENAI_API_KEY}` })
+          ...(useProxy
+            ? (AI_PROXY_CLIENT_TOKEN
+              ? { "X-Immigration-Helper-Token": AI_PROXY_CLIENT_TOKEN }
+              : {})
+            : { Authorization: `Bearer ${OPENAI_API_KEY}` })
         },
         body: JSON.stringify(requestBody)
       });

@@ -1,4 +1,5 @@
 import http from "node:http";
+import { timingSafeEqual } from "node:crypto";
 import { createAnswerService } from "./ai/answer.mjs";
 import { createCorpusIndex, loadCorpus } from "./uscis/search.mjs";
 
@@ -7,10 +8,17 @@ const OPENAI_API_KEY = (process.env.OPENAI_API_KEY || "").trim();
 const OPENAI_MODEL = (process.env.OPENAI_MODEL || "gpt-5.4-mini").trim();
 const VECTOR_STORE_ID = (process.env.USCIS_VECTOR_STORE_ID || "").trim();
 const ALLOWED_ORIGIN = (process.env.ALLOWED_ORIGIN || "*").trim();
+const CLIENT_TOKEN = (process.env.AI_PROXY_CLIENT_TOKEN || "").trim();
+const REQUIRE_AI_GENERATION = process.env.REQUIRE_AI_GENERATION === "true";
 const MAX_BODY_BYTES = 64 * 1024;
 const RATE_WINDOW_MS = 10 * 60 * 1000;
 const RATE_LIMIT = 30;
 const requestLog = new Map();
+
+if (REQUIRE_AI_GENERATION && !OPENAI_API_KEY) {
+  throw new Error("OPENAI_API_KEY is required when REQUIRE_AI_GENERATION=true.");
+}
+
 const corpus = loadCorpus();
 const corpusIndex = createCorpusIndex(corpus);
 const answerQuestion = createAnswerService({
@@ -22,12 +30,21 @@ const answerQuestion = createAnswerService({
 
 function corsHeaders() {
   return {
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Headers": "Content-Type, X-Immigration-Helper-Token",
     "Access-Control-Allow-Methods": "POST,OPTIONS",
     "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
     "Cache-Control": "no-store",
     "Content-Type": "application/json; charset=utf-8"
   };
+}
+
+function authorized(request) {
+  if (!CLIENT_TOKEN) return true;
+  const supplied = String(request.headers["x-immigration-helper-token"] || "");
+  const expectedBuffer = Buffer.from(CLIENT_TOKEN);
+  const suppliedBuffer = Buffer.from(supplied);
+  return suppliedBuffer.length === expectedBuffer.length &&
+    timingSafeEqual(suppliedBuffer, expectedBuffer);
 }
 
 function sendJson(response, status, body) {
@@ -87,6 +104,11 @@ const server = http.createServer(async (request, response) => {
     return;
   }
 
+  if (!authorized(request)) {
+    sendJson(response, 401, { error: { message: "Unauthorized." } });
+    return;
+  }
+
   if (!withinRateLimit(request)) {
     sendJson(response, 429, {
       error: { message: "Too many requests. Please wait a few minutes and try again." }
@@ -107,10 +129,19 @@ const server = http.createServer(async (request, response) => {
   }
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`USCIS AI proxy listening on http://localhost:${PORT}`);
   console.log(
     `Loaded ${corpusIndex.pageCount} USCIS page(s) and ` +
     `${corpusIndex.documents.length} searchable passage(s).`
   );
 });
+
+function shutdown(signal) {
+  console.log(`${signal} received. Closing USCIS AI proxy.`);
+  server.close(() => process.exit(0));
+  setTimeout(() => process.exit(1), 10_000).unref();
+}
+
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));

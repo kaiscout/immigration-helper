@@ -1,8 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import zlib from "node:zlib";
-import { CORPUS_PATH } from "./corpus.mjs";
-import { PACKAGED_CORPUS_PATH } from "./search.mjs";
+import { CORPUS_PATH, PACKAGED_CORPUS_PATH } from "./paths.mjs";
 
 export function packageCorpus() {
   if (!fs.existsSync(CORPUS_PATH)) {

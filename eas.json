@@ -4,10 +4,12 @@
   },
   "build": {
     "development": {
+      "environment": "development",
       "developmentClient": true,
       "distribution": "internal"
     },
     "preview": {
+      "environment": "preview",
       "distribution": "internal",
       "ios": {
         "simulator": false
@@ -17,6 +19,7 @@
       }
     },
     "production": {
+      "environment": "production",
       "autoIncrement": true,
       "distribution": "store",
       "android": {

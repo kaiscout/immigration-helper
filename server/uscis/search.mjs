@@ -1,8 +1,8 @@
 import fs from "node:fs";
 import zlib from "node:zlib";
-import { CORPUS_PATH } from "./corpus.mjs";
+import { CORPUS_PATH, PACKAGED_CORPUS_PATH } from "./paths.mjs";
 
-export const PACKAGED_CORPUS_PATH = `${CORPUS_PATH}.gz`;
+export { PACKAGED_CORPUS_PATH };
 
 const STOP_WORDS = new Set([
   "about", "after", "also", "and", "are", "can", "could", "did", "does", "for",

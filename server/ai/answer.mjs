@@ -438,6 +438,7 @@ export function createAnswerService({
     try {
       const openAIResponse = await fetchImpl("https://api.openai.com/v1/responses", {
         method: "POST",
+        signal: AbortSignal.timeout(75_000),
         headers: {
           Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json"

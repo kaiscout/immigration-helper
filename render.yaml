@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: immigration-helper-ai
+    runtime: docker
+    plan: starter
+    region: virginia
+    branch: main
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-5.4-mini
+      - key: REQUIRE_AI_GENERATION
+        value: "true"
+      - key: AI_PROXY_CLIENT_TOKEN
+        sync: false
+      - key: USCIS_VECTOR_STORE_ID
+        sync: false
+      - key: ALLOWED_ORIGIN
+        value: "*"

@@ -10,10 +10,9 @@ import {
   normalizeUscisUrl,
   parseRobotsRules
 } from "./config.mjs";
+import { CORPUS_PATH, DATA_DIR, MANIFEST_PATH } from "./paths.mjs";
 
-export const DATA_DIR = path.resolve("server/data");
-export const CORPUS_PATH = path.join(DATA_DIR, "uscis-corpus.jsonl");
-export const MANIFEST_PATH = path.join(DATA_DIR, "uscis-manifest.json");
+export { CORPUS_PATH, DATA_DIR, MANIFEST_PATH };
 
 const sleep = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
 
