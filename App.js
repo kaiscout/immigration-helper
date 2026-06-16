@@ -16,6 +16,7 @@ import RemindersScreen from "./screens/RemindersScreen";
 import AIAdvisorScreen from "./screens/AIAdvisorScreen";
 import ResourcesScreen from "./screens/ResourcesScreen";
 import PrivacyScreen from "./screens/PrivacyScreen";
+import PaywallScreen from "./screens/PaywallScreen";
 import { COLORS } from "./constants/theme";
 import { loadPreferredLanguage } from "./data/languagePreference";
 import LanguageDropdown from "./components/LanguageDropdown";
@@ -122,6 +123,11 @@ export default function App() {
           name="Privacy"
           component={PrivacyScreen}
           options={{ title: t("privacy.title") }}
+        />
+        <Stack.Screen
+          name="Paywall"
+          component={PaywallScreen}
+          options={{ title: t("plus.shortTitle") }}
         />
       </Stack.Navigator>
     </NavigationContainer>

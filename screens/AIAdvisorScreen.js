@@ -22,6 +22,12 @@ import {
 } from "../data/flowState";
 import { createNotificationTrigger, loadNotificationsAsync } from "../data/notificationService";
 import { openExternalLink } from "../data/externalLinks";
+import {
+  FREE_AI_QUESTION_LIMIT,
+  loadAiUsage,
+  loadSubscriptionState,
+  recordAiQuestion
+} from "../data/subscriptionService";
 import euLanguageSupport from "../data/euLanguageSupport.json";
 
 const EU_LANGUAGE_SUPPORT = Object.values(euLanguageSupport);
@@ -58,6 +64,23 @@ const developmentProxyUrl = () => {
 const AI_PROXY_URL = CONFIGURED_AI_PROXY_URL || developmentProxyUrl();
 const openEndedAiConfigured = Boolean(AI_PROXY_URL && AI_PROXY_CLIENT_TOKEN);
 const AI_REQUEST_TIMEOUT_MS = 90_000;
+const LOADING_STAGE_KEYS = [
+  "ai.loadingSources",
+  "ai.loadingOfficial",
+  "ai.loadingWriting"
+];
+const FOLLOWUP_TRANSLATION_KEYS = {
+  nextSteps: "ai.followupNextSteps",
+  documents: "ai.followupDocuments",
+  official: "ai.followupOfficial",
+  fees: "ai.followupFees",
+  timeline: "ai.followupTimeline",
+  caseStatus: "ai.followupCaseStatus",
+  scams: "ai.followupScams",
+  legalHelp: "ai.followupLegalHelp",
+  forms: "ai.followupForms",
+  checklist: "ai.followupChecklist"
+};
 const SENSITIVE_IDENTIFIER_PATTERNS = [
   /\bA[-\s]?\d{7,9}\b/i,
   /\b[A-Z]{3}\d{10}\b/i,
@@ -749,6 +772,37 @@ function responseSections(data) {
     });
 }
 
+function responseFollowups(data, t) {
+  const rawItems = Array.isArray(data?.followups) ? data.followups : [];
+  const seen = new Set();
+  return rawItems.flatMap((item) => {
+    const id = typeof item === "string" ? item : item?.id;
+    const key = FOLLOWUP_TRANSLATION_KEYS[id];
+    if (!id || !key || seen.has(id)) return [];
+    seen.add(id);
+    const label = t(key);
+    return [{ id, label, prompt: label }];
+  }).slice(0, 3);
+}
+
+function sectionsForProgressiveReveal(text, sources = [], sections = []) {
+  const cleanedSections = Array.isArray(sections)
+    ? sections.filter((section) => String(section?.text || "").trim())
+    : [];
+  if (cleanedSections.length) return cleanedSections;
+
+  const paragraphs = String(text || "")
+    .split(/\n[ \t]*\n/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+
+  return (paragraphs.length ? paragraphs : [String(text || "").trim()])
+    .filter(Boolean)
+    .map((paragraph) => ({ text: paragraph, sources }));
+}
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export default function AIAdvisorScreen({ navigation }) {
   const { t, i18n } = useTranslation();
   const lang = (i18n.language || "en").toLowerCase();
@@ -756,9 +810,12 @@ export default function AIAdvisorScreen({ navigation }) {
   const scrollRef = useRef(null);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingStageIndex, setLoadingStageIndex] = useState(0);
   const [flowStates, setFlowStates] = useState({});
   const [aiConsent, setAiConsent] = useState(undefined);
   const [consentChecklist, setConsentChecklist] = useState(false);
+  const [subscription, setSubscription] = useState({ isPlus: false });
+  const [aiUsage, setAiUsage] = useState({ count: 0 });
   const [messages, setMessages] = useState([
     {
       role: "assistant",
@@ -766,19 +823,28 @@ export default function AIAdvisorScreen({ navigation }) {
     }
   ]);
 
+  const isPlus = subscription?.isPlus === true;
+  const freeAiRemaining = Math.max(0, FREE_AI_QUESTION_LIMIT - Number(aiUsage?.count || 0));
+
   const loadScreenState = useCallback(async () => {
     try {
-      const [states, consent] = await Promise.all([
+      const [states, consent, plusState, usage] = await Promise.all([
         loadAllFlowStates(),
-        loadAiConsent()
+        loadAiConsent(),
+        loadSubscriptionState(),
+        loadAiUsage()
       ]);
       setFlowStates(states);
       setAiConsent(consent);
       setConsentChecklist(consent?.shareChecklist === true);
+      setSubscription(plusState);
+      setAiUsage(usage);
     } catch {
       setFlowStates({});
       setAiConsent(null);
       setConsentChecklist(false);
+      setSubscription({ isPlus: false });
+      setAiUsage({ count: 0 });
       Alert.alert(t("alerts.loadingErrorTitle"), t("alerts.loadingErrorBody"));
     }
   }, [t]);
@@ -793,6 +859,19 @@ export default function AIAdvisorScreen({ navigation }) {
     scrollRef.current?.scrollToEnd?.({ animated: true });
   }, [messages, loading]);
 
+  useEffect(() => {
+    if (!loading) {
+      setLoadingStageIndex(0);
+      return undefined;
+    }
+
+    const timer = setInterval(() => {
+      setLoadingStageIndex((current) => (current + 1) % LOADING_STAGE_KEYS.length);
+    }, 2100);
+
+    return () => clearInterval(timer);
+  }, [loading]);
+
   const prompts = [
     { key: "progress", text: t("ai.promptProgress") },
     { key: "tasks", text: t("ai.promptTasks") },
@@ -802,17 +881,55 @@ export default function AIAdvisorScreen({ navigation }) {
 
   const contextText = useMemo(() => buildAssistantContext(flowStates, lang, t), [flowStates, lang, t]);
 
-  const appendAssistant = (text, sources = [], sections = []) => {
-    setMessages((current) => [...current, { role: "assistant", text, sources, sections }]);
+  const appendAssistant = (text, sources = [], sections = [], followups = []) => {
+    setMessages((current) => [...current, { role: "assistant", text, sources, sections, followups }]);
+  };
+
+  const appendAssistantProgressively = async (text, sources = [], sections = [], followups = []) => {
+    const id = `assistant-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const chunks = sectionsForProgressiveReveal(text, sources, sections);
+
+    setMessages((current) => [
+      ...current,
+      { id, role: "assistant", text: "", sources: [], sections: [], followups: [], streaming: true }
+    ]);
+
+    for (let index = 0; index < chunks.length; index += 1) {
+      await sleep(index === 0 ? 70 : 130);
+      const visibleSections = chunks.slice(0, index + 1);
+      const done = index === chunks.length - 1;
+      setMessages((current) => current.map((message) => (
+        message.id === id
+          ? {
+              ...message,
+              text: visibleSections.map((section) => section.text).join("\n\n"),
+              sources,
+              sections: visibleSections,
+              followups: done ? followups : [],
+              streaming: !done
+            }
+          : message
+      )));
+    }
   };
 
   const acceptAiConsent = async () => {
     try {
-      const consent = await saveAiConsent({ shareChecklist: consentChecklist });
+      const consent = await saveAiConsent({ shareChecklist: isPlus && consentChecklist });
       setAiConsent(consent);
     } catch {
       Alert.alert(t("alerts.saveErrorTitle"), t("alerts.saveErrorBody"));
     }
+  };
+
+  const requestChecklistConsent = (value) => {
+    if (value && !isPlus) {
+      setConsentChecklist(false);
+      navigation.navigate("Paywall", { feature: "checklistAi" });
+      return;
+    }
+
+    setConsentChecklist(value);
   };
 
   const refreshAndSetStates = async () => {
@@ -938,6 +1055,22 @@ export default function AIAdvisorScreen({ navigation }) {
       flow &&
       scores.reminder >= ACTION_INTENT_THRESHOLD &&
       scores.create >= ACTION_INTENT_THRESHOLD;
+    const checklistAutomationNeedsPlus =
+      wantsSummary ||
+      wantsReminder ||
+      wantsDateQuery ||
+      wantsDate ||
+      wantsUndo ||
+      wantsMarkDone ||
+      wantsClear;
+
+    if (checklistAutomationNeedsPlus && !isPlus) {
+      return {
+        requiresPlus: true,
+        message: t("plus.checklistRequired")
+      };
+    }
+
     if (wantsOpen) {
       if (flow) {
         navigation.navigate("Flow", { flow });
@@ -1083,6 +1216,12 @@ export default function AIAdvisorScreen({ navigation }) {
     try {
       const localResult = await handleLocalTask(question);
       if (localResult) {
+        if (localResult.requiresPlus) {
+          appendAssistant(localResult.message);
+          navigation.navigate("Paywall", { feature: "checklistAi" });
+          return;
+        }
+
         appendAssistant(localResult);
         return;
       }
@@ -1092,11 +1231,17 @@ export default function AIAdvisorScreen({ navigation }) {
         return;
       }
 
+      if (!isPlus && freeAiRemaining <= 0) {
+        appendAssistant(t("plus.aiLimitReached", { limit: FREE_AI_QUESTION_LIMIT }));
+        navigation.navigate("Paywall", { feature: "aiLimit" });
+        return;
+      }
+
       const recentConversation = [...messages.slice(-8), userMessage]
         .map((msg) => `${msg.role === "user" ? "User" : "Assistant"}: ${msg.text}`)
         .join("\n");
 
-      const sharedChecklistContext = aiConsent?.shareChecklist ? contextText : "";
+      const sharedChecklistContext = isPlus && aiConsent?.shareChecklist ? contextText : "";
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), AI_REQUEST_TIMEOUT_MS);
       let response;
@@ -1132,8 +1277,16 @@ export default function AIAdvisorScreen({ navigation }) {
       }
 
       const answer = responseOutputText(data, t("ai.noAnswer"));
+      const sources = responseSources(data);
+      const sections = responseSections(data);
+      const followups = responseFollowups(data, t);
 
-      appendAssistant(answer, responseSources(data), responseSections(data));
+      if (!isPlus) {
+        setAiUsage(await recordAiQuestion());
+      }
+
+      setLoading(false);
+      await appendAssistantProgressively(answer, sources, sections, followups);
     } catch (e) {
       const message = e?.name === "AbortError"
         ? t("ai.requestFailed")
@@ -1192,13 +1345,15 @@ export default function AIAdvisorScreen({ navigation }) {
         <View style={styles.checklistChoice}>
           <View style={{ flex: 1 }}>
             <Text style={styles.choiceTitle}>{t("privacy.checklistConsentTitle")}</Text>
-            <Text style={styles.choiceBody}>{t("privacy.checklistConsentBody")}</Text>
+            <Text style={styles.choiceBody}>
+              {isPlus ? t("privacy.checklistConsentBody") : t("plus.checklistConsentBody")}
+            </Text>
           </View>
           <Switch
-            value={consentChecklist}
-            onValueChange={setConsentChecklist}
+            value={isPlus && consentChecklist}
+            onValueChange={requestChecklistConsent}
             trackColor={{ false: COLORS.border, true: COLORS.primaryLight }}
-            thumbColor={consentChecklist ? COLORS.primary : COLORS.subtext}
+            thumbColor={isPlus && consentChecklist ? COLORS.primary : COLORS.subtext}
             accessibilityLabel={t("privacy.checklistConsentTitle")}
           />
         </View>
@@ -1243,6 +1398,24 @@ export default function AIAdvisorScreen({ navigation }) {
           </View>
           <Text style={styles.title}>{t("ai.title")}</Text>
           <Text style={styles.subtitle}>{t("ai.subtitle")}</Text>
+          <TouchableOpacity
+            style={styles.plusStatusPill}
+            onPress={() => !isPlus && navigation.navigate("Paywall")}
+            activeOpacity={isPlus ? 1 : 0.8}
+            accessibilityRole="button"
+            accessibilityLabel={isPlus ? t("plus.statusActive") : t("plus.aiLimitLabel", { remaining: freeAiRemaining })}
+          >
+            <Ionicons
+              name={isPlus ? "checkmark-circle-outline" : "sparkles-outline"}
+              size={15}
+              color={COLORS.primaryTextOn}
+            />
+            <Text style={styles.plusStatusText}>
+              {isPlus
+                ? t("plus.statusActive")
+                : t("plus.aiLimitLabel", { remaining: freeAiRemaining })}
+            </Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.guardCard}>
@@ -1365,12 +1538,35 @@ export default function AIAdvisorScreen({ navigation }) {
                 ))}
               </View>
             ) : null}
+            {msg.role === "assistant" && msg.followups?.length && !msg.streaming ? (
+              <View style={styles.followupRow}>
+                {msg.followups.map((followup) => (
+                  <TouchableOpacity
+                    key={followup.id}
+                    style={[styles.followupChip, loading && styles.disabledControl]}
+                    onPress={() => sendMessage(followup.prompt || followup.label)}
+                    disabled={loading}
+                    accessibilityRole="button"
+                    accessibilityLabel={followup.label}
+                  >
+                    <Text style={[styles.followupText, isRtl && styles.rtlSourceText]}>
+                      {followup.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            ) : null}
           </View>
         ))}
 
         {loading ? (
           <View style={[styles.bubble, styles.assistantBubble]}>
-            <Text style={styles.assistantText}>{t("ai.thinking")}</Text>
+            <View style={styles.loadingBubbleRow}>
+              <ActivityIndicator color={COLORS.primary} size="small" />
+              <Text style={styles.assistantText}>
+                {t(LOADING_STAGE_KEYS[loadingStageIndex])}
+              </Text>
+            </View>
           </View>
         ) : null}
 
@@ -1522,6 +1718,22 @@ const styles = StyleSheet.create({
   },
   title: { color: COLORS.primaryTextOn, fontSize: 26, fontWeight: "900", letterSpacing: 0 },
   subtitle: { color: "rgba(255,255,255,0.84)", marginTop: SPACING.sm, lineHeight: 20 },
+  plusStatusPill: {
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginTop: SPACING.md,
+    paddingVertical: 8,
+    paddingHorizontal: 11,
+    borderRadius: RADII.pill,
+    backgroundColor: "rgba(255,255,255,0.16)"
+  },
+  plusStatusText: {
+    color: COLORS.primaryTextOn,
+    fontWeight: "900",
+    fontSize: 12
+  },
   guardCard: {
     flexDirection: "row",
     gap: SPACING.md,
@@ -1535,9 +1747,10 @@ const styles = StyleSheet.create({
   },
   guardTitle: { color: COLORS.text, fontWeight: "900" },
   guardBody: { color: COLORS.subtext, lineHeight: 19, marginTop: 3, fontSize: 13 },
-  progressGrid: { flexDirection: "row", gap: SPACING.sm, marginBottom: SPACING.md },
+  progressGrid: { flexDirection: "row", flexWrap: "wrap", gap: SPACING.sm, marginBottom: SPACING.md },
   progressCard: {
     flex: 1,
+    minWidth: 104,
     backgroundColor: COLORS.card,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -1545,7 +1758,7 @@ const styles = StyleSheet.create({
     padding: SPACING.sm,
     ...SHADOW.soft
   },
-  progressTitle: { color: COLORS.text, fontWeight: "900", fontSize: 12 },
+  progressTitle: { color: COLORS.text, fontWeight: "900", fontSize: 12, lineHeight: 16 },
   progressMeta: { color: COLORS.subtext, fontSize: 11, marginTop: 5, fontWeight: "700" },
   progressTrackMini: {
     height: 6,
@@ -1559,10 +1772,12 @@ const styles = StyleSheet.create({
   promptChip: {
     backgroundColor: COLORS.primaryLight,
     borderRadius: RADII.pill,
-    paddingVertical: 9,
+    minHeight: 38,
+    justifyContent: "center",
+    paddingVertical: 8,
     paddingHorizontal: 12
   },
-  promptText: { color: COLORS.primary, fontWeight: "900", fontSize: 12 },
+  promptText: { color: COLORS.primary, fontWeight: "900", fontSize: 12, lineHeight: 16 },
   bubble: {
     borderRadius: RADII.lg,
     padding: SPACING.md,
@@ -1617,6 +1832,33 @@ const styles = StyleSheet.create({
   },
   rtlSourceText: {
     textAlign: "right"
+  },
+  followupRow: {
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+    marginTop: SPACING.sm,
+    paddingTop: SPACING.sm,
+    gap: 8
+  },
+  followupChip: {
+    alignSelf: "flex-start",
+    borderRadius: RADII.pill,
+    borderWidth: 1,
+    borderColor: COLORS.primaryLight,
+    backgroundColor: COLORS.primaryLight,
+    paddingVertical: 8,
+    paddingHorizontal: 11
+  },
+  followupText: {
+    color: COLORS.primary,
+    fontWeight: "900",
+    fontSize: 12,
+    lineHeight: 16
+  },
+  loadingBubbleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.sm
   },
   sourceRow: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: SPACING.md },
   sourceBtn: {

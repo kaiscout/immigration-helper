@@ -81,6 +81,93 @@ const normalizeForRouting = (value) =>
     .replace(/[^\p{L}\p{N}]+/gu, " ")
     .trim();
 
+const CACHE_TTL_MS = 5 * 60 * 1000;
+const CACHE_MAX_ENTRIES = 80;
+
+function cloneJson(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function makeCacheKey({ question, language, model, vectorStoreId }) {
+  const normalizedQuestion = normalizeForRouting(question).slice(0, 900);
+  if (!normalizedQuestion) return "";
+  return [
+    "v3",
+    language.code,
+    model,
+    vectorStoreId || "no-vector",
+    normalizedQuestion
+  ].join("|");
+}
+
+function readCachedAnswer(cache, key) {
+  if (!key) return null;
+  const cached = cache.get(key);
+  if (!cached) return null;
+  if (Date.now() - cached.createdAt > CACHE_TTL_MS) {
+    cache.delete(key);
+    return null;
+  }
+  cache.delete(key);
+  cache.set(key, cached);
+  return cloneJson(cached.body);
+}
+
+function writeCachedAnswer(cache, key, body) {
+  if (!key) return;
+  cache.set(key, { createdAt: Date.now(), body: cloneJson(body) });
+  while (cache.size > CACHE_MAX_ENTRIES) {
+    cache.delete(cache.keys().next().value);
+  }
+}
+
+export function followUpsForQuestion(question, sources = []) {
+  const normalized = normalizeForRouting(question);
+  const sourceText = sources.map((source) => `${source.title || ""} ${source.url || ""}`).join(" ");
+  const hasSourceDomain = (domain) => sourceText.includes(domain);
+  const hasAny = (terms) => terms.some((term) => normalized.includes(normalizeForRouting(term)));
+
+  if (hasAny(["scam", "fraud", "notario", "arnaque", "estafa", "truffa", "dolandirici", "dolandırıcı", "诈骗", "धोखाधड़ी", "احتيال", "প্রতারণা", "мошеннич"])) {
+    return [{ id: "scams" }, { id: "legalHelp" }, { id: "official" }];
+  }
+
+  if (hasAny(["fee", "cost", "payment", "filing fee", "tarifa", "taxa", "tariffa", "frais", "ucret", "ücret", "费用", "फीस", "رسوم", "ফি", "сбор"])) {
+    return [{ id: "fees" }, { id: "forms" }, { id: "nextSteps" }];
+  }
+
+  if (hasAny(["processing", "timeline", "wait", "how long", "procesamiento", "processamento", "elaborazione", "traitement", "islem", "işlem", "处理", "समय", "معالجة", "প্রসেসিং", "обработ"])) {
+    return [{ id: "timeline" }, { id: "caseStatus" }, { id: "nextSteps" }];
+  }
+
+  if (
+    hasSourceDomain("state.gov") ||
+    hasAny(["visitor visa", "tourist visa", "embassy", "consulate", "visit the united states", "visto turistico", "visa touristique", "visa de turista"])
+  ) {
+    return [{ id: "documents" }, { id: "official" }, { id: "nextSteps" }];
+  }
+
+  return [{ id: "nextSteps" }, { id: "documents" }, { id: "official" }];
+}
+
+function withAssistantMetadata(body, { question, language, localResults = [], cached = false } = {}) {
+  const sources = uniqueSources(body?.sources || []);
+  const sections = Array.isArray(body?.sections) ? body.sections : [];
+  return {
+    ...body,
+    sources,
+    sections,
+    followups: body?.followups || followUpsForQuestion(question, sources),
+    answer_profile: {
+      language: language?.code || "en",
+      source_count: sources.length,
+      retrieval_count: localResults.length,
+      grounded_on: body?.grounded_on || "unknown",
+      cached,
+      degraded: body?.degraded === true
+    }
+  };
+}
+
 export function officialDomainsForQuestion(question) {
   const normalized = normalizeForRouting(question);
   if (VISITOR_VISA_TERMS.some((term) => normalized.includes(normalizeForRouting(term)))) {
@@ -427,6 +514,15 @@ function recentUserQuestion(conversation) {
     .trim() || "";
 }
 
+function hasPriorDifferentUserQuestion(conversation, currentQuestion) {
+  const current = normalizeForRouting(currentQuestion);
+  return String(conversation || "")
+    .split(/\r?\n/)
+    .filter((line) => line.startsWith("User:"))
+    .map((line) => normalizeForRouting(line.slice(5)))
+    .some((line) => line && line !== current);
+}
+
 export function buildRetrievalQuery(question, conversation) {
   const current = String(question || "").trim();
   const tokens = queryTokens(current);
@@ -458,6 +554,8 @@ export function createAnswerService({
   vectorStoreId = "",
   fetchImpl = fetch
 }) {
+  const answerCache = new Map();
+
   const fetchOpenAI = async (body) => {
     let lastResponse;
 
@@ -511,9 +609,25 @@ export function createAnswerService({
     const retrievalQuery = buildRetrievalQuery(question, conversation);
     const localResults = searchCorpus(corpusIndex, retrievalQuery, 8);
     const localFallback = buildLocalFallback(question, language.code, localResults);
+    const cacheable = !checklistContext.trim() && !hasPriorDifferentUserQuestion(conversation, question);
+    const cacheKey = cacheable ? makeCacheKey({ question, language, model, vectorStoreId }) : "";
+    const cachedAnswer = readCachedAnswer(answerCache, cacheKey);
+    if (cachedAnswer) {
+      return {
+        status: 200,
+        body: withAssistantMetadata(cachedAnswer, {
+          question,
+          language,
+          localResults,
+          cached: true
+        })
+      };
+    }
 
     if (!apiKey) {
-      return { status: 200, body: localFallback };
+      const body = withAssistantMetadata(localFallback, { question, language, localResults });
+      writeCachedAnswer(answerCache, cacheKey, body);
+      return { status: 200, body };
     }
 
     const tools = [{
@@ -556,12 +670,14 @@ export function createAnswerService({
       const data = await openAIResponse.json();
       const outputText = extractOutputText(data);
       if (!openAIResponse.ok || !outputText) {
+        const body = withAssistantMetadata({
+          ...localFallback,
+          upstream_status: openAIResponse.status
+        }, { question, language, localResults });
+        writeCachedAnswer(answerCache, cacheKey, body);
         return {
           status: 200,
-          body: {
-            ...localFallback,
-            upstream_status: openAIResponse.status
-          }
+          body
         };
       }
 
@@ -574,22 +690,23 @@ export function createAnswerService({
       const sources = sectionSources.length
         ? sectionSources
         : (webSources.length ? webSources : localSources);
-      return {
-        status: 200,
-        body: {
-          output_text: outputText,
-          sources: uniqueSources(sources),
-          sections: answerSections.length
-            ? answerSections
-            : [{ text: outputText, sources: uniqueSources(sources) }],
-          grounded_on: sectionSources.length || webSources.length
-            ? "live_official_sources"
-            : "local_uscis_corpus",
-          degraded: false
-        }
-      };
+      const body = withAssistantMetadata({
+        output_text: outputText,
+        sources: uniqueSources(sources),
+        sections: answerSections.length
+          ? answerSections
+          : [{ text: outputText, sources: uniqueSources(sources) }],
+        grounded_on: sectionSources.length || webSources.length
+          ? "live_official_sources"
+          : "local_uscis_corpus",
+        degraded: false
+      }, { question, language, localResults });
+      writeCachedAnswer(answerCache, cacheKey, body);
+      return { status: 200, body };
     } catch {
-      return { status: 200, body: localFallback };
+      const body = withAssistantMetadata(localFallback, { question, language, localResults });
+      writeCachedAnswer(answerCache, cacheKey, body);
+      return { status: 200, body };
     }
   };
 }

@@ -3,7 +3,7 @@ import { timingSafeEqual } from "node:crypto";
 import { createAnswerService, SUPPORTED_AI_LANGUAGES } from "./ai/answer.mjs";
 import { createCorpusIndex, loadCorpus } from "./uscis/search.mjs";
 
-const SERVER_VERSION = "2026-06-12.2";
+const SERVER_VERSION = "2026-06-16.1";
 const PORT = Number.parseInt(process.env.PORT || "8787", 10);
 const OPENAI_API_KEY = (process.env.OPENAI_API_KEY || "").trim();
 const OPENAI_MODEL = (process.env.OPENAI_MODEL || "gpt-5.4-mini").trim();

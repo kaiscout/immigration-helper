@@ -9,8 +9,9 @@ test("AI Helper requires stored consent before rendering the chat", async () => 
   const screen = await readProjectFile("screens/AIAdvisorScreen.js");
 
   assert.match(screen, /if \(!aiConsent\)/);
-  assert.match(screen, /saveAiConsent\(\{ shareChecklist: consentChecklist \}\)/);
-  assert.match(screen, /aiConsent\?\.shareChecklist \? contextText : ""/);
+  assert.match(screen, /saveAiConsent\(\{ shareChecklist: isPlus && consentChecklist \}\)/);
+  assert.match(screen, /isPlus && aiConsent\?\.shareChecklist \? contextText : ""/);
+  assert.match(screen, /navigation\.navigate\("Paywall", \{ feature: "checklistAi" \}\)/);
 });
 
 test("checklist sharing is optional and disabled by default", async () => {

@@ -31,3 +31,16 @@ Important: Never put a private OpenAI key in an `EXPO_PUBLIC_` variable. The
 production app calls the Render service configured in `render.yaml`; Render
 stores the private OpenAI key. EAS stores only the public proxy URL and the app
 client token used for basic endpoint abuse deterrence.
+
+Plus subscription setup:
+Immigration Helper Plus uses RevenueCat with auto-renewable store products.
+The app code expects these default identifiers:
+- Entitlement: immigration_helper_plus
+- Monthly product: immigration_helper_plus_monthly
+- Yearly product: immigration_helper_plus_yearly
+
+Before the next production build, create matching subscriptions in App Store
+Connect and RevenueCat, then add the public RevenueCat SDK key and product
+identifier values to EAS environment variables. The app stays usable in Expo Go,
+but purchases only work in a store or TestFlight build that includes the native
+RevenueCat module.

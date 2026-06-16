@@ -7,14 +7,24 @@ import { loadAiConsent, revokeAiConsent, updateChecklistSharing } from "../data/
 import { OFFICIAL_LINKS } from "../constants/officialLinks";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
 import { openExternalLink } from "../data/externalLinks";
+import {
+  loadSubscriptionState,
+  restorePlusPurchases
+} from "../data/subscriptionService";
 
 export default function PrivacyScreen({ navigation }) {
   const { t } = useTranslation();
   const [consent, setConsent] = useState(undefined);
+  const [subscription, setSubscription] = useState({ isPlus: false });
 
   const loadConsent = useCallback(async () => {
     try {
-      setConsent(await loadAiConsent());
+      const [nextConsent, nextSubscription] = await Promise.all([
+        loadAiConsent(),
+        loadSubscriptionState()
+      ]);
+      setConsent(nextConsent);
+      setSubscription(nextSubscription);
     } catch {
       Alert.alert(t("alerts.loadingErrorTitle"), t("alerts.loadingErrorBody"));
       setConsent(null);
@@ -28,11 +38,29 @@ export default function PrivacyScreen({ navigation }) {
   }, [navigation, loadConsent]);
 
   const changeChecklistSharing = async (value) => {
+    if (value && !subscription?.isPlus) {
+      navigation.navigate("Paywall", { feature: "checklistAi" });
+      return;
+    }
+
     try {
       const next = await updateChecklistSharing(value);
       setConsent(next);
     } catch {
       Alert.alert(t("alerts.saveErrorTitle"), t("alerts.saveErrorBody"));
+    }
+  };
+
+  const restorePurchases = async () => {
+    try {
+      const next = await restorePlusPurchases();
+      setSubscription(next);
+      Alert.alert(
+        next.isPlus ? t("plus.restoreSuccessTitle") : t("plus.restoreMissingTitle"),
+        next.isPlus ? t("plus.restoreSuccessBody") : t("plus.restoreMissingBody")
+      );
+    } catch {
+      Alert.alert(t("plus.purchaseErrorTitle"), t("plus.storeUnavailableBody"));
     }
   };
 
@@ -80,6 +108,27 @@ export default function PrivacyScreen({ navigation }) {
         </View>
       ))}
 
+      <View style={styles.plusCard}>
+        <View style={styles.iconBox}>
+          <Ionicons name="sparkles-outline" size={22} color={COLORS.primary} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.cardTitle}>{t("plus.title")}</Text>
+          <Text style={styles.cardBody}>
+            {subscription?.isPlus ? t("plus.statusActive") : t("plus.statusInactive")}
+          </Text>
+        </View>
+        <TouchableOpacity
+          style={styles.plusButton}
+          onPress={() => subscription?.isPlus ? restorePurchases() : navigation.navigate("Paywall")}
+          accessibilityRole="button"
+        >
+          <Text style={styles.plusButtonText}>
+            {subscription?.isPlus ? t("plus.restore") : t("plus.shortTitle")}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.controls}>
         <View style={styles.controlsHeader}>
           <View style={styles.iconBox}>
@@ -100,10 +149,10 @@ export default function PrivacyScreen({ navigation }) {
               <Text style={styles.settingBody}>{t("privacy.checklistSettingBody")}</Text>
             </View>
             <Switch
-              value={consent.shareChecklist === true}
+              value={subscription?.isPlus === true && consent.shareChecklist === true}
               onValueChange={changeChecklistSharing}
               trackColor={{ false: COLORS.border, true: COLORS.primaryLight }}
-              thumbColor={consent.shareChecklist ? COLORS.primary : COLORS.subtext}
+              thumbColor={subscription?.isPlus === true && consent.shareChecklist ? COLORS.primary : COLORS.subtext}
               accessibilityLabel={t("privacy.checklistConsentTitle")}
             />
           </View>
@@ -176,6 +225,26 @@ const styles = StyleSheet.create({
   },
   cardTitle: { color: COLORS.text, fontWeight: "900", fontSize: 16 },
   cardBody: { color: COLORS.subtext, lineHeight: 20, marginTop: 4 },
+  plusCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.md,
+    backgroundColor: COLORS.card,
+    borderRadius: RADII.xl,
+    padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: "#C7D2FE",
+    ...SHADOW.soft
+  },
+  plusButton: {
+    minHeight: 40,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: RADII.pill,
+    paddingHorizontal: SPACING.md,
+    backgroundColor: COLORS.primary
+  },
+  plusButtonText: { color: COLORS.primaryTextOn, fontWeight: "900", fontSize: 12 },
   controls: {
     backgroundColor: COLORS.card,
     borderRadius: RADII.xl,

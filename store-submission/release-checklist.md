@@ -11,6 +11,7 @@
 - [x] App declares iOS non-exempt encryption status as false.
 - [x] App includes in-app privacy and safety screen.
 - [x] App includes legal disclaimer and government non-affiliation language.
+- [x] App includes Immigration Helper Plus paywall, restore purchases, and free AI usage gate.
 
 ## Before Apple Submission
 
@@ -25,8 +26,10 @@
 - [x] Replace the previously uploaded screenshots with the refreshed files in `store-submission/screenshots/iphone-6.5/final`.
 - [x] Add age rating.
 - [x] Add review notes from `store-submission/review-notes.md`.
-- [x] Build a fresh production iOS binary containing the final multilingual, AI, reminder, and target-date fixes with `eas build --platform ios --profile production`.
-- [x] Select and submit that fresh build through App Store Connect.
+- [ ] Create App Store Connect auto-renewable subscription products matching `store-submission/subscription-setup.md`.
+- [ ] Add RevenueCat public SDK keys to the EAS production environment before the next store build.
+- [ ] Build a fresh production iOS binary containing the Plus subscription changes with `eas build --platform ios --profile production`.
+- [ ] Select and submit that fresh build through App Store Connect.
 
 ## Before Google Play Submission
 

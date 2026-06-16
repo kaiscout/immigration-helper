@@ -84,6 +84,22 @@ export default function HomeScreen({ navigation }) {
         <Ionicons name="chevron-forward" size={22} color={COLORS.primaryTextOn} />
       </TouchableOpacity>
 
+      <TouchableOpacity
+        style={styles.plusCard}
+        onPress={() => navigation.navigate("Paywall")}
+        accessibilityRole="button"
+        accessibilityLabel={t("plus.title")}
+      >
+        <View style={styles.plusIcon}>
+          <Ionicons name="sparkles-outline" size={20} color={COLORS.primary} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.plusTitle}>{t("plus.homeTitle")}</Text>
+          <Text style={styles.plusBody}>{t("plus.homeBody")}</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color={COLORS.subtext} />
+      </TouchableOpacity>
+
       <View style={styles.quickGrid}>
         <TouchableOpacity
           style={styles.quickCard}
@@ -218,9 +234,31 @@ const styles = StyleSheet.create({
   },
   aiTitle: { color: COLORS.primaryTextOn, fontWeight: "900", fontSize: 18 },
   aiSubtitle: { color: "rgba(255,255,255,0.82)", marginTop: 3, fontSize: 13, lineHeight: 18 },
-  quickGrid: { flexDirection: "row", gap: SPACING.md },
+  plusCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.md,
+    backgroundColor: COLORS.card,
+    borderRadius: RADII.xl,
+    padding: SPACING.lg,
+    borderWidth: 1,
+    borderColor: "#C7D2FE",
+    ...SHADOW.soft
+  },
+  plusIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: RADII.lg,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: COLORS.primaryLight
+  },
+  plusTitle: { color: COLORS.text, fontWeight: "900", fontSize: 16 },
+  plusBody: { color: COLORS.subtext, marginTop: 4, fontSize: 12, lineHeight: 17 },
+  quickGrid: { flexDirection: "row", flexWrap: "wrap", gap: SPACING.md },
   quickCard: {
     flex: 1,
+    minWidth: 150,
     backgroundColor: COLORS.card,
     borderRadius: RADII.xl,
     padding: SPACING.md,
@@ -228,7 +266,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     ...SHADOW.soft
   },
-  quickTitle: { marginTop: SPACING.sm, color: COLORS.text, fontWeight: "900" },
+  quickTitle: { marginTop: SPACING.sm, color: COLORS.text, fontWeight: "900", lineHeight: 19 },
   quickSub: { marginTop: 4, color: COLORS.subtext, fontSize: 12, lineHeight: 17 },
   card: {
     backgroundColor: COLORS.card,
@@ -257,7 +295,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: COLORS.primaryLight
   },
-  cardTitle: { fontSize: 18, fontWeight: "900", color: COLORS.text },
+  cardTitle: { fontSize: 18, lineHeight: 23, fontWeight: "900", color: COLORS.text },
   cardSub: { marginTop: 4, color: COLORS.subtext, fontSize: 13, lineHeight: 18 },
   disclaimerBox: { flexDirection: "row", gap: 8, alignItems: "flex-start", marginTop: SPACING.md },
   disclaimer: { color: COLORS.subtext, fontSize: 12, lineHeight: 18, flex: 1 },

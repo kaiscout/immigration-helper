@@ -639,7 +639,8 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     borderRadius: RADII.lg,
     backgroundColor: COLORS.cardSoft,
-    padding: SPACING.sm,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: 11,
     justifyContent: "center"
   },
   dateSelectLabel: {
@@ -653,14 +654,15 @@ const styles = StyleSheet.create({
   dateSelectValueRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    gap: 4
+    justifyContent: "flex-start",
+    gap: 5
   },
   dateSelectValue: {
     color: COLORS.text,
     fontSize: 16,
     fontWeight: "900",
-    flexShrink: 1
+    flexShrink: 1,
+    lineHeight: 20
   },
   dateSelectPlaceholder: { color: COLORS.subtext, fontSize: 14 },
   selectedDatePill: {
@@ -759,7 +761,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 9
   },
-  timelineBadgeText: { color: COLORS.primary, fontSize: 11, fontWeight: "900" },
+  timelineBadgeText: { color: COLORS.primary, fontSize: 11, lineHeight: 15, fontWeight: "900" },
   dateLine: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -769,7 +771,7 @@ const styles = StyleSheet.create({
     borderBottomColor: COLORS.border
   },
   dateLabel: { color: COLORS.subtext, flex: 1 },
-  dateValue: { color: COLORS.text, fontWeight: "900" },
+  dateValue: { color: COLORS.text, fontWeight: "900", textAlign: "right", flexShrink: 0 },
   smallBtn: {
     backgroundColor: COLORS.card,
     paddingVertical: SPACING.sm,

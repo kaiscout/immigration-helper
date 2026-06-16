@@ -16,6 +16,7 @@ Suggested review path:
 8. Open Reminders and send a test notification.
 9. Open Privacy & Safety to review disclosures.
 10. Open AI Helper. The first-use screen discloses Render and OpenAI processing and offers optional checklist sharing, which is off by default.
+11. Open Immigration Helper Plus from Home or Privacy & Safety to review the subscription paywall.
 
 ## Safety Positioning
 
@@ -32,6 +33,22 @@ Online answers use a developer-operated HTTPS backend hosted by Render, which ca
 Before any online AI content is sent, the app asks the user to agree to a disclosure explaining that submitted questions and recent chat are processed by Render and OpenAI. Optional checklist sharing is off by default. Users can change that setting or withdraw online AI permission in Privacy & Safety.
 
 No login is required. AI requests are not attached to an account, advertising identifier, or user profile.
+
+## Subscription Notes
+
+The app uses an optional auto-renewable subscription called Immigration Helper Plus. No account login is required.
+
+Free users can use checklists, dates, resources, reminders, privacy controls, and a limited number of general AI Helper questions each month.
+
+Plus unlocks expanded AI Helper access and checklist-aware AI features, including asking the assistant to summarize saved progress, save target dates, schedule reminders from chat, and mark checklist steps complete. Optional checklist sharing remains off by default and only works when Plus is active.
+
+Review path for the subscription:
+
+1. Open Home.
+2. Tap Immigration Helper Plus.
+3. Review the yearly and monthly subscription choices.
+4. Tap Restore purchases to verify the restore path.
+5. You can also trigger the paywall by opening AI Helper and asking for checklist progress as a free user.
 
 ## Notification Notes
 
