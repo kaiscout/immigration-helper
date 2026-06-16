@@ -1,6 +1,6 @@
 # Immigration Helper Privacy Policy
 
-Effective date: June 12, 2026
+Effective date: June 16, 2026
 
 Immigration Helper is an independent checklist, reminder, and official-resource app. It is not affiliated with USCIS, DHS, or any government agency. It provides general information only and does not provide legal advice.
 
@@ -13,6 +13,12 @@ The app does not operate a user account system. Locally stored checklist data is
 ## Notifications
 
 If you choose to set reminders, the app asks for notification permission and schedules local notifications on your device. You can deny notification permission or clear scheduled reminders in the app.
+
+## Optional Subscriptions
+
+Immigration Helper may offer an optional auto-renewable subscription called Immigration Helper Plus. Purchases, subscription status, free trials, renewals, cancellations, and restore-purchase requests are handled by the app stores and RevenueCat. RevenueCat may process purchase identifiers, subscription status, product identifiers, transaction information, timestamps, and device or diagnostic information needed to operate subscriptions.
+
+The app does not use subscription information for advertising or cross-app tracking. Subscription status is used only to unlock paid app features and support restore-purchase functionality.
 
 ## Online AI Helper And Consent
 
@@ -44,6 +50,8 @@ The app links to official resources such as USCIS pages and legal-help resources
 Render hosts the Immigration Helper backend, and OpenAI processes AI requests and generates responses. Information is shared with these providers only to operate the AI Helper, maintain security, and provide the requested response.
 
 OpenAI states that API data is not used to train or improve its models unless the API customer explicitly opts in. OpenAI's standard abuse-monitoring logs may retain API inputs and outputs for up to 30 days, unless longer retention is required by law or needed to protect the service or others.
+
+RevenueCat processes subscription-related information to operate Immigration Helper Plus purchases, entitlement checks, and restore-purchase functionality.
 
 The app does not include advertising SDKs, analytics SDKs, tracking SDKs, or third-party sign-in. The developer does not sell user data or use it for cross-app tracking or advertising.
 

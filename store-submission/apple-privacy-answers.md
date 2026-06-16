@@ -9,6 +9,9 @@ The production build uses an online AI backend. Do not answer "Data Not Collecte
 Data type:
 
 - User Content → Other User Content.
+- Purchases → Purchase History, if App Store Connect asks about third-party subscription management or RevenueCat purchase-state processing.
+- Identifiers → User ID or Device ID only if App Store Connect's current definitions require disclosure for RevenueCat app-user IDs or device identifiers used to manage entitlements.
+- Diagnostics → Crash Data or Performance Data only if RevenueCat diagnostics are enabled or required by the current App Store Connect definitions.
 
 What this includes:
 
@@ -19,6 +22,7 @@ What this includes:
 Purpose:
 
 - App Functionality.
+- Purchases and subscription entitlement checks are used only for App Functionality.
 
 Linked to user:
 
@@ -42,6 +46,7 @@ Checklist sharing:
 Other technical data:
 
 - Render and OpenAI may process IP address, timestamps, and security or diagnostic metadata as service providers.
+- RevenueCat may process purchase identifiers, product identifiers, subscription status, entitlement status, transaction timestamps, app-user identifiers, and device/diagnostic metadata to operate Immigration Helper Plus purchases and restore-purchase functionality.
 - Review App Store Connect's current "Other Data" and diagnostics questions and disclose any category its definitions require for this provider processing.
 
 Notes:
@@ -51,6 +56,7 @@ Notes:
 - Users can withdraw permission in Privacy & Safety.
 - The app uses HTTPS for AI requests.
 - No analytics, advertising, tracking, or third-party sign-in is included.
+- No subscription or purchase data is used for advertising or cross-app tracking.
 
 ## Permission Notes
 
