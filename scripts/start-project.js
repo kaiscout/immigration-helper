@@ -83,7 +83,7 @@ function qrSvg(value) {
   );
 }
 
-function phoneLauncherHtml(launcherUrl, expoUrl) {
+function phoneLauncherHtml(expoUrl) {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -105,8 +105,8 @@ function phoneLauncherHtml(launcherUrl, expoUrl) {
 <body>
   <main>
     <h1>Immigration Helper</h1>
-    <p>Scan this QR code with the iPhone Camera.</p>
-    <div class="qr">${qrSvg(launcherUrl)}</div>
+    <p>Scan this QR code to open the project directly in Expo Go.</p>
+    <div class="qr">${qrSvg(expoUrl)}</div>
     <a class="open" href="${expoUrl}">Open in Expo Go</a>
     <p class="hint">Keep this computer and the iPhone on the same Wi-Fi network.</p>
   </main>
@@ -233,7 +233,7 @@ async function startPhoneLauncher(expoPort) {
   const launcherPort = await availablePhoneLauncherPort(expoPort);
   const expoUrl = `exp://${host}:${expoPort}`;
   const launcherUrl = `http://${host}:${launcherPort}`;
-  const html = phoneLauncherHtml(launcherUrl, expoUrl);
+  const html = phoneLauncherHtml(expoUrl);
   phoneLauncherServer = http.createServer((request, response) => {
     response.writeHead(200, {
       "Cache-Control": "no-store",
