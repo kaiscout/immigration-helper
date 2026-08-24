@@ -284,6 +284,8 @@
     "restoreSuccessBody": "Your Plus status has been updated.",
     "restoreMissingTitle": "No active subscription found",
     "restoreMissingBody": "We could not find an active Plus subscription for this store account.",
+    "privacyPolicy": "Privatlivspolitik",
+    "termsOfUse": "Vilkår for brug",
     "legal": "Kun generel information. Immigration Helper er uafhængig og ikke tilknyttet USCIS eller nogen offentlig myndighed. Abonnementer fornyes automatisk, medmindre de annulleres på din butikskonto.",
     "reviewNote": "You can manage or cancel your subscription through your App Store account."
   }

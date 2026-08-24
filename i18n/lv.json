@@ -284,6 +284,8 @@
     "restoreSuccessBody": "Your Plus status has been updated.",
     "restoreMissingTitle": "No active subscription found",
     "restoreMissingBody": "We could not find an active Plus subscription for this store account.",
+    "privacyPolicy": "Privātuma politika",
+    "termsOfUse": "Lietošanas noteikumi",
     "legal": "Tikai vispārīga informācija. Immigration Helper ir neatkarīga lietotne un nav saistīta ar USCIS vai nevienu valdības iestādi. Abonementi automātiski atjaunojas, ja tie netiek atcelti jūsu veikala kontā.",
     "reviewNote": "You can manage or cancel your subscription through your App Store account."
   }

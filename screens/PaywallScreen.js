@@ -9,6 +9,8 @@ import {
   purchasePlus,
   restorePlusPurchases
 } from "../data/subscriptionService";
+import { OFFICIAL_LINKS } from "../constants/officialLinks";
+import { openExternalLink } from "../data/externalLinks";
 
 const benefitIcons = [
   "chatbubble-ellipses-outline",
@@ -249,6 +251,21 @@ export default function PaywallScreen({ navigation, route }) {
 
       <Text style={styles.legal}>{t("plus.legal")}</Text>
       <Text style={styles.legal}>{t("plus.reviewNote")}</Text>
+      <View style={styles.legalLinks}>
+        <TouchableOpacity
+          onPress={() => openExternalLink(OFFICIAL_LINKS.privacy, t)}
+          accessibilityRole="link"
+        >
+          <Text style={styles.legalLink}>{t("plus.privacyPolicy")}</Text>
+        </TouchableOpacity>
+        <Text style={styles.legalSeparator}>·</Text>
+        <TouchableOpacity
+          onPress={() => openExternalLink(OFFICIAL_LINKS.terms, t)}
+          accessibilityRole="link"
+        >
+          <Text style={styles.legalLink}>{t("plus.termsOfUse")}</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 }
@@ -407,5 +424,14 @@ const styles = StyleSheet.create({
   restoreText: { color: COLORS.primary, fontWeight: "900" },
   notNowButton: { alignItems: "center", justifyContent: "center", paddingVertical: SPACING.xs, minHeight: 40 },
   notNowText: { color: COLORS.subtext, fontWeight: "800" },
-  legal: { color: COLORS.subtext, fontSize: 12, lineHeight: 18, textAlign: "center" }
+  legal: { color: COLORS.subtext, fontSize: 12, lineHeight: 18, textAlign: "center" },
+  legalLinks: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    flexWrap: "wrap",
+    gap: SPACING.sm
+  },
+  legalLink: { color: COLORS.primary, fontSize: 12, fontWeight: "900", lineHeight: 18 },
+  legalSeparator: { color: COLORS.subtext, fontSize: 12, lineHeight: 18 }
 });

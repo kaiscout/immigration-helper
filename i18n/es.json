@@ -284,6 +284,8 @@
     "restoreSuccessBody": "Tu estado de Plus se actualizó.",
     "restoreMissingTitle": "No se encontró suscripción activa",
     "restoreMissingBody": "No encontramos una suscripción Plus activa para esta cuenta.",
+    "privacyPolicy": "Política de privacidad",
+    "termsOfUse": "Términos de uso",
     "legal": "Solo información general. Immigration Helper es independiente y no está afiliada con USCIS ni con ninguna agencia gubernamental. Las suscripciones se renuevan automáticamente salvo que las canceles en tu cuenta de la tienda.",
     "reviewNote": "Puedes administrar o cancelar tu suscripción desde tu cuenta de App Store."
   }

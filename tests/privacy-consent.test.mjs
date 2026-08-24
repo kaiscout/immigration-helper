@@ -29,3 +29,15 @@ test("public privacy policy names AI recipients and retention", async () => {
   assert.match(policy, /up to 30 days/i);
   assert.match(policy, /not used to train/i);
 });
+
+test("subscription paywall exposes privacy and terms links", async () => {
+  const [paywall, links] = await Promise.all([
+    readProjectFile("screens/PaywallScreen.js"),
+    readProjectFile("constants/officialLinks.js")
+  ]);
+
+  assert.match(paywall, /OFFICIAL_LINKS\.privacy/);
+  assert.match(paywall, /OFFICIAL_LINKS\.terms/);
+  assert.match(links, /privacy-policy\.html/);
+  assert.match(links, /apple\.com\/legal\/internet-services\/itunes\/dev\/stdeula/);
+});

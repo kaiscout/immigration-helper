@@ -12,6 +12,7 @@
 - [x] App includes in-app privacy and safety screen.
 - [x] App includes legal disclaimer and government non-affiliation language.
 - [x] App includes Immigration Helper Plus paywall, restore purchases, and free AI usage gate.
+- [x] Plus paywall links directly to the privacy policy and Apple standard Terms of Use.
 
 ## Before Apple Submission
 

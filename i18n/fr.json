@@ -284,6 +284,8 @@
     "restoreSuccessBody": "Votre statut Plus a été mis à jour.",
     "restoreMissingTitle": "Aucun abonnement actif trouvé",
     "restoreMissingBody": "Nous n’avons trouvé aucun abonnement Plus actif pour ce compte.",
+    "privacyPolicy": "Politique de confidentialité",
+    "termsOfUse": "Conditions d’utilisation",
     "legal": "Informations générales uniquement. Immigration Helper est indépendant et n’est pas affilié à USCIS ni à une agence gouvernementale. Les abonnements se renouvellent automatiquement sauf annulation dans votre compte de boutique.",
     "reviewNote": "Vous pouvez gérer ou annuler votre abonnement dans votre compte App Store."
   }

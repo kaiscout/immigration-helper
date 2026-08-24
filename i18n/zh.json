@@ -284,6 +284,8 @@
     "restoreSuccessBody": "你的 Plus 状态已更新。",
     "restoreMissingTitle": "未找到有效订阅",
     "restoreMissingBody": "未找到此商店账户的有效 Plus 订阅。",
+    "privacyPolicy": "隐私政策",
+    "termsOfUse": "使用条款",
     "legal": "仅提供一般信息。Immigration Helper 独立运营，与 USCIS 或任何政府机构无关联。除非在商店账户中取消，否则订阅会自动续订。",
     "reviewNote": "你可以通过 App Store 账户管理或取消订阅。"
   }

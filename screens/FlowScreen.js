@@ -401,7 +401,7 @@ export default function FlowScreen({ route, navigation }) {
         </TouchableOpacity>
       </View>
 
-      {(noticeDate || dueDate) && (
+      {Boolean(noticeDate || dueDate) && (
         <View style={styles.timelineBox}>
           <View style={styles.timelineHeader}>
             <Text style={styles.timelineTitle}>{t("flow.keyDatesTitle")}</Text>

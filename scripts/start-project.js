@@ -9,6 +9,7 @@ const node = process.execPath;
 const expoCli = path.join(root, "node_modules", "expo", "bin", "cli");
 const expectedAiServerVersion = require(path.join(root, "server", "version.cjs"));
 const expectedLanguageCount = 30;
+const webMode = process.argv.includes("--web");
 const children = new Set();
 let shuttingDown = false;
 let phoneLauncherServer = null;
@@ -276,6 +277,7 @@ async function startPhoneLauncher(expoPort) {
 
 function expoArguments(expoPort) {
   const args = [expoCli, "start", "--lan"];
+  if (webMode) args.push("--web");
   if (process.argv.includes("--clear")) args.push("--clear");
   args.push("--port", String(expoPort));
   return args;
@@ -355,8 +357,13 @@ async function main() {
   if (expoPort !== Number.parseInt(process.env.EXPO_PORT || "8081", 10)) {
     console.log(`Port 8081 is in use by another project. Starting this app on port ${expoPort}.`);
   }
-  await startPhoneLauncher(expoPort);
-  console.log("Starting Expo Go over LAN. Keep the computer and phone on the same Wi-Fi network.");
+  if (webMode) {
+    currentLanHost = lanAddress();
+    console.log("Starting Immigration Helper in the browser.");
+  } else {
+    await startPhoneLauncher(expoPort);
+    console.log("Starting Expo Go over LAN. Keep the computer and phone on the same Wi-Fi network.");
+  }
   startExpo(expoPort);
   monitorNetwork(expoPort);
 }

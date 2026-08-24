@@ -284,6 +284,8 @@
     "restoreSuccessBody": "Plus durumunuz güncellendi.",
     "restoreMissingTitle": "Aktif abonelik bulunamadı",
     "restoreMissingBody": "Bu mağaza hesabı için aktif Plus aboneliği bulamadık.",
+    "privacyPolicy": "Gizlilik Politikası",
+    "termsOfUse": "Kullanım Koşulları",
     "legal": "Yalnızca genel bilgi. Immigration Helper bağımsızdır ve USCIS veya herhangi bir devlet kurumu ile bağlantılı değildir. Abonelikler mağaza hesabınızdan iptal edilmediği sürece otomatik yenilenir.",
     "reviewNote": "Aboneliğinizi App Store hesabınızdan yönetebilir veya iptal edebilirsiniz."
   }

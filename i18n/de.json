@@ -284,6 +284,8 @@
     "restoreSuccessBody": "Ihr Plus-Status wurde aktualisiert.",
     "restoreMissingTitle": "Kein aktives Abo gefunden",
     "restoreMissingBody": "Wir konnten kein aktives Plus-Abo für dieses Store-Konto finden.",
+    "privacyPolicy": "Datenschutzrichtlinie",
+    "termsOfUse": "Nutzungsbedingungen",
     "legal": "Nur allgemeine Informationen. Immigration Helper ist unabhängig und nicht mit USCIS oder einer Regierungsbehörde verbunden. Abonnements verlängern sich automatisch, sofern sie nicht in Ihrem Store-Konto gekündigt werden.",
     "reviewNote": "Sie können Ihr Abonnement über Ihr App-Store-Konto verwalten oder kündigen."
   }

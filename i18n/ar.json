@@ -284,6 +284,8 @@
     "restoreSuccessBody": "تم تحديث حالة Plus الخاصة بك.",
     "restoreMissingTitle": "لم يتم العثور على اشتراك نشط",
     "restoreMissingBody": "لم نجد اشتراك Plus نشطا لهذا الحساب.",
+    "privacyPolicy": "سياسة الخصوصية",
+    "termsOfUse": "شروط الاستخدام",
     "legal": "معلومات عامة فقط. Immigration Helper مستقل وغير تابع لـ USCIS أو أي جهة حكومية. تتجدد الاشتراكات تلقائيا ما لم يتم إلغاؤها من حساب المتجر.",
     "reviewNote": "يمكنك إدارة الاشتراك أو إلغاءه من حساب App Store."
   }
