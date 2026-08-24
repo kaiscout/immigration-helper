@@ -12,6 +12,10 @@ const expectedLanguageCount = 30;
 const children = new Set();
 let shuttingDown = false;
 let phoneLauncherServer = null;
+let networkMonitor = null;
+let currentLanHost = null;
+let expoChild = null;
+let expoRestarting = false;
 
 function spawnChild(args, label) {
   const child = spawn(node, args, {
@@ -22,7 +26,8 @@ function spawnChild(args, label) {
   children.add(child);
   child.on("exit", (code, signal) => {
     children.delete(child);
-    if (!shuttingDown && (label === "Expo" || code !== 0)) {
+    const expectedExpoRestart = label === "Expo" && expoRestarting;
+    if (!shuttingDown && !expectedExpoRestart && (label === "Expo" || code !== 0)) {
       shutdown(code ?? (signal ? 1 : 0));
     }
   });
@@ -32,6 +37,7 @@ function spawnChild(args, label) {
 function shutdown(exitCode = 0) {
   if (shuttingDown) return;
   shuttingDown = true;
+  if (networkMonitor) clearInterval(networkMonitor);
   phoneLauncherServer?.close();
   for (const child of children) {
     if (!child.killed) child.kill("SIGTERM");
@@ -110,6 +116,16 @@ function phoneLauncherHtml(expoUrl) {
     <a class="open" href="${expoUrl}">Open in Expo Go</a>
     <p class="hint">Keep this computer and the iPhone on the same Wi-Fi network.</p>
   </main>
+  <script>
+    const initialExpoUrl = ${JSON.stringify(expoUrl)};
+    setInterval(async () => {
+      try {
+        const response = await fetch("/config", { cache: "no-store" });
+        const config = await response.json();
+        if (config.expoUrl !== initialExpoUrl) location.reload();
+      } catch {}
+    }, 1500);
+  </script>
 </body>
 </html>`;
 }
@@ -229,26 +245,89 @@ async function availablePhoneLauncherPort(expoPort) {
 }
 
 async function startPhoneLauncher(expoPort) {
-  const host = lanAddress();
+  currentLanHost = lanAddress();
   const launcherPort = await availablePhoneLauncherPort(expoPort);
-  const expoUrl = `exp://${host}:${expoPort}`;
-  const launcherUrl = `http://${host}:${launcherPort}`;
-  const html = phoneLauncherHtml(expoUrl);
+  const launcherUrl = `http://${currentLanHost}:${launcherPort}`;
   phoneLauncherServer = http.createServer((request, response) => {
+    const expoUrl = `exp://${currentLanHost}:${expoPort}`;
+    if (request.url === "/config") {
+      response.writeHead(200, {
+        "Cache-Control": "no-store",
+        "Content-Type": "application/json; charset=utf-8",
+        "X-Content-Type-Options": "nosniff"
+      });
+      response.end(JSON.stringify({ expoUrl }));
+      return;
+    }
     response.writeHead(200, {
       "Cache-Control": "no-store",
       "Content-Type": "text/html; charset=utf-8",
       "X-Content-Type-Options": "nosniff"
     });
-    response.end(html);
+    response.end(phoneLauncherHtml(expoUrl));
   });
   await new Promise((resolve, reject) => {
     phoneLauncherServer.once("error", reject);
     phoneLauncherServer.listen(launcherPort, "0.0.0.0", resolve);
   });
-  process.env.REACT_NATIVE_PACKAGER_HOSTNAME = host;
   console.log(`Phone launcher: ${launcherUrl}`);
   openBrowser(`http://127.0.0.1:${launcherPort}`);
+}
+
+function expoArguments(expoPort) {
+  const args = [expoCli, "start", "--lan"];
+  if (process.argv.includes("--clear")) args.push("--clear");
+  args.push("--port", String(expoPort));
+  return args;
+}
+
+function startExpo(expoPort) {
+  process.env.REACT_NATIVE_PACKAGER_HOSTNAME = currentLanHost;
+  expoChild = spawnChild(expoArguments(expoPort), "Expo");
+}
+
+async function waitForPort(port) {
+  for (let attempt = 0; attempt < 40; attempt += 1) {
+    if (await portIsAvailable(port)) return;
+    await new Promise((resolve) => setTimeout(resolve, 150));
+  }
+  throw new Error(`Expo did not release port ${port} while changing networks.`);
+}
+
+async function restartExpoForNetwork(expoPort, nextHost) {
+  if (expoRestarting || shuttingDown || nextHost === "127.0.0.1") return;
+  expoRestarting = true;
+  console.log(`Network address changed to ${nextHost}. Refreshing Expo and the browser QR...`);
+  try {
+    if (expoChild && !expoChild.killed) {
+      await new Promise((resolve) => {
+        const fallback = setTimeout(resolve, 3_000);
+        expoChild.once("exit", () => {
+          clearTimeout(fallback);
+          resolve();
+        });
+        expoChild.kill("SIGTERM");
+      });
+    }
+    await waitForPort(expoPort);
+    currentLanHost = nextHost;
+    process.env.REACT_NATIVE_PACKAGER_HOSTNAME = currentLanHost;
+    expoChild = spawnChild(expoArguments(expoPort), "Expo");
+  } catch (error) {
+    console.error(error);
+    shutdown(1);
+  } finally {
+    expoRestarting = false;
+  }
+}
+
+function monitorNetwork(expoPort) {
+  networkMonitor = setInterval(() => {
+    const nextHost = lanAddress();
+    if (nextHost !== currentLanHost) {
+      void restartExpoForNetwork(expoPort, nextHost);
+    }
+  }, 2_000);
 }
 
 async function main() {
@@ -278,10 +357,8 @@ async function main() {
   }
   await startPhoneLauncher(expoPort);
   console.log("Starting Expo Go over LAN. Keep the computer and phone on the same Wi-Fi network.");
-  const expoArgs = [expoCli, "start", "--lan"];
-  if (process.argv.includes("--clear")) expoArgs.push("--clear");
-  expoArgs.push("--port", String(expoPort));
-  spawnChild(expoArgs, "Expo");
+  startExpo(expoPort);
+  monitorNetwork(expoPort);
 }
 
 process.on("SIGINT", () => shutdown(0));
