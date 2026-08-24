@@ -5,7 +5,7 @@ const path = require("path");
 const root = path.resolve(__dirname, "..");
 const node = process.execPath;
 const expoCli = path.join(root, "node_modules", "expo", "bin", "cli");
-const expectedAiServerVersion = "2026-06-12.2";
+const expectedAiServerVersion = require(path.join(root, "server", "version.cjs"));
 const expectedLanguageCount = 30;
 const children = new Set();
 let shuttingDown = false;
@@ -32,7 +32,7 @@ function shutdown(exitCode = 0) {
   for (const child of children) {
     if (!child.killed) child.kill("SIGTERM");
   }
-  setTimeout(() => process.exit(exitCode), 150).unref();
+  setTimeout(() => process.exit(exitCode), 150);
 }
 
 async function aiServerHealth() {
@@ -56,16 +56,36 @@ const aiServerIsReady = (health) =>
   );
 
 async function stopStaleProjectAiServer() {
-  const result = spawnSync("lsof", ["-tiTCP:8787", "-sTCP:LISTEN"], {
-    encoding: "utf8"
-  });
+  const result = process.platform === "win32"
+    ? spawnSync(
+      "powershell.exe",
+      [
+        "-NoProfile",
+        "-Command",
+        "Get-NetTCPConnection -State Listen -LocalPort 8787 -ErrorAction SilentlyContinue | " +
+          "Select-Object -ExpandProperty OwningProcess -Unique"
+      ],
+      { encoding: "utf8" }
+    )
+    : spawnSync("lsof", ["-tiTCP:8787", "-sTCP:LISTEN"], { encoding: "utf8" });
   const pids = String(result.stdout || "").trim().split(/\s+/).filter(Boolean);
   if (!pids.length) return;
 
   for (const pid of pids) {
-    const details = spawnSync("ps", ["-p", pid, "-o", "command="], { encoding: "utf8" });
-    const command = String(details.stdout || "");
-    if (!command.includes("server/index.mjs") && !command.includes(root)) {
+    const details = process.platform === "win32"
+      ? spawnSync(
+        "powershell.exe",
+        [
+          "-NoProfile",
+          "-Command",
+          `(Get-CimInstance Win32_Process -Filter \"ProcessId = ${Number(pid)}\").CommandLine`
+        ],
+        { encoding: "utf8" }
+      )
+      : spawnSync("ps", ["-p", pid, "-o", "command="], { encoding: "utf8" });
+    const command = String(details.stdout || "").replace(/\\/g, "/").toLowerCase();
+    const normalizedRoot = root.replace(/\\/g, "/").toLowerCase();
+    if (!command.includes("server/index.mjs") && !command.includes(normalizedRoot)) {
       throw new Error(
         `Port 8787 is occupied by another service (PID ${pid}). Stop that service before starting Immigration Helper.`
       );
@@ -133,8 +153,8 @@ async function main() {
   if (expoPort !== Number.parseInt(process.env.EXPO_PORT || "8081", 10)) {
     console.log(`Port 8081 is in use by another project. Starting this app on port ${expoPort}.`);
   }
-  console.log("Starting Expo Go with a tunnel so phones can connect reliably.");
-  spawnChild([expoCli, "start", "--tunnel", "--clear", "--port", String(expoPort)], "Expo");
+  console.log("Starting Expo Go over LAN. Keep the computer and phone on the same Wi-Fi network.");
+  spawnChild([expoCli, "start", "--lan", "--clear", "--port", String(expoPort)], "Expo");
 }
 
 process.on("SIGINT", () => shutdown(0));
