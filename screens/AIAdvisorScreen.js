@@ -7,6 +7,10 @@ import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
 import { OFFICIAL_LINKS } from "../constants/officialLinks";
 import { loadAiConsent, saveAiConsent } from "../data/aiConsent";
 import { scoreExactIntent } from "../data/aiIntent";
+import { buildCasePilotRequestContext } from "../data/casePilotContext";
+import { normalizeCasePilotFollowups } from "../data/casePilotFollowups";
+import { isExplicitSavedChecklistSummary } from "../data/casePilotIntent";
+import { shouldCountCasePilotQuestion } from "../data/casePilotResponse";
 import {
   FLOWS,
   computeDueDate,
@@ -64,7 +68,7 @@ const developmentProxyUrl = () => {
 
 const AI_PROXY_URL = CONFIGURED_AI_PROXY_URL || developmentProxyUrl();
 const openEndedAiConfigured = Boolean(AI_PROXY_URL && AI_PROXY_CLIENT_TOKEN);
-const AI_REQUEST_TIMEOUT_MS = 90_000;
+const AI_REQUEST_TIMEOUT_MS = 125_000;
 const LOADING_STAGE_KEYS = [
   "ai.loadingSources",
   "ai.loadingOfficial",
@@ -344,22 +348,6 @@ const QUESTION_TERMS = [
   "কি", "কী", "কোন", "কিভাবে", "কখন", "কেন", "কোথায়", "আমি কি",
   "что", "какой", "какая", "как", "когда", "почему", "где", "могу ли", "нужно ли",
   ...euSupportTerms("intents", "question")
-];
-
-const SUMMARY_PHRASES = [
-  "what have i", "where am i", "what is next", "what's next", "what do i need",
-  "que me falta", "qué me falta", "que sigue", "qué sigue", "que necesito", "qué necesito",
-  "o que falta", "qual o próximo passo", "o que preciso", "onde estou", "o que concluí",
-  "cosa manca", "qual è il prossimo passo", "qual e il prossimo passo", "cosa devo fare",
-  "a che punto sono", "cosa ho completato",
-  "neredeyim", "bende ne var", "ne kaldi", "ne kaldı", "sirada ne", "sırada ne",
-  "ou en suis", "où en suis", "que reste", "prochaine etape", "prochaine étape",
-  "我还剩", "下一步", "我需要什么",
-  "मेरे पास क्या", "क्या बाकी", "अगला कदम",
-  "ما المتبقي", "الخطوة التالية", "ماذا أحتاج", "ماذا احتاج",
-  "আমার কী বাকি", "আমার কি বাকি", "পরের ধাপ",
-  "что осталось", "что дальше", "что нужно",
-  ...euSupportTerms("intents", "summaryPhrases")
 ];
 
 const ALL_TERMS = [
@@ -774,16 +762,10 @@ function responseSections(data) {
 }
 
 function responseFollowups(data, t) {
-  const rawItems = Array.isArray(data?.followups) ? data.followups : [];
-  const seen = new Set();
-  return rawItems.flatMap((item) => {
-    const id = typeof item === "string" ? item : item?.id;
-    const key = FOLLOWUP_TRANSLATION_KEYS[id];
-    if (!id || !key || seen.has(id)) return [];
-    seen.add(id);
-    const label = t(key);
-    return [{ id, label, prompt: label }];
-  }).slice(0, 3);
+  return normalizeCasePilotFollowups(
+    data?.followups,
+    (id) => FOLLOWUP_TRANSLATION_KEYS[id] ? t(FOLLOWUP_TRANSLATION_KEYS[id]) : ""
+  );
 }
 
 function sectionsForProgressiveReveal(text, sources = [], sections = []) {
@@ -1034,12 +1016,10 @@ export default function AIAdvisorScreen({ navigation }) {
     const flowKey = flowMatch?.key;
     const explicitQuestion = hasAnyTerm(q, QUESTION_TERMS, 1);
     const wantsOpen = scores.open >= ACTION_INTENT_THRESHOLD && !explicitQuestion;
-    const hasSummaryTerm = scores.summary >= ACTION_INTENT_THRESHOLD;
-    const mentionsChecklist = scores.checklist >= ACTION_INTENT_THRESHOLD;
-    const wantsSummary =
-      (flow && hasSummaryTerm) ||
-      mentionsChecklist ||
-      hasAnyTerm(q, SUMMARY_PHRASES, ACTION_INTENT_THRESHOLD);
+    const wantsSummary = isExplicitSavedChecklistSummary(question, [
+      t("ai.promptProgress"),
+      t("ai.followupChecklist")
+    ]);
     const hasDateLiteral = /\b\d{4}-\d{2}-\d{2}\b/.test(question);
     const wantsDateQuery = flow && scores.dateNoun >= 1 && explicitQuestion && !hasDateLiteral;
     const wantsDate = flow && (
@@ -1238,9 +1218,10 @@ export default function AIAdvisorScreen({ navigation }) {
         return;
       }
 
-      const recentConversation = [...messages.slice(-8), userMessage]
-        .map((msg) => `${msg.role === "user" ? "User" : "Assistant"}: ${msg.text}`)
-        .join("\n");
+      const {
+        conversation: recentConversation,
+        userContext
+      } = buildCasePilotRequestContext(messages, userMessage);
 
       const sharedChecklistContext = isPlus && aiConsent?.shareChecklist ? contextText : "";
       const controller = new AbortController();
@@ -1257,6 +1238,7 @@ export default function AIAdvisorScreen({ navigation }) {
           body: JSON.stringify({
             question,
             conversation: recentConversation,
+            userContext,
             checklistContext: sharedChecklistContext,
             language: i18n.language
           })
@@ -1282,7 +1264,7 @@ export default function AIAdvisorScreen({ navigation }) {
       const sections = responseSections(data);
       const followups = responseFollowups(data, t);
 
-      if (!isPlus) {
+      if (!isPlus && shouldCountCasePilotQuestion(data)) {
         setAiUsage(await recordAiQuestion());
       }
 

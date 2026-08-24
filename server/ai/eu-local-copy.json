@@ -1,4 +1,546 @@
 {
+  "planning": {
+    "en": {
+      "destinations": ["united states", "usa", "u.s.a.", "america"],
+      "relocation": ["move", "moving", "relocate", "relocating", "immigrate", "immigrating", "migrate", "settle", "live in", "work in"],
+      "continuation": {
+        "temporary": ["temporary", "temporarily", "nonimmigrant"],
+        "permanent": ["permanent", "permanent residence", "green card", "immigrant visa"],
+        "family": ["family", "spouse", "relative", "sponsor"],
+        "employment": ["job", "job offer", "employer", "employment"],
+        "study": ["study", "school", "student"],
+        "investment": ["business", "invest", "investment", "entrepreneur"],
+        "affirmative": ["yes"],
+        "negative": ["no", "not", "without", "do not want"],
+        "unsure": ["not sure", "maybe"],
+        "correction": ["actually", "correction", "instead"],
+        "generic": ["What should they do next?", "Which documents should they prepare?", "Which official page should they check?"]
+      },
+      "fallback": "I couldn’t complete the live official-source research needed to tailor a reliable U.S. immigration plan right now. I won’t guess your eligibility. Please try again shortly; if the decision is urgent, consult a licensed U.S. immigration attorney or DOJ-accredited representative."
+    },
+    "tr": {
+      "destinations": ["amerika birleşik devletleri", "abd", "amerika"],
+      "relocation": ["taşınmak", "yerleşmek", "göç etmek"],
+      "continuation": {
+        "temporary": ["geçici", "geçici olarak", "göçmen olmayan"],
+        "permanent": ["kalıcı", "daimi ikamet", "yeşil kart"],
+        "family": ["aile", "eş", "akraba", "sponsor"],
+        "employment": ["iş teklifi", "işveren", "istihdam"],
+        "study": ["eğitim", "okumak", "öğrenci"],
+        "investment": ["yatırım", "yatırım yapmak", "girişimci"],
+        "affirmative": ["evet"],
+        "negative": ["hayır", "değil", "istemiyorum", "yok"],
+        "unsure": ["emin değilim", "belki"],
+        "correction": ["aslında", "düzeltme", "yerine"],
+        "generic": ["Sonra ne yapmalılar?", "Hangi belgeleri hazırlamalılar?", "Hangi resmi sayfayı kontrol etmeliler?"]
+      },
+      "fallback": "Şu anda size güvenilir ve kişiselleştirilmiş bir ABD göç planı sunmak için gereken güncel resmî kaynak araştırmasını tamamlayamadım. Uygunluğunuz hakkında tahminde bulunmayacağım. Lütfen kısa süre sonra tekrar deneyin; karar acilse lisanslı bir ABD göçmenlik avukatına veya DOJ tarafından akredite edilmiş bir temsilciye danışın."
+    },
+    "es": {
+      "destinations": ["estados unidos", "ee. uu.", "eeuu"],
+      "relocation": ["mudarme", "trasladarme", "inmigrar", "vivir en"],
+      "continuation": {
+        "temporary": ["temporal", "temporalmente", "no inmigrante"],
+        "permanent": ["permanente", "residencia permanente", "tarjeta verde"],
+        "family": ["familia", "cónyuge", "pariente", "patrocinador"],
+        "employment": ["empleo", "trabajo", "oferta de trabajo", "empleador"],
+        "study": ["estudiar", "estudios", "estudiante"],
+        "investment": ["inversión", "invertir", "negocio", "emprendedor"],
+        "affirmative": ["sí"],
+        "negative": ["no", "sin", "no quiero"],
+        "unsure": ["no estoy seguro", "quizá"],
+        "correction": ["en realidad", "corrección", "mejor dicho"],
+        "generic": ["¿Qué deberían hacer después?", "¿Qué documentos deberían preparar?", "¿Qué página oficial deberían revisar?"]
+      },
+      "fallback": "Ahora mismo no pude completar la investigación en fuentes oficiales actualizadas necesaria para adaptar un plan de inmigración a Estados Unidos que sea fiable. No voy a adivinar si cumples los requisitos. Inténtalo de nuevo en breve; si la decisión es urgente, consulta con un abogado de inmigración de EE. UU. con licencia o un representante acreditado por el DOJ."
+    },
+    "zh": {
+      "destinations": ["美国", "美利坚合众国"],
+      "relocation": ["移居", "移民", "搬到", "定居"],
+      "continuation": {
+        "temporary": ["临时", "非移民"],
+        "permanent": ["永久", "永久居留", "绿卡"],
+        "family": ["家人", "家庭", "配偶", "亲属"],
+        "employment": ["工作", "工作机会", "雇主", "就业"],
+        "study": ["学习", "留学", "学生"],
+        "investment": ["投资", "生意", "企业家"],
+        "affirmative": ["是", "可以"],
+        "negative": ["不", "没有", "不想"],
+        "unsure": ["不确定", "也许"],
+        "correction": ["其实", "更正", "改为"],
+        "generic": ["他们下一步应该做什么？", "他们应该准备哪些文件？", "他们应该查看哪个官方页面？"]
+      },
+      "fallback": "我目前无法完成制定可靠、个性化美国移民计划所需的最新官方资料核查，因此不会猜测您是否符合资格。请稍后重试；如果事情紧急，请咨询持牌美国移民律师或经美国司法部认可的代表。"
+    },
+    "hi": {
+      "destinations": ["संयुक्त राज्य अमेरिका", "अमेरिका"],
+      "relocation": ["बसना", "स्थानांतरित", "आप्रवास", "जाकर रहना"],
+      "continuation": {
+        "temporary": ["अस्थायी", "गैर आप्रवासी"],
+        "permanent": ["स्थायी", "स्थायी निवास", "ग्रीन कार्ड"],
+        "family": ["परिवार", "जीवनसाथी", "रिश्तेदार", "प्रायोजक"],
+        "employment": ["नौकरी", "नौकरी का प्रस्ताव", "नियोक्ता", "रोजगार"],
+        "study": ["पढ़ाई", "अध्ययन", "छात्र"],
+        "investment": ["निवेश", "निवेश करना", "व्यवसाय", "उद्यमी"],
+        "affirmative": ["हाँ"],
+        "negative": ["नहीं", "बिना", "नहीं चाहता"],
+        "unsure": ["पक्का नहीं", "शायद"],
+        "correction": ["असल में", "सुधार", "इसके बजाय"],
+        "generic": ["उन्हें आगे क्या करना चाहिए?", "उन्हें कौन से दस्तावेज़ तैयार करने चाहिए?", "उन्हें कौन सा आधिकारिक पेज देखना चाहिए?"]
+      },
+      "fallback": "मैं अभी आपके लिए विश्वसनीय और व्यक्तिगत अमेरिकी आव्रजन योजना तैयार करने हेतु आवश्यक नवीनतम आधिकारिक स्रोतों की जाँच पूरी नहीं कर सका। मैं आपकी पात्रता का अनुमान नहीं लगाऊँगा। कृपया थोड़ी देर बाद फिर कोशिश करें; मामला अत्यावश्यक हो तो लाइसेंस प्राप्त अमेरिकी आव्रजन वकील या DOJ-मान्यता प्राप्त प्रतिनिधि से संपर्क करें।"
+    },
+    "fr": {
+      "destinations": ["états-unis", "etats unis", "usa"],
+      "relocation": ["m’installer", "m'installer", "déménager", "immigrer", "vivre aux"],
+      "continuation": {
+        "temporary": ["temporaire", "non immigrant"],
+        "permanent": ["permanent", "résidence permanente", "carte verte"],
+        "family": ["famille", "conjoint", "parent", "parrain"],
+        "employment": ["emploi", "travail", "offre d’emploi", "employeur"],
+        "study": ["étudier", "études", "étudiant"],
+        "investment": ["investissement", "investir", "entreprise", "entrepreneur"],
+        "affirmative": ["oui"],
+        "negative": ["non", "sans", "ne veux pas"],
+        "unsure": ["pas sûr", "peut-être"],
+        "correction": ["en fait", "correction", "plutôt"],
+        "generic": ["Que devraient-ils faire ensuite ?", "Quels documents doivent-ils préparer ?", "Quelle page officielle doivent-ils vérifier ?"]
+      },
+      "fallback": "Je n’ai pas pu terminer la recherche dans les sources officielles à jour nécessaire pour personnaliser dès maintenant un plan d’immigration américain fiable. Je ne vais pas deviner votre admissibilité. Réessayez sous peu ; si la décision est urgente, consultez un avocat américain agréé en immigration ou un représentant accrédité par le DOJ."
+    },
+    "ar": {
+      "destinations": ["الولايات المتحدة", "أمريكا", "امريكا"],
+      "relocation": ["الانتقال", "الهجرة", "الاستقرار", "العيش في"],
+      "continuation": {
+        "temporary": ["مؤقت", "غير مهاجر"],
+        "permanent": ["دائم", "إقامة دائمة", "البطاقة الخضراء"],
+        "family": ["عائلة", "أسرة", "زوج", "قريب", "كفيل"],
+        "employment": ["عمل", "عرض عمل", "صاحب عمل", "توظيف"],
+        "study": ["دراسة", "أدرس", "طالب"],
+        "investment": ["استثمار", "أستثمر", "مشروع", "رائد أعمال"],
+        "affirmative": ["نعم"],
+        "negative": ["لا", "بدون", "لا أريد"],
+        "unsure": ["لست متأكدا", "ربما"],
+        "correction": ["في الواقع", "تصحيح", "بدلا من ذلك"],
+        "generic": ["ما الخطوة التالية لهم؟", "ما المستندات التي يجب تجهيزها؟", "أي صفحة رسمية يجب مراجعتها؟"]
+      },
+      "fallback": "تعذّر عليّ الآن إكمال البحث في المصادر الرسمية المحدّثة اللازم لإعداد خطة موثوقة ومخصّصة للهجرة إلى الولايات المتحدة. لن أخمّن أهليتك. يُرجى المحاولة مجددًا بعد قليل؛ وإذا كان القرار عاجلًا، فاستشر محامي هجرة أمريكيًا مرخّصًا أو ممثلًا معتمدًا لدى وزارة العدل."
+    },
+    "bn": {
+      "destinations": ["যুক্তরাষ্ট্র", "মার্কিন যুক্তরাষ্ট্র", "আমেরিকা"],
+      "relocation": ["স্থায়ী হতে", "চলে যেতে", "অভিবাসন", "বসবাস করতে"],
+      "continuation": {
+        "temporary": ["অস্থায়ী", "অ অভিবাসী"],
+        "permanent": ["স্থায়ী", "স্থায়ী বসবাস", "গ্রিন কার্ড"],
+        "family": ["পরিবার", "স্বামী স্ত্রী", "আত্মীয়", "পৃষ্ঠপোষক"],
+        "employment": ["চাকরি", "চাকরির প্রস্তাব", "নিয়োগকর্তা", "কর্মসংস্থান"],
+        "study": ["পড়াশোনা", "অধ্যয়ন", "শিক্ষার্থী"],
+        "investment": ["বিনিয়োগ", "ব্যবসা", "উদ্যোক্তা"],
+        "affirmative": ["হ্যাঁ"],
+        "negative": ["না", "নেই", "চাই না"],
+        "unsure": ["নিশ্চিত নই", "হয়তো"],
+        "correction": ["আসলে", "সংশোধন", "পরিবর্তে"],
+        "generic": ["তাদের পরের ধাপ কী হওয়া উচিত?", "কোন নথি প্রস্তুত করা উচিত?", "কোন সরকারি পৃষ্ঠা দেখা উচিত?"]
+      },
+      "fallback": "এই মুহূর্তে নির্ভরযোগ্য ও ব্যক্তিগতকৃত যুক্তরাষ্ট্রের অভিবাসন পরিকল্পনা তৈরির জন্য প্রয়োজনীয় হালনাগাদ সরকারি উৎসের গবেষণা শেষ করতে পারিনি। আপনার যোগ্যতা সম্পর্কে আমি অনুমান করব না। অনুগ্রহ করে কিছুক্ষণ পরে আবার চেষ্টা করুন; সিদ্ধান্তটি জরুরি হলে লাইসেন্সপ্রাপ্ত যুক্তরাষ্ট্রের অভিবাসন আইনজীবী বা DOJ-স্বীকৃত প্রতিনিধির সঙ্গে কথা বলুন।"
+    },
+    "ru": {
+      "destinations": ["сша", "соединённые штаты", "соединенные штаты", "америка"],
+      "relocation": ["переехать", "иммигрировать", "поселиться", "жить в"],
+      "continuation": {
+        "temporary": ["временно", "временный", "неиммиграционный"],
+        "permanent": ["постоянно", "постоянное место жительства", "грин карта"],
+        "family": ["семья", "супруг", "родственник", "спонсор"],
+        "employment": ["работа", "предложение о работе", "работодатель", "трудоустройство"],
+        "study": ["учиться", "учеба", "студент"],
+        "investment": ["инвестиции", "инвестировать", "бизнес", "предприниматель"],
+        "affirmative": ["да"],
+        "negative": ["нет", "без", "не хочу"],
+        "unsure": ["не уверен", "возможно"],
+        "correction": ["на самом деле", "поправка", "вместо"],
+        "generic": ["Что им делать дальше?", "Какие документы нужно подготовить?", "Какую официальную страницу проверить?"]
+      },
+      "fallback": "Сейчас мне не удалось завершить проверку актуальных официальных источников, необходимую для надёжного персонального плана иммиграции в США. Я не буду предполагать, соответствуете ли вы требованиям. Повторите попытку немного позже; если решение срочное, обратитесь к лицензированному иммиграционному адвокату США или представителю, аккредитованному Министерством юстиции."
+    },
+    "pt": {
+      "destinations": ["estados unidos", "eua", "usa"],
+      "relocation": ["mudar-me", "mudar para", "morar nos", "imigrar", "viver nos"],
+      "continuation": {
+        "temporary": ["temporário", "temporária", "não imigrante"],
+        "permanent": ["permanente", "residência permanente", "green card"],
+        "family": ["família", "cônjuge", "parente", "patrocinador"],
+        "employment": ["emprego", "trabalho", "oferta de emprego", "empregador"],
+        "study": ["estudar", "estudos", "estudante"],
+        "investment": ["investimento", "investir", "negócio", "empreendedor"],
+        "affirmative": ["sim"],
+        "negative": ["não", "sem", "não quero"],
+        "unsure": ["não tenho certeza", "talvez"],
+        "correction": ["na verdade", "correção", "em vez disso"],
+        "generic": ["O que eles devem fazer depois?", "Quais documentos devem preparar?", "Qual página oficial devem verificar?"]
+      },
+      "fallback": "Neste momento, não consegui concluir a pesquisa em fontes oficiais atualizadas necessária para adaptar um plano de imigração para os Estados Unidos que seja confiável. Não vou presumir a sua elegibilidade. Tente novamente em breve; se a decisão for urgente, consulte um advogado de imigração dos EUA licenciado ou um representante credenciado pelo DOJ."
+    },
+    "it": {
+      "destinations": ["stati uniti", "usa", "america"],
+      "relocation": ["trasferirmi", "trasferirsi", "immigrare", "vivere negli"],
+      "continuation": {
+        "temporary": ["temporaneo", "temporanea", "non immigrante"],
+        "permanent": ["permanente", "residenza permanente", "carta verde"],
+        "family": ["famiglia", "coniuge", "parente", "sponsor"],
+        "employment": ["lavoro", "offerta di lavoro", "datore di lavoro", "occupazione"],
+        "study": ["studiare", "studio", "studente"],
+        "investment": ["investimento", "investire", "attività", "imprenditore"],
+        "affirmative": ["sì"],
+        "negative": ["no", "senza", "non voglio"],
+        "unsure": ["non sono sicuro", "forse"],
+        "correction": ["in realtà", "correzione", "invece"],
+        "generic": ["Cosa dovrebbero fare dopo?", "Quali documenti devono preparare?", "Quale pagina ufficiale devono controllare?"]
+      },
+      "fallback": "Al momento non sono riuscito a completare la ricerca nelle fonti ufficiali aggiornate necessaria per personalizzare un piano affidabile di immigrazione negli Stati Uniti. Non farò supposizioni sulla tua idoneità. Riprova tra poco; se la decisione è urgente, consulta un avvocato statunitense abilitato in materia di immigrazione o un rappresentante accreditato dal DOJ."
+    },
+    "bg": {
+      "destinations": ["съединените щати", "сащ", "америка"],
+      "relocation": ["преместя", "преместя се", "имигрирам", "живея в"],
+      "continuation": {
+        "temporary": ["временно", "временен", "неимигрантски"],
+        "permanent": ["постоянно", "постоянно пребиваване", "зелена карта"],
+        "family": ["семейство", "съпруг", "роднина", "спонсор"],
+        "employment": ["работа", "предложение за работа", "работодател", "заетост"],
+        "study": ["уча", "обучение", "студент"],
+        "investment": ["инвестиция", "инвестирам", "бизнес", "предприемач"],
+        "affirmative": ["да"],
+        "negative": ["не", "без", "не искам"],
+        "unsure": ["не съм сигурен", "може би"],
+        "correction": ["всъщност", "поправка", "вместо"],
+        "generic": ["Какво следва да направят?", "Кои документи трябва да подготвят?", "Коя официална страница да проверят?"]
+      },
+      "fallback": "В момента не успях да завърша проверката на актуалните официални източници, необходима за надежден и персонализиран план за имиграция в САЩ. Няма да предполагам дали отговаряте на условията. Опитайте отново скоро; ако решението е спешно, консултирайте се с лицензиран имиграционен адвокат в САЩ или представител, акредитиран от Министерството на правосъдието."
+    },
+    "hr": {
+      "destinations": ["sjedinjene države", "sad", "amerika"],
+      "relocation": ["preseliti", "useliti", "imigrirati", "živjeti u"],
+      "continuation": {
+        "temporary": ["privremeno", "privremeni", "neimigrantski"],
+        "permanent": ["trajno", "stalni boravak", "zelena karta"],
+        "family": ["obitelj", "supružnik", "rođak", "sponzor"],
+        "employment": ["posao", "ponuda za posao", "poslodavac", "zaposlenje"],
+        "study": ["studirati", "studij", "student"],
+        "investment": ["ulaganje", "uložiti", "poslovanje", "poduzetnik"],
+        "affirmative": ["da"],
+        "negative": ["ne", "bez", "ne želim"],
+        "unsure": ["nisam siguran", "možda"],
+        "correction": ["zapravo", "ispravak", "umjesto"],
+        "generic": ["Što trebaju učiniti sljedeće?", "Koje dokumente trebaju pripremiti?", "Koju službenu stranicu trebaju provjeriti?"]
+      },
+      "fallback": "Trenutačno nisam uspio dovršiti provjeru ažurnih službenih izvora potrebnu za pouzdan i prilagođen plan useljenja u SAD. Neću nagađati ispunjavate li uvjete. Pokušajte ponovno uskoro; ako je odluka hitna, obratite se licenciranom američkom imigracijskom odvjetniku ili predstavniku akreditiranom pri Ministarstvu pravosuđa."
+    },
+    "cs": {
+      "destinations": ["spojené státy", "spojených států", "usa", "amerika"],
+      "relocation": ["přestěhovat", "přistěhovat", "emigrovat", "žít v"],
+      "continuation": {
+        "temporary": ["dočasně", "dočasný", "nepřistěhovalecký"],
+        "permanent": ["trvale", "trvalý pobyt", "zelená karta"],
+        "family": ["rodina", "manžel", "příbuzný", "sponzor"],
+        "employment": ["práce", "pracovní nabídka", "zaměstnavatel", "zaměstnání"],
+        "study": ["studovat", "studium", "student"],
+        "investment": ["investice", "investovat", "podnikání", "podnikatel"],
+        "affirmative": ["ano"],
+        "negative": ["ne", "bez", "nechci"],
+        "unsure": ["nejsem si jistý", "možná"],
+        "correction": ["vlastně", "oprava", "místo toho"],
+        "generic": ["Co mají udělat dál?", "Jaké dokumenty mají připravit?", "Kterou oficiální stránku mají zkontrolovat?"]
+      },
+      "fallback": "Nyní se mi nepodařilo dokončit ověření aktuálních oficiálních zdrojů potřebné pro spolehlivý a přizpůsobený plán přistěhování do USA. Nebudu odhadovat, zda splňujete podmínky. Zkuste to prosím znovu za chvíli; pokud je rozhodnutí naléhavé, obraťte se na licencovaného amerického imigračního advokáta nebo zástupce akreditovaného ministerstvem spravedlnosti."
+    },
+    "da": {
+      "destinations": ["forenede stater", "usa", "amerika"],
+      "relocation": ["flytte", "indvandre", "bosætte", "bo i"],
+      "continuation": {
+        "temporary": ["midlertidigt", "midlertidig", "ikke immigrant"],
+        "permanent": ["permanent", "permanent ophold", "green card"],
+        "family": ["familie", "ægtefælle", "slægtning", "sponsor"],
+        "employment": ["job", "jobtilbud", "arbejdsgiver", "beskæftigelse"],
+        "study": ["studere", "studie", "studerende"],
+        "investment": ["investering", "investere", "virksomhed", "iværksætter"],
+        "affirmative": ["ja"],
+        "negative": ["nej", "uden", "ønsker ikke"],
+        "unsure": ["ikke sikker", "måske"],
+        "correction": ["faktisk", "rettelse", "i stedet"],
+        "generic": ["Hvad skal de gøre nu?", "Hvilke dokumenter skal de forberede?", "Hvilken officiel side skal de tjekke?"]
+      },
+      "fallback": "Jeg kunne ikke færdiggøre kontrollen af aktuelle officielle kilder, som er nødvendig for en pålidelig og personligt tilpasset amerikansk immigrationsplan lige nu. Jeg vil ikke gætte på, om du opfylder kravene. Prøv igen om lidt; hvis beslutningen haster, bør du kontakte en autoriseret amerikansk immigrationsadvokat eller en repræsentant, der er akkrediteret af justitsministeriet."
+    },
+    "nl": {
+      "destinations": ["verenigde staten", "vs", "usa", "amerika"],
+      "relocation": ["verhuizen", "emigreren", "immigreren", "wonen in"],
+      "continuation": {
+        "temporary": ["tijdelijk", "niet immigrant"],
+        "permanent": ["permanent", "permanente verblijfsvergunning", "green card"],
+        "family": ["familie", "echtgenoot", "familielid", "sponsor"],
+        "employment": ["baan", "werkaanbod", "werkgever", "werk"],
+        "study": ["studeren", "studie", "student"],
+        "investment": ["investering", "investeren", "bedrijf", "ondernemer"],
+        "affirmative": ["ja"],
+        "negative": ["nee", "zonder", "wil niet"],
+        "unsure": ["niet zeker", "misschien"],
+        "correction": ["eigenlijk", "correctie", "in plaats daarvan"],
+        "generic": ["Wat moeten ze hierna doen?", "Welke documenten moeten ze voorbereiden?", "Welke officiële pagina moeten ze controleren?"]
+      },
+      "fallback": "Ik kon het actuele officiële bronnenonderzoek dat nodig is voor een betrouwbaar en persoonlijk immigratieplan voor de Verenigde Staten nu niet afronden. Ik zal niet raden of u in aanmerking komt. Probeer het binnenkort opnieuw; is de beslissing dringend, raadpleeg dan een bevoegde Amerikaanse immigratieadvocaat of een door het ministerie van Justitie erkende vertegenwoordiger."
+    },
+    "et": {
+      "destinations": ["ameerika ühendriigid", "usa", "ameerika"],
+      "relocation": ["kolida", "sisserändama", "elama asuda", "elada"],
+      "continuation": {
+        "temporary": ["ajutiselt", "ajutine", "mitteimmigrant"],
+        "permanent": ["alaliselt", "alaline elamisluba", "roheline kaart"],
+        "family": ["perekond", "abikaasa", "sugulane", "sponsor"],
+        "employment": ["töö", "tööpakkumine", "tööandja", "tööhõive"],
+        "study": ["õppida", "õpingud", "üliõpilane"],
+        "investment": ["investeering", "investeerida", "ettevõte", "ettevõtja"],
+        "affirmative": ["jah"],
+        "negative": ["ei", "ilma", "ei soovi"],
+        "unsure": ["pole kindel", "võib-olla"],
+        "correction": ["tegelikult", "parandus", "selle asemel"],
+        "generic": ["Mida nad peaksid järgmisena tegema?", "Millised dokumendid tuleks ette valmistada?", "Millist ametlikku lehte kontrollida?"]
+      },
+      "fallback": "Mul ei õnnestunud praegu lõpule viia ajakohaste ametlike allikate kontrolli, mida on vaja usaldusväärse ja isikupärastatud USA sisserändeplaani koostamiseks. Ma ei hakka teie sobivust oletama. Proovige varsti uuesti; kui otsus on kiireloomuline, pidage nõu litsentseeritud USA immigratsiooniadvokaadi või justiitsministeeriumi akrediteeritud esindajaga."
+    },
+    "fi": {
+      "destinations": ["yhdysvallat", "yhdysvaltoihin", "usa", "amerikka"],
+      "relocation": ["muuttaa", "maahanmuuttaa", "asettua", "asua"],
+      "continuation": {
+        "temporary": ["tilapäisesti", "tilapäinen", "ei maahanmuuttaja"],
+        "permanent": ["pysyvästi", "pysyvä oleskelu", "green card"],
+        "family": ["perhe", "puoliso", "sukulainen", "sponsori"],
+        "employment": ["työ", "työtarjous", "työnantaja", "työllisyys"],
+        "study": ["opiskella", "opinnot", "opiskelija"],
+        "investment": ["sijoitus", "sijoittaa", "yritys", "yrittäjä"],
+        "affirmative": ["kyllä"],
+        "negative": ["ei", "ilman", "en halua"],
+        "unsure": ["en ole varma", "ehkä"],
+        "correction": ["itse asiassa", "korjaus", "sen sijaan"],
+        "generic": ["Mitä heidän pitäisi tehdä seuraavaksi?", "Mitkä asiakirjat heidän pitäisi valmistella?", "Mikä virallinen sivu heidän pitäisi tarkistaa?"]
+      },
+      "fallback": "En pystynyt juuri nyt viimeistelemään ajantasaisten virallisten lähteiden tarkistusta, jota luotettava ja henkilökohtainen Yhdysvaltojen maahanmuuttosuunnitelma edellyttää. En arvaa, täytättekö vaatimukset. Yritä pian uudelleen; jos päätös on kiireellinen, ota yhteyttä luvan saaneeseen yhdysvaltalaiseen maahanmuuttoasianajajaan tai oikeusministeriön valtuuttamaan edustajaan."
+    },
+    "de": {
+      "destinations": ["vereinigte staaten", "vereinigten staaten", "usa", "amerika"],
+      "relocation": ["ziehen", "auswandern", "umsiedeln", "leben in"],
+      "continuation": {
+        "temporary": ["vorübergehend", "befristet", "nichteinwanderer"],
+        "permanent": ["dauerhaft", "dauerhafter aufenthalt", "green card"],
+        "family": ["familie", "ehepartner", "verwandter", "sponsor"],
+        "employment": ["arbeit", "jobangebot", "arbeitgeber", "beschäftigung"],
+        "study": ["studieren", "studium", "student"],
+        "investment": ["investition", "investieren", "unternehmen", "unternehmer"],
+        "affirmative": ["ja"],
+        "negative": ["nein", "ohne", "möchte nicht"],
+        "unsure": ["nicht sicher", "vielleicht"],
+        "correction": ["eigentlich", "korrektur", "stattdessen"],
+        "generic": ["Was sollten sie als Nächstes tun?", "Welche Dokumente sollten sie vorbereiten?", "Welche offizielle Seite sollten sie prüfen?"]
+      },
+      "fallback": "Ich konnte die aktuelle Recherche in offiziellen Quellen, die für einen verlässlichen und persönlichen US-Einwanderungsplan nötig ist, gerade nicht abschließen. Ich werde nicht darüber spekulieren, ob Sie die Voraussetzungen erfüllen. Versuchen Sie es bitte in Kürze erneut; wenn die Entscheidung dringend ist, wenden Sie sich an einen zugelassenen US-Einwanderungsanwalt oder einen vom Justizministerium akkreditierten Vertreter."
+    },
+    "el": {
+      "destinations": ["ηνωμένες πολιτείες", "ηπα", "αμερική"],
+      "relocation": ["μετακομίσω", "μεταναστεύσω", "εγκατασταθώ", "ζήσω"],
+      "continuation": {
+        "temporary": ["προσωρινά", "προσωρινός", "μη μεταναστευτική"],
+        "permanent": ["μόνιμα", "μόνιμη διαμονή", "πράσινη κάρτα"],
+        "family": ["οικογένεια", "σύζυγος", "συγγενής", "χορηγός"],
+        "employment": ["εργασία", "προσφορά εργασίας", "εργοδότης", "απασχόληση"],
+        "study": ["σπουδές", "σπουδάσω", "φοιτητής"],
+        "investment": ["επένδυση", "επενδύσω", "επιχείρηση", "επιχειρηματίας"],
+        "affirmative": ["ναι"],
+        "negative": ["όχι", "χωρίς", "δεν θέλω"],
+        "unsure": ["δεν είμαι σίγουρος", "ίσως"],
+        "correction": ["στην πραγματικότητα", "διόρθωση", "αντί"],
+        "generic": ["Τι πρέπει να κάνουν μετά;", "Ποια έγγραφα πρέπει να προετοιμάσουν;", "Ποια επίσημη σελίδα πρέπει να ελέγξουν;"]
+      },
+      "fallback": "Δεν μπόρεσα αυτή τη στιγμή να ολοκληρώσω την έρευνα σε ενημερωμένες επίσημες πηγές που απαιτείται για ένα αξιόπιστο και εξατομικευμένο σχέδιο μετανάστευσης στις ΗΠΑ. Δεν θα υποθέσω αν πληροίτε τις προϋποθέσεις. Δοκιμάστε ξανά σύντομα· αν η απόφαση είναι επείγουσα, συμβουλευτείτε αδειοδοτημένο δικηγόρο μετανάστευσης των ΗΠΑ ή εκπρόσωπο διαπιστευμένο από το Υπουργείο Δικαιοσύνης."
+    },
+    "hu": {
+      "destinations": ["egyesült államok", "egyesült államokba", "usa", "amerika"],
+      "relocation": ["költözni", "kivándorolni", "letelepedni", "élni"],
+      "continuation": {
+        "temporary": ["ideiglenesen", "ideiglenes", "nem bevándorló"],
+        "permanent": ["véglegesen", "állandó tartózkodás", "zöld kártya"],
+        "family": ["család", "házastárs", "rokon", "támogató"],
+        "employment": ["munka", "állásajánlat", "munkáltató", "foglalkoztatás"],
+        "study": ["tanulni", "tanulmányok", "diák"],
+        "investment": ["befektetés", "befektetni", "vállalkozás", "vállalkozó"],
+        "affirmative": ["igen"],
+        "negative": ["nem", "nélkül", "nem akarok"],
+        "unsure": ["nem vagyok biztos", "talán"],
+        "correction": ["valójában", "javítás", "helyette"],
+        "generic": ["Mi legyen a következő lépésük?", "Milyen dokumentumokat készítsenek elő?", "Melyik hivatalos oldalt ellenőrizzék?"]
+      },
+      "fallback": "Most nem tudtam befejezni a megbízható és személyre szabott amerikai bevándorlási tervhez szükséges, naprakész hivatalos forráskutatást. Nem fogok találgatni arról, hogy megfelel-e a feltételeknek. Próbálja újra rövidesen; ha a döntés sürgős, forduljon engedéllyel rendelkező amerikai bevándorlási ügyvédhez vagy az Igazságügyi Minisztérium által akkreditált képviselőhöz."
+    },
+    "ga": {
+      "destinations": ["stáit aontaithe", "s.a.m.", "meiriceá"],
+      "relocation": ["bogadh", "imirce", "cur fúm", "cónaí"],
+      "continuation": {
+        "temporary": ["sealadach", "neamh inimirceach"],
+        "permanent": ["buan", "buanchónaí", "cárta glas"],
+        "family": ["teaghlach", "céile", "gaol", "urraitheoir"],
+        "employment": ["post", "tairiscint poist", "fostóir", "fostaíocht"],
+        "study": ["staidéar", "mac léinn"],
+        "investment": ["infheistíocht", "infheistiú", "gnó", "fiontraí"],
+        "affirmative": ["tá"],
+        "negative": ["níl", "gan", "níl mé ag iarraidh"],
+        "unsure": ["níl mé cinnte", "b'fhéidir"],
+        "correction": ["i ndáiríre", "ceartúchán", "ina ionad"],
+        "generic": ["Cad ba chóir dóibh a dhéanamh ansin?", "Cé na doiciméid ba chóir dóibh a ullmhú?", "Cén leathanach oifigiúil ba chóir dóibh a sheiceáil?"]
+      },
+      "fallback": "Ní raibh mé in ann an taighde cothrom le dáta ar fhoinsí oifigiúla a theastaíonn chun plean iontaofa pearsantaithe inimirce chuig na Stáit Aontaithe a ullmhú a chríochnú faoi láthair. Ní dhéanfaidh mé buille faoi thuairim faoi d’incháilitheacht. Bain triail eile as ar ball; má tá an cinneadh práinneach, labhair le haturnae inimirce ceadúnaithe sna Stáit Aontaithe nó le hionadaí creidiúnaithe ag an Roinn Dlí agus Cirt."
+    },
+    "lv": {
+      "destinations": ["amerikas savienotās valstis", "amerikas savienotajām valstīm", "asv", "amerika"],
+      "relocation": ["pārcelties", "imigrēt", "apmesties", "dzīvot"],
+      "continuation": {
+        "temporary": ["pagaidu", "īslaicīgi", "neimigranta"],
+        "permanent": ["pastāvīgi", "pastāvīgā uzturēšanās", "zaļā karte"],
+        "family": ["ģimene", "laulātais", "radinieks", "sponsors"],
+        "employment": ["darbs", "darba piedāvājums", "darba devējs", "nodarbinātība"],
+        "study": ["studēt", "studijas", "students"],
+        "investment": ["ieguldījums", "investēt", "uzņēmums", "uzņēmējs"],
+        "affirmative": ["jā"],
+        "negative": ["nē", "bez", "nevēlos"],
+        "unsure": ["neesmu pārliecināts", "varbūt"],
+        "correction": ["patiesībā", "labojums", "tā vietā"],
+        "generic": ["Ko viņiem darīt tālāk?", "Kādi dokumenti jāsagatavo?", "Kuru oficiālo lapu pārbaudīt?"]
+      },
+      "fallback": "Pašlaik man neizdevās pabeigt aktuālo oficiālo avotu pārbaudi, kas vajadzīga uzticamam un personalizētam ASV imigrācijas plānam. Es neminēšu, vai jūs atbilstat prasībām. Lūdzu, mēģiniet vēlreiz drīzumā; ja lēmums ir steidzams, konsultējieties ar licencētu ASV imigrācijas advokātu vai Tieslietu ministrijas akreditētu pārstāvi."
+    },
+    "lt": {
+      "destinations": ["jungtinės amerikos valstijos", "jungtines amerikos valstijas", "jav", "amerika"],
+      "relocation": ["persikelti", "emigruoti", "apsigyventi", "gyventi"],
+      "continuation": {
+        "temporary": ["laikinai", "laikinas", "neimigracinis"],
+        "permanent": ["nuolat", "nuolatinė gyvenamoji vieta", "žalioji korta"],
+        "family": ["šeima", "sutuoktinis", "giminaitis", "rėmėjas"],
+        "employment": ["darbas", "darbo pasiūlymas", "darbdavys", "užimtumas"],
+        "study": ["studijuoti", "studijos", "studentas"],
+        "investment": ["investicija", "investuoti", "verslas", "verslininkas"],
+        "affirmative": ["taip"],
+        "negative": ["ne", "be", "nenoriu"],
+        "unsure": ["nesu tikras", "galbūt"],
+        "correction": ["iš tikrųjų", "pataisymas", "vietoj"],
+        "generic": ["Ką jiems daryti toliau?", "Kokius dokumentus reikėtų paruošti?", "Kurį oficialų puslapį reikėtų patikrinti?"]
+      },
+      "fallback": "Šiuo metu nepavyko užbaigti naujausių oficialių šaltinių patikros, būtinos patikimam ir asmeniškai pritaikytam JAV imigracijos planui. Nespėliosiu, ar atitinkate reikalavimus. Netrukus bandykite dar kartą; jei sprendimas skubus, pasitarkite su licencijuotu JAV imigracijos advokatu arba Teisingumo departamento akredituotu atstovu."
+    },
+    "mt": {
+      "destinations": ["stati uniti", "istati uniti", "usa", "amerika"],
+      "relocation": ["immur ngħix", "nimigra", "noqgħod", "ngħix"],
+      "continuation": {
+        "temporary": ["temporanjament", "temporanju", "mhux immigrant"],
+        "permanent": ["permanenti", "residenza permanenti", "karta ħadra"],
+        "family": ["familja", "konjuġi", "qarib", "sponsor"],
+        "employment": ["xogħol", "offerta ta' xogħol", "impjegatur", "impjieg"],
+        "study": ["nistudja", "studju", "student"],
+        "investment": ["investiment", "ninvesti", "negozju", "intraprenditur"],
+        "affirmative": ["iva"],
+        "negative": ["le", "mingħajr", "ma rridx"],
+        "unsure": ["mhux ċert", "forsi"],
+        "correction": ["fil-fatt", "korrezzjoni", "minflok"],
+        "generic": ["X’għandhom jagħmlu wara?", "Liema dokumenti għandhom jippreparaw?", "Liema paġna uffiċjali għandhom jiċċekkjaw?"]
+      },
+      "fallback": "Bħalissa ma stajtx inlesti r-riċerka aġġornata f’sorsi uffiċjali meħtieġa għal pjan affidabbli u personalizzat tal-immigrazzjoni lejn l-Istati Uniti. Mhux se naħseb bl-addoċċ dwar l-eliġibbiltà tiegħek. Erġa’ pprova dalwaqt; jekk id-deċiżjoni hija urġenti, ikkonsulta avukat liċenzjat tal-immigrazzjoni fl-Istati Uniti jew rappreżentant akkreditat mid-Dipartiment tal-Ġustizzja."
+    },
+    "pl": {
+      "destinations": ["stany zjednoczone", "stanów zjednoczonych", "usa", "ameryka"],
+      "relocation": ["przeprowadzić się", "wyemigrować", "zamieszkać", "żyć w"],
+      "continuation": {
+        "temporary": ["tymczasowo", "tymczasowy", "nieimigracyjny"],
+        "permanent": ["na stałe", "stały pobyt", "zielona karta"],
+        "family": ["rodzina", "małżonek", "krewny", "sponsor"],
+        "employment": ["praca", "oferta pracy", "pracodawca", "zatrudnienie"],
+        "study": ["studiować", "studia", "student"],
+        "investment": ["inwestycja", "inwestować", "biznes", "przedsiębiorca"],
+        "affirmative": ["tak"],
+        "negative": ["nie", "bez", "nie chcę"],
+        "unsure": ["nie jestem pewien", "może"],
+        "correction": ["właściwie", "korekta", "zamiast"],
+        "generic": ["Co powinni zrobić dalej?", "Jakie dokumenty powinni przygotować?", "Którą oficjalną stronę powinni sprawdzić?"]
+      },
+      "fallback": "Nie udało mi się teraz zakończyć sprawdzania aktualnych oficjalnych źródeł potrzebnych do przygotowania wiarygodnego i dopasowanego planu imigracji do USA. Nie będę zgadywać, czy spełniasz wymagania. Spróbuj ponownie wkrótce; jeśli decyzja jest pilna, skonsultuj się z licencjonowanym amerykańskim prawnikiem imigracyjnym lub przedstawicielem akredytowanym przez Departament Sprawiedliwości."
+    },
+    "ro": {
+      "destinations": ["statele unite", "sua", "america"],
+      "relocation": ["mă mut", "emigrez", "imigrez", "locuiesc"],
+      "continuation": {
+        "temporary": ["temporar", "neimigrant"],
+        "permanent": ["permanent", "rezidență permanentă", "carte verde"],
+        "family": ["familie", "soț", "rudă", "sponsor"],
+        "employment": ["loc de muncă", "ofertă de muncă", "angajator", "ocupare"],
+        "study": ["studiez", "studii", "student"],
+        "investment": ["investiție", "investesc", "afacere", "antreprenor"],
+        "affirmative": ["da"],
+        "negative": ["nu", "fără", "nu vreau"],
+        "unsure": ["nu sunt sigur", "poate"],
+        "correction": ["de fapt", "corectare", "în schimb"],
+        "generic": ["Ce ar trebui să facă în continuare?", "Ce documente ar trebui să pregătească?", "Ce pagină oficială ar trebui verificată?"]
+      },
+      "fallback": "În acest moment nu am putut finaliza verificarea surselor oficiale actualizate necesară pentru un plan de imigrare în SUA fiabil și personalizat. Nu voi presupune dacă îndepliniți condițiile. Încercați din nou în curând; dacă decizia este urgentă, consultați un avocat american licențiat în imigrație sau un reprezentant acreditat de Departamentul de Justiție."
+    },
+    "sk": {
+      "destinations": ["spojené štáty", "spojených štátov", "usa", "amerika"],
+      "relocation": ["presťahovať", "prisťahovať", "emigrovať", "žiť"],
+      "continuation": {
+        "temporary": ["dočasne", "dočasný", "neprisťahovalecký"],
+        "permanent": ["natrvalo", "trvalý pobyt", "zelená karta"],
+        "family": ["rodina", "manžel", "príbuzný", "sponzor"],
+        "employment": ["práca", "pracovná ponuka", "zamestnávateľ", "zamestnanie"],
+        "study": ["študovať", "štúdium", "študent"],
+        "investment": ["investícia", "investovať", "podnikanie", "podnikateľ"],
+        "affirmative": ["áno"],
+        "negative": ["nie", "bez", "nechcem"],
+        "unsure": ["nie som si istý", "možno"],
+        "correction": ["vlastne", "oprava", "namiesto toho"],
+        "generic": ["Čo majú urobiť ďalej?", "Aké dokumenty majú pripraviť?", "Ktorú oficiálnu stránku majú skontrolovať?"]
+      },
+      "fallback": "Momentálne sa mi nepodarilo dokončiť overenie aktuálnych oficiálnych zdrojov potrebné na spoľahlivý a prispôsobený plán prisťahovania do USA. Nebudem odhadovať, či spĺňate podmienky. Skúste to čoskoro znova; ak je rozhodnutie naliehavé, obráťte sa na licencovaného amerického imigračného advokáta alebo zástupcu akreditovaného ministerstvom spravodlivosti."
+    },
+    "sl": {
+      "destinations": ["združene države", "zda", "amerika"],
+      "relocation": ["preseliti", "priseliti", "izseliti", "živeti"],
+      "continuation": {
+        "temporary": ["začasno", "začasni", "nepriseljenski"],
+        "permanent": ["stalno", "stalno prebivališče", "zelena karta"],
+        "family": ["družina", "zakonec", "sorodnik", "sponzor"],
+        "employment": ["delo", "ponudba za delo", "delodajalec", "zaposlitev"],
+        "study": ["študirati", "študij", "študent"],
+        "investment": ["naložba", "investirati", "podjetje", "podjetnik"],
+        "affirmative": ["da"],
+        "negative": ["ne", "brez", "nočem"],
+        "unsure": ["nisem prepričan", "mogoče"],
+        "correction": ["pravzaprav", "popravek", "namesto"],
+        "generic": ["Kaj naj naredijo naslednje?", "Katere dokumente naj pripravijo?", "Katero uradno stran naj preverijo?"]
+      },
+      "fallback": "Trenutno mi ni uspelo dokončati preverjanja posodobljenih uradnih virov, potrebnega za zanesljiv in prilagojen načrt priselitve v ZDA. Ne bom ugibal, ali izpolnjujete pogoje. Poskusite znova kmalu; če je odločitev nujna, se posvetujte z licenciranim ameriškim odvetnikom za priseljevanje ali predstavnikom, ki ga je pooblastilo ministrstvo za pravosodje."
+    },
+    "sv": {
+      "destinations": ["förenta staterna", "usa", "amerika"],
+      "relocation": ["flytta", "invandra", "bosätta", "bo i"],
+      "continuation": {
+        "temporary": ["tillfälligt", "tillfällig", "icke invandrare"],
+        "permanent": ["permanent", "permanent uppehållstillstånd", "green card"],
+        "family": ["familj", "make", "släkting", "sponsor"],
+        "employment": ["jobb", "jobberbjudande", "arbetsgivare", "anställning"],
+        "study": ["studera", "studier", "student"],
+        "investment": ["investering", "investera", "företag", "entreprenör"],
+        "affirmative": ["ja"],
+        "negative": ["nej", "utan", "vill inte"],
+        "unsure": ["inte säker", "kanske"],
+        "correction": ["faktiskt", "rättelse", "i stället"],
+        "generic": ["Vad bör de göra härnäst?", "Vilka dokument bör de förbereda?", "Vilken officiell sida bör de kontrollera?"]
+      },
+      "fallback": "Jag kunde inte slutföra kontrollen av aktuella officiella källor som behövs för en tillförlitlig och personligt anpassad amerikansk immigrationsplan just nu. Jag tänker inte gissa om du uppfyller kraven. Försök igen om en stund; om beslutet är brådskande bör du rådgöra med en licensierad amerikansk immigrationsadvokat eller en representant som ackrediterats av justitiedepartementet."
+    }
+  },
   "cs": {
     "intro": "Tady je nejbližší oficiální pokyn USCIS, který jsem našel:",
     "sourceLanguage": "Následující pasáž USCIS je v angličtině:",
