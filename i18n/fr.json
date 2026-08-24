@@ -306,7 +306,7 @@
     "suggestedNextStep": "Prochaine étape suggérée",
     "vaultSubtitle": "Organisez les PDF, images, notes et statuts de fichiers.",
     "aiSubtitle": "Posez des questions à l’aide du contexte de votre liste enregistrée.",
-    "suggestedNextStepBody": "Vérifiez les fichiers marqués « À vérifier », puis terminez le prochain élément de votre liste.",
+    "suggestedNextStepBody": "Ajoutez ou vérifiez un fichier, puis terminez l’élément suivant de votre liste.",
     "plusActive": "Plus actif",
     "plusChecking": "Vérification de Plus",
     "stepsComplete": "{{completed}}/{{total}} étapes",

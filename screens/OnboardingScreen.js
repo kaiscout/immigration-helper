@@ -1,9 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTranslation } from "react-i18next";
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
 import LanguageDropdown from "../components/LanguageDropdown";
+import { showAlert } from "../data/appAlert";
 
 const ONBOARDING_KEY = "hasSeenOnboarding";
 
@@ -15,7 +16,7 @@ export default function OnboardingScreen({ navigation }) {
       await AsyncStorage.setItem(ONBOARDING_KEY, "true");
       navigation.replace("Home");
     } catch {
-      Alert.alert(t("alerts.saveErrorTitle"), t("alerts.saveErrorBody"));
+      showAlert(t("alerts.saveErrorTitle"), t("alerts.saveErrorBody"));
     }
   };
 

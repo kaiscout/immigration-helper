@@ -306,7 +306,7 @@
     "suggestedNextStep": "Sugerowany następny krok",
     "vaultSubtitle": "Porządkuj pliki PDF, obrazy, notatki i statusy plików.",
     "aiSubtitle": "Zadawaj pytania z wykorzystaniem zapisanej listy kontrolnej.",
-    "suggestedNextStepBody": "Sprawdź pliki ze statusem „Wymaga sprawdzenia”, a następnie ukończ kolejny punkt listy.",
+    "suggestedNextStepBody": "Dodaj lub sprawdź plik, a następnie ukończ kolejny punkt listy.",
     "plusActive": "Plus aktywny",
     "plusChecking": "Sprawdzanie Plus",
     "stepsComplete": "{{completed}}/{{total}} kroków",

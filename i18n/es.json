@@ -306,7 +306,7 @@
     "suggestedNextStep": "Siguiente paso sugerido",
     "vaultSubtitle": "Organiza PDF, imágenes, notas y estados de archivos.",
     "aiSubtitle": "Haz preguntas con el contexto de tu lista guardada.",
-    "suggestedNextStepBody": "Revisa los archivos marcados como «Requiere revisión» y completa el siguiente elemento de tu lista.",
+    "suggestedNextStepBody": "Añade o revisa un archivo y completa el siguiente elemento de tu lista.",
     "plusActive": "Plus activo",
     "plusChecking": "Comprobando Plus",
     "stepsComplete": "{{completed}}/{{total}} pasos",

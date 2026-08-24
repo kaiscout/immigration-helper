@@ -306,7 +306,7 @@
     "suggestedNextStep": "Föreslaget nästa steg",
     "vaultSubtitle": "Ordna PDF-filer, bilder, anteckningar och filstatusar.",
     "aiSubtitle": "Ställ frågor med hjälp av din sparade checklista.",
-    "suggestedNextStepBody": "Granska filer märkta ”Behöver granskas” och slutför sedan nästa punkt på checklistan.",
+    "suggestedNextStepBody": "Lägg till eller granska en fil och slutför sedan nästa punkt på checklistan.",
     "plusActive": "Plus aktivt",
     "plusChecking": "Kontrollerar Plus",
     "stepsComplete": "{{completed}}/{{total}} steg",

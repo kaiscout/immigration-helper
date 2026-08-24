@@ -306,7 +306,7 @@
     "suggestedNextStep": "Doporučený další krok",
     "vaultSubtitle": "Uspořádejte si PDF, obrázky, poznámky a stavy souborů.",
     "aiSubtitle": "Ptejte se s využitím kontextu uloženého kontrolního seznamu.",
-    "suggestedNextStepBody": "Zkontrolujte soubory označené „Vyžaduje kontrolu“ a poté dokončete další položku kontrolního seznamu.",
+    "suggestedNextStepBody": "Přidejte nebo zkontrolujte soubor a poté dokončete další položku kontrolního seznamu.",
     "plusActive": "Plus aktivní",
     "plusChecking": "Kontrola Plus",
     "stepsComplete": "{{completed}}/{{total}} kroků",

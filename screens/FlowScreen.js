@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
 import {
@@ -11,6 +11,7 @@ import {
   saveFlowState
 } from "../data/flowState";
 import { createNotificationTrigger, loadNotificationsAsync } from "../data/notificationService";
+import { showAlert } from "../data/appAlert";
 import { openExternalLink } from "../data/externalLinks";
 
 const pad2 = (value) => String(value).padStart(2, "0");
@@ -116,7 +117,7 @@ export default function FlowScreen({ route, navigation }) {
         setDueDate(parsed.dueDate || "");
         setDone(parsed.done || {});
       } catch {
-        Alert.alert(t("alerts.loadingErrorTitle"), t("alerts.loadingErrorBody"));
+        showAlert(t("alerts.loadingErrorTitle"), t("alerts.loadingErrorBody"));
       }
     })();
   }, [flow, t]);
@@ -127,13 +128,13 @@ export default function FlowScreen({ route, navigation }) {
 
   const computeDue = async () => {
     if (!noticeDate) {
-      Alert.alert(t("alerts.enterDateTitle"), t("alerts.enterDateBody"));
+      showAlert(t("alerts.enterDateTitle"), t("alerts.enterDateBody"));
       return;
     }
 
     const base = new Date(noticeDate);
     if (isNaN(base.getTime())) {
-      Alert.alert(t("alerts.invalidDateTitle"), t("alerts.invalidDateBody"));
+      showAlert(t("alerts.invalidDateTitle"), t("alerts.invalidDateBody"));
       return;
     }
 
@@ -142,7 +143,7 @@ export default function FlowScreen({ route, navigation }) {
       await saveState({ noticeDate, dueDate: iso, done });
       setDueDate(iso);
     } catch {
-      Alert.alert(t("alerts.saveErrorTitle"), t("alerts.saveErrorBody"));
+      showAlert(t("alerts.saveErrorTitle"), t("alerts.saveErrorBody"));
     }
   };
 
@@ -152,7 +153,7 @@ export default function FlowScreen({ route, navigation }) {
       await saveState({ noticeDate, dueDate, done: newState });
       setDone(newState);
     } catch {
-      Alert.alert(t("alerts.saveErrorTitle"), t("alerts.saveErrorBody"));
+      showAlert(t("alerts.saveErrorTitle"), t("alerts.saveErrorBody"));
     }
   };
 
@@ -161,12 +162,12 @@ export default function FlowScreen({ route, navigation }) {
       const { environment, Notifications } = await loadNotificationsAsync();
 
       if (environment === "web") {
-        Alert.alert(t("alerts.webReminderTitle"), t("alerts.webReminderBody"));
+        showAlert(t("alerts.webReminderTitle"), t("alerts.webReminderBody"));
         return null;
       }
 
       if (environment === "expoGo") {
-        Alert.alert(t("alerts.expoGoNotificationsTitle"), t("alerts.expoGoNotificationsBody"));
+        showAlert(t("alerts.expoGoNotificationsTitle"), t("alerts.expoGoNotificationsBody"));
         return null;
       }
 
@@ -175,13 +176,13 @@ export default function FlowScreen({ route, navigation }) {
 
       const requested = await Notifications.requestPermissionsAsync();
       if (!requested.granted) {
-        Alert.alert(t("reminders.permissionTitle"), t("reminders.permissionBody"));
+        showAlert(t("reminders.permissionTitle"), t("reminders.permissionBody"));
         return null;
       }
 
       return Notifications;
     } catch {
-      Alert.alert(t("alerts.reminderErrorTitle"), t("alerts.reminderErrorBody"));
+      showAlert(t("alerts.reminderErrorTitle"), t("alerts.reminderErrorBody"));
       return null;
     }
   };
@@ -191,7 +192,7 @@ export default function FlowScreen({ route, navigation }) {
     if (!Notifications) return;
 
     if (!dueDate) {
-      Alert.alert(t("alerts.noDateTitle"), t("alerts.noDateBody"));
+      showAlert(t("alerts.noDateTitle"), t("alerts.noDateBody"));
       return;
     }
 
@@ -200,7 +201,7 @@ export default function FlowScreen({ route, navigation }) {
     fire.setDate(fire.getDate() - daysBefore);
 
     if (fire.getTime() <= Date.now()) {
-      Alert.alert(t("alerts.pastDateTitle"), t("alerts.pastDateBody"));
+      showAlert(t("alerts.pastDateTitle"), t("alerts.pastDateBody"));
       return;
     }
 
@@ -214,12 +215,12 @@ export default function FlowScreen({ route, navigation }) {
         trigger: createNotificationTrigger({ type: "date", date: fire })
       });
 
-      Alert.alert(
+      showAlert(
         t("reminders.scheduledTitle"),
         `${t("notifications.reminderSet")} ${fire.toLocaleString(lang)}`
       );
     } catch {
-      Alert.alert(t("alerts.reminderErrorTitle"), t("alerts.reminderErrorBody"));
+      showAlert(t("alerts.reminderErrorTitle"), t("alerts.reminderErrorBody"));
     }
   };
 
@@ -228,19 +229,19 @@ export default function FlowScreen({ route, navigation }) {
       const { environment, Notifications } = await loadNotificationsAsync();
 
       if (environment === "web") {
-        Alert.alert(t("alerts.webReminderTitle"), t("alerts.webReminderBody"));
+        showAlert(t("alerts.webReminderTitle"), t("alerts.webReminderBody"));
         return;
       }
 
       if (environment === "expoGo") {
-        Alert.alert(t("alerts.expoGoNotificationsTitle"), t("alerts.expoGoNotificationsBody"));
+        showAlert(t("alerts.expoGoNotificationsTitle"), t("alerts.expoGoNotificationsBody"));
         return;
       }
 
       await Notifications.cancelAllScheduledNotificationsAsync();
-      Alert.alert(t("notifications.clearedTitle"), t("notifications.clearedBody"));
+      showAlert(t("notifications.clearedTitle"), t("notifications.clearedBody"));
     } catch {
-      Alert.alert(t("alerts.reminderErrorTitle"), t("alerts.reminderErrorBody"));
+      showAlert(t("alerts.reminderErrorTitle"), t("alerts.reminderErrorBody"));
     }
   };
 
@@ -290,7 +291,12 @@ export default function FlowScreen({ route, navigation }) {
           <Text style={styles.trustTitle}>{t("flow.verifyTitle")}</Text>
           <Text style={styles.trustText}>{t("flow.verifyBody")}</Text>
         </View>
-        <TouchableOpacity style={styles.trustBtn} onPress={() => navigation.navigate("Resources")}>
+        <TouchableOpacity
+          style={styles.trustBtn}
+          onPress={() => navigation.navigate("Resources")}
+          accessibilityRole="button"
+          accessibilityLabel={t("resources.title")}
+        >
           <Text style={styles.trustBtnText}>{t("resources.title")}</Text>
         </TouchableOpacity>
       </View>
@@ -363,7 +369,12 @@ export default function FlowScreen({ route, navigation }) {
           <Text style={styles.dateSafetyText}>{t("flow.dateSafetyNote")}</Text>
         </View>
 
-        <TouchableOpacity style={styles.btn} onPress={computeDue}>
+        <TouchableOpacity
+          style={styles.btn}
+          onPress={computeDue}
+          accessibilityRole="button"
+          accessibilityLabel={t("common.save")}
+        >
           <Ionicons name="checkmark-circle-outline" size={19} color={COLORS.primaryTextOn} />
           <Text style={styles.btnText}>{t("common.save")}</Text>
         </TouchableOpacity>
@@ -385,7 +396,13 @@ export default function FlowScreen({ route, navigation }) {
           <Text style={styles.helperText}>{t("flow.reminderBody")}</Text>
           <View style={styles.actionRow}>
             {reminderOptions.map((item) => (
-              <TouchableOpacity key={item.days} style={styles.smallBtn} onPress={() => setReminder(item.days)}>
+              <TouchableOpacity
+                key={item.days}
+                style={styles.smallBtn}
+                onPress={() => setReminder(item.days)}
+                accessibilityRole="button"
+                accessibilityLabel={item.label}
+              >
                 <Ionicons name="notifications-outline" size={18} color={COLORS.text} />
                 <Text style={styles.linkText}>{item.label}</Text>
               </TouchableOpacity>
@@ -395,7 +412,12 @@ export default function FlowScreen({ route, navigation }) {
       ) : null}
 
       <View style={styles.actionRow}>
-        <TouchableOpacity style={styles.smallBtn} onPress={clearReminder}>
+        <TouchableOpacity
+          style={styles.smallBtn}
+          onPress={clearReminder}
+          accessibilityRole="button"
+          accessibilityLabel={t("common.clearReminder")}
+        >
           <Ionicons name="trash-outline" size={18} color={COLORS.text} />
           <Text style={styles.linkText}>{t("common.clearReminder")}</Text>
         </TouchableOpacity>
@@ -534,6 +556,8 @@ export default function FlowScreen({ route, navigation }) {
                   key={`${picker.type}-${item.value}`}
                   style={styles.pickerOption}
                   onPress={() => selectPickerValue(item.value)}
+                  accessibilityRole="button"
+                  accessibilityLabel={String(item.label)}
                 >
                   <Text style={styles.pickerOptionText}>{item.label}</Text>
                 </TouchableOpacity>
@@ -548,7 +572,13 @@ export default function FlowScreen({ route, navigation }) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: COLORS.bg },
-  wrap: { padding: SPACING.lg, paddingBottom: SPACING.xxl },
+  wrap: {
+    width: "100%",
+    maxWidth: 900,
+    alignSelf: "center",
+    padding: SPACING.lg,
+    paddingBottom: SPACING.xxl
+  },
   emptyWrap: { flex: 1, padding: SPACING.xl, backgroundColor: COLORS.bg },
   headerCard: {
     backgroundColor: COLORS.card,

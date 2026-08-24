@@ -306,7 +306,7 @@
     "suggestedNextStep": "الخطوة التالية المقترحة",
     "vaultSubtitle": "نظّم ملفات PDF والصور والملاحظات وحالة الملفات.",
     "aiSubtitle": "اطرح أسئلة باستخدام سياق قائمة التحقق المحفوظة.",
-    "suggestedNextStepBody": "راجع الملفات المصنفة «يحتاج إلى مراجعة»، ثم أكمل العنصر التالي في قائمة التحقق.",
+    "suggestedNextStepBody": "أضف ملفًا أو راجعه، ثم أكمل العنصر التالي في قائمة التحقق.",
     "plusActive": "Plus مفعّل",
     "plusChecking": "جارٍ التحقق من Plus",
     "stepsComplete": "{{completed}}/{{total}} خطوات",

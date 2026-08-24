@@ -306,7 +306,7 @@
     "suggestedNextStep": "Empfohlener nächster Schritt",
     "vaultSubtitle": "Organisieren Sie PDFs, Bilder, Notizen und Dateistatus.",
     "aiSubtitle": "Stellen Sie Fragen mit dem Kontext Ihrer gespeicherten Checkliste.",
-    "suggestedNextStepBody": "Prüfen Sie Dateien mit dem Status „Prüfung erforderlich“ und erledigen Sie dann den nächsten Checklistenpunkt.",
+    "suggestedNextStepBody": "Fügen Sie eine Datei hinzu oder überprüfen Sie eine und erledigen Sie anschließend den nächsten Punkt auf Ihrer Checkliste.",
     "plusActive": "Plus aktiv",
     "plusChecking": "Plus wird geprüft",
     "stepsComplete": "{{completed}}/{{total}} Schritte",

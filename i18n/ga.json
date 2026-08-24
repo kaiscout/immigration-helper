@@ -306,7 +306,7 @@
     "suggestedNextStep": "An chéad chéim eile a mholtar",
     "vaultSubtitle": "Eagraigh PDFanna, íomhánna, nótaí agus stádas comhaid.",
     "aiSubtitle": "Cuir ceisteanna le comhthéacs do sheicliosta shábháilte.",
-    "suggestedNextStepBody": "Athbhreithnigh comhaid a bhfuil “Le hathbhreithniú” orthu, ansin críochnaigh an chéad mhír eile ar do sheicliosta.",
+    "suggestedNextStepBody": "Cuir comhad leis nó athbhreithnigh ceann, ansin críochnaigh an chéad mhír eile ar do sheicliosta.",
     "plusActive": "Plus gníomhach",
     "plusChecking": "Plus á sheiceáil",
     "stepsComplete": "{{completed}}/{{total}} céim",

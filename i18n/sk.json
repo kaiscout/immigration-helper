@@ -306,7 +306,7 @@
     "suggestedNextStep": "Navrhovaný ďalší krok",
     "vaultSubtitle": "Usporiadajte si PDF súbory, obrázky, poznámky a stavy súborov.",
     "aiSubtitle": "Pýtajte sa s využitím kontextu uloženého kontrolného zoznamu.",
-    "suggestedNextStepBody": "Skontrolujte súbory označené „Treba skontrolovať“ a potom dokončite ďalšiu položku kontrolného zoznamu.",
+    "suggestedNextStepBody": "Pridajte alebo skontrolujte súbor a potom dokončite ďalšiu položku kontrolného zoznamu.",
     "plusActive": "Plus aktívne",
     "plusChecking": "Kontrola Plus",
     "stepsComplete": "{{completed}}/{{total}} krokov",

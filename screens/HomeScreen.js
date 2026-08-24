@@ -219,7 +219,14 @@ export default function HomeScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: COLORS.bg },
-  wrap: { padding: SPACING.lg, gap: SPACING.md, flexGrow: 1 },
+  wrap: {
+    width: "100%",
+    maxWidth: 900,
+    alignSelf: "center",
+    padding: SPACING.lg,
+    gap: SPACING.md,
+    flexGrow: 1
+  },
   hero: {
     backgroundColor: COLORS.card,
     padding: SPACING.xl,

@@ -306,7 +306,7 @@
     "suggestedNextStep": "Soovitatud järgmine samm",
     "vaultSubtitle": "Korrasta PDF-e, pilte, märkmeid ja failide olekuid.",
     "aiSubtitle": "Esita küsimusi salvestatud kontrollnimekirja konteksti põhjal.",
-    "suggestedNextStepBody": "Vaata üle failid olekuga „Vajab ülevaatamist“ ja seejärel lõpeta kontrollnimekirja järgmine punkt.",
+    "suggestedNextStepBody": "Lisa fail või vaata see üle, seejärel lõpeta kontrollnimekirja järgmine punkt.",
     "plusActive": "Plus aktiivne",
     "plusChecking": "Plusi kontrollimine",
     "stepsComplete": "{{completed}}/{{total}} sammu",

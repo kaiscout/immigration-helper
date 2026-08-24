@@ -306,7 +306,7 @@
     "suggestedNextStep": "建议的下一步",
     "vaultSubtitle": "整理 PDF、图片、备注和文件状态。",
     "aiSubtitle": "结合已保存清单的内容提问。",
-    "suggestedNextStepBody": "查看标记为“需要审核”的文件，然后完成清单中的下一项。",
+    "suggestedNextStepBody": "添加或查看文件，然后完成清单中的下一项。",
     "plusActive": "Plus 已启用",
     "plusChecking": "正在检查 Plus",
     "stepsComplete": "{{completed}}/{{total}} 个步骤",

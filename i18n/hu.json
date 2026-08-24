@@ -306,7 +306,7 @@
     "suggestedNextStep": "Javasolt következő lépés",
     "vaultSubtitle": "Rendszerezze a PDF-eket, képeket, jegyzeteket és fájlállapotokat.",
     "aiSubtitle": "Tegyen fel kérdéseket a mentett ellenőrzőlista adataival.",
-    "suggestedNextStepBody": "Tekintse át az „Áttekintést igényel” jelölésű fájlokat, majd végezze el az ellenőrzőlista következő elemét.",
+    "suggestedNextStepBody": "Adjon hozzá vagy tekintsen át egy fájlt, majd végezze el az ellenőrzőlista következő elemét.",
     "plusActive": "A Plus aktív",
     "plusChecking": "Plus ellenőrzése",
     "stepsComplete": "{{completed}}/{{total}} lépés",

@@ -306,7 +306,7 @@
     "suggestedNextStep": "सुझाया गया अगला कदम",
     "vaultSubtitle": "PDF, तस्वीरें, नोट्स और फ़ाइल की स्थितियाँ व्यवस्थित करें।",
     "aiSubtitle": "अपनी सेव की गई चेकलिस्ट के संदर्भ के साथ सवाल पूछें।",
-    "suggestedNextStepBody": "‘समीक्षा ज़रूरी’ वाली फ़ाइलें देखें, फिर चेकलिस्ट का अगला आइटम पूरा करें।",
+    "suggestedNextStepBody": "कोई फ़ाइल जोड़ें या उसकी समीक्षा करें, फिर अपनी चेकलिस्ट का अगला आइटम पूरा करें।",
     "plusActive": "Plus सक्रिय",
     "plusChecking": "Plus की जाँच हो रही है",
     "stepsComplete": "{{completed}}/{{total}} कदम",

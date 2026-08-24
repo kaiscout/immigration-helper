@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
@@ -22,6 +22,7 @@ import {
 } from "../data/flowState";
 import { createNotificationTrigger, loadNotificationsAsync } from "../data/notificationService";
 import { openExternalLink } from "../data/externalLinks";
+import { showAlert } from "../data/appAlert";
 import {
   FREE_AI_QUESTION_LIMIT,
   loadAiUsage,
@@ -845,7 +846,7 @@ export default function AIAdvisorScreen({ navigation }) {
       setConsentChecklist(false);
       setSubscription({ isPlus: false });
       setAiUsage({ count: 0 });
-      Alert.alert(t("alerts.loadingErrorTitle"), t("alerts.loadingErrorBody"));
+      showAlert(t("alerts.loadingErrorTitle"), t("alerts.loadingErrorBody"));
     }
   }, [t]);
 
@@ -918,7 +919,7 @@ export default function AIAdvisorScreen({ navigation }) {
       const consent = await saveAiConsent({ shareChecklist: isPlus && consentChecklist });
       setAiConsent(consent);
     } catch {
-      Alert.alert(t("alerts.saveErrorTitle"), t("alerts.saveErrorBody"));
+      showAlert(t("alerts.saveErrorTitle"), t("alerts.saveErrorBody"));
     }
   };
 
@@ -967,12 +968,12 @@ export default function AIAdvisorScreen({ navigation }) {
       const { environment, Notifications } = await loadNotificationsAsync();
 
       if (environment === "web") {
-        Alert.alert(t("alerts.webReminderTitle"), t("alerts.webReminderBody"));
+        showAlert(t("alerts.webReminderTitle"), t("alerts.webReminderBody"));
         return null;
       }
 
       if (environment === "expoGo") {
-        Alert.alert(t("alerts.expoGoNotificationsTitle"), t("alerts.expoGoNotificationsBody"));
+        showAlert(t("alerts.expoGoNotificationsTitle"), t("alerts.expoGoNotificationsBody"));
         return null;
       }
 
@@ -981,13 +982,13 @@ export default function AIAdvisorScreen({ navigation }) {
 
       const requested = await Notifications.requestPermissionsAsync();
       if (!requested.granted) {
-        Alert.alert(t("reminders.permissionTitle"), t("reminders.permissionBody"));
+        showAlert(t("reminders.permissionTitle"), t("reminders.permissionBody"));
         return null;
       }
 
       return Notifications;
     } catch {
-      Alert.alert(t("alerts.reminderErrorTitle"), t("alerts.reminderErrorBody"));
+      showAlert(t("alerts.reminderErrorTitle"), t("alerts.reminderErrorBody"));
       return null;
     }
   };
@@ -1204,7 +1205,7 @@ export default function AIAdvisorScreen({ navigation }) {
     const question = (preset ?? input).trim();
     if (!question || loading) return;
     if (containsSensitiveIdentifier(question)) {
-      Alert.alert(t("ai.errorTitle"), t("privacy.consentSensitive"));
+      showAlert(t("ai.errorTitle"), t("privacy.consentSensitive"));
       return;
     }
 
@@ -1291,7 +1292,7 @@ export default function AIAdvisorScreen({ navigation }) {
       const message = e?.name === "AbortError"
         ? t("ai.requestFailed")
         : String(e?.message || e || t("ai.requestFailed"));
-      Alert.alert(t("ai.errorTitle"), message);
+      showAlert(t("ai.errorTitle"), message);
       appendAssistant(`${broadFallback(question, t)}\n\n${t("ai.requestFallback")}`);
     } finally {
       setLoading(false);
@@ -1360,12 +1361,22 @@ export default function AIAdvisorScreen({ navigation }) {
 
         <Text style={styles.consentAgreement}>{t("privacy.consentAgreement")}</Text>
 
-        <TouchableOpacity style={styles.consentPrimary} onPress={acceptAiConsent}>
+        <TouchableOpacity
+          style={styles.consentPrimary}
+          onPress={acceptAiConsent}
+          accessibilityRole="button"
+          accessibilityLabel={t("privacy.consentContinue")}
+        >
           <Ionicons name="checkmark-circle-outline" size={20} color={COLORS.primaryTextOn} />
           <Text style={styles.consentPrimaryText}>{t("privacy.consentContinue")}</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.consentSecondary} onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+          style={styles.consentSecondary}
+          onPress={() => navigation.goBack()}
+          accessibilityRole="button"
+          accessibilityLabel={t("privacy.consentNotNow")}
+        >
           <Text style={styles.consentSecondaryText}>{t("privacy.consentNotNow")}</Text>
         </TouchableOpacity>
 
@@ -1627,6 +1638,9 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.bg
   },
   consentWrap: {
+    width: "100%",
+    maxWidth: 900,
+    alignSelf: "center",
     padding: SPACING.lg,
     paddingBottom: SPACING.xxl,
     gap: SPACING.md
@@ -1699,7 +1713,13 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.sm
   },
   policyLinkText: { color: COLORS.primary, fontWeight: "900" },
-  messages: { padding: SPACING.lg, paddingBottom: SPACING.lg },
+  messages: {
+    width: "100%",
+    maxWidth: 900,
+    alignSelf: "center",
+    padding: SPACING.lg,
+    paddingBottom: SPACING.lg
+  },
   headerCard: {
     backgroundColor: COLORS.ai,
     borderRadius: RADII.xl,
@@ -1874,6 +1894,9 @@ const styles = StyleSheet.create({
   },
   sourceText: { color: COLORS.primary, fontWeight: "900", fontSize: 12 },
   inputBar: {
+    width: "100%",
+    maxWidth: 900,
+    alignSelf: "center",
     flexDirection: "row",
     alignItems: "flex-end",
     gap: SPACING.sm,

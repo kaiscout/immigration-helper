@@ -306,7 +306,7 @@
     "suggestedNextStep": "Voorgestelde volgende stap",
     "vaultSubtitle": "Orden PDF's, afbeeldingen, notities en bestandsstatussen.",
     "aiSubtitle": "Stel vragen met de context van je opgeslagen checklist.",
-    "suggestedNextStepBody": "Controleer bestanden met de status ‘Controle nodig’ en rond daarna het volgende checklistitem af.",
+    "suggestedNextStepBody": "Voeg een bestand toe of controleer er een en rond daarna het volgende checklistitem af.",
     "plusActive": "Plus actief",
     "plusChecking": "Plus controleren",
     "stepsComplete": "{{completed}}/{{total}} stappen",

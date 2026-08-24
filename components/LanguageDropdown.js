@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
 import { LANGUAGES } from "../i18n/languages";
 import { savePreferredLanguage } from "../data/languagePreference";
+import { showAlert } from "../data/appAlert";
 
 export default function LanguageDropdown({ compact = false, buttonOnly = false, header = false }) {
   const { t, i18n } = useTranslation();
@@ -23,7 +24,7 @@ export default function LanguageDropdown({ compact = false, buttonOnly = false, 
       await savePreferredLanguage(code);
       setOpen(false);
     } catch {
-      Alert.alert(t("alerts.saveErrorTitle"), t("alerts.saveErrorBody"));
+      showAlert(t("alerts.saveErrorTitle"), t("alerts.saveErrorBody"));
     }
   };
 

@@ -306,7 +306,7 @@
     "suggestedNextStep": "Ieteiktais nākamais solis",
     "vaultSubtitle": "Sakārtojiet PDF failus, attēlus, piezīmes un failu statusus.",
     "aiSubtitle": "Uzdodiet jautājumus, izmantojot saglabātā kontrolsaraksta kontekstu.",
-    "suggestedNextStepBody": "Pārskatiet failus ar statusu “Jāpārskata” un pēc tam pabeidziet nākamo kontrolsaraksta punktu.",
+    "suggestedNextStepBody": "Pievienojiet vai pārskatiet failu un pēc tam pabeidziet nākamo kontrolsaraksta punktu.",
     "plusActive": "Plus aktīvs",
     "plusChecking": "Pārbauda Plus",
     "stepsComplete": "{{completed}}/{{total}} soļi",

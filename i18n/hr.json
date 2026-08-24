@@ -306,7 +306,7 @@
     "suggestedNextStep": "Predloženi sljedeći korak",
     "vaultSubtitle": "Organizirajte PDF-ove, slike, bilješke i statuse datoteka.",
     "aiSubtitle": "Postavljajte pitanja uz kontekst spremljenog kontrolnog popisa.",
-    "suggestedNextStepBody": "Pregledajte datoteke označene kao „Potreban pregled“, a zatim dovršite sljedeću stavku kontrolnog popisa.",
+    "suggestedNextStepBody": "Dodajte ili pregledajte datoteku, a zatim dovršite sljedeću stavku kontrolnog popisa.",
     "plusActive": "Plus je aktivan",
     "plusChecking": "Provjera Plusa",
     "stepsComplete": "{{completed}}/{{total}} koraka",

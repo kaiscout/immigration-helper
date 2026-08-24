@@ -306,7 +306,7 @@
     "suggestedNextStep": "Siūlomas kitas žingsnis",
     "vaultSubtitle": "Tvarkykite PDF failus, vaizdus, pastabas ir failų būsenas.",
     "aiSubtitle": "Užduokite klausimus naudodami išsaugoto kontrolinio sąrašo kontekstą.",
-    "suggestedNextStepBody": "Peržiūrėkite failus, pažymėtus „Reikia peržiūrėti“, tada užbaikite kitą kontrolinio sąrašo punktą.",
+    "suggestedNextStepBody": "Pridėkite arba peržiūrėkite failą, tada užbaikite kitą kontrolinio sąrašo punktą.",
     "plusActive": "„Plus“ aktyvi",
     "plusChecking": "Tikrinama „Plus“",
     "stepsComplete": "{{completed}}/{{total}} žingsnių",

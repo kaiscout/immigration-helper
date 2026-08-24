@@ -306,7 +306,7 @@
     "suggestedNextStep": "Il-pass li jmiss issuġġerit",
     "vaultSubtitle": "Organizza PDFs, immaġnijiet, noti u l-istatus tal-fajls.",
     "aiSubtitle": "Staqsi mistoqsijiet bil-kuntest tal-lista ta’ kontroll issejvjata tiegħek.",
-    "suggestedNextStepBody": "Irrevedi l-fajls immarkati “Jeħtieġ rieżami”, imbagħad lesti l-punt li jmiss fil-lista ta’ kontroll.",
+    "suggestedNextStepBody": "Żid fajl jew irrevedi wieħed, imbagħad lesti l-punt li jmiss fil-lista ta’ kontroll.",
     "plusActive": "Plus attiv",
     "plusChecking": "Qed jiġi ċċekkjat Plus",
     "stepsComplete": "{{completed}}/{{total}} passi",

@@ -50,7 +50,14 @@ export default function ResourcesScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: COLORS.bg },
-  wrap: { padding: SPACING.lg, paddingBottom: SPACING.xxl, gap: SPACING.md },
+  wrap: {
+    width: "100%",
+    maxWidth: 900,
+    alignSelf: "center",
+    padding: SPACING.lg,
+    paddingBottom: SPACING.xxl,
+    gap: SPACING.md
+  },
   header: {
     backgroundColor: COLORS.card,
     borderRadius: RADII.xl,

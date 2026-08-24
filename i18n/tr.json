@@ -306,7 +306,7 @@
     "suggestedNextStep": "Önerilen sonraki adım",
     "vaultSubtitle": "PDF'leri, görselleri, notları ve dosya durumlarını düzenleyin.",
     "aiSubtitle": "Kayıtlı kontrol listenizin bağlamıyla sorular sorun.",
-    "suggestedNextStepBody": "“İncelenmeli” olarak işaretlenen dosyaları gözden geçirin, ardından kontrol listenizdeki sonraki öğeyi tamamlayın.",
+    "suggestedNextStepBody": "Bir dosya ekleyin veya gözden geçirin, ardından kontrol listenizdeki sonraki öğeyi tamamlayın.",
     "plusActive": "Plus etkin",
     "plusChecking": "Plus denetleniyor",
     "stepsComplete": "{{completed}}/{{total}} adım",

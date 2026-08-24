@@ -306,7 +306,7 @@
     "suggestedNextStep": "Ehdotettu seuraava vaihe",
     "vaultSubtitle": "Järjestä PDF:t, kuvat, muistiinpanot ja tiedostojen tilat.",
     "aiSubtitle": "Esitä kysymyksiä tallennetun tarkistuslistasi tietojen avulla.",
-    "suggestedNextStepBody": "Tarkista tiedostot, joiden tila on ”Tarkistettava”, ja viimeistele sitten tarkistuslistan seuraava kohta.",
+    "suggestedNextStepBody": "Lisää tai tarkista tiedosto ja viimeistele sitten tarkistuslistan seuraava kohta.",
     "plusActive": "Plus aktiivinen",
     "plusChecking": "Tarkistetaan Plus-tilausta",
     "stepsComplete": "{{completed}}/{{total}} vaihetta",

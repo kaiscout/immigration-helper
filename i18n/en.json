@@ -306,7 +306,7 @@
     "suggestedNextStep": "Suggested next step",
     "vaultSubtitle": "Organize PDFs, images, notes, and file status.",
     "aiSubtitle": "Ask questions with your saved checklist context.",
-    "suggestedNextStepBody": "Review files marked Needs review, then complete your next checklist item.",
+    "suggestedNextStepBody": "Add or review a file, then complete your next checklist item.",
     "plusActive": "Plus active",
     "plusChecking": "Checking Plus",
     "stepsComplete": "{{completed}}/{{total}} steps",

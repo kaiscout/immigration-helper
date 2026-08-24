@@ -306,7 +306,7 @@
     "suggestedNextStep": "Foreslået næste skridt",
     "vaultSubtitle": "Organiser PDF-filer, billeder, noter og filstatus.",
     "aiSubtitle": "Stil spørgsmål med oplysninger fra din gemte tjekliste.",
-    "suggestedNextStepBody": "Gennemgå filer markeret „Skal gennemgås“, og færdiggør derefter næste punkt på tjeklisten.",
+    "suggestedNextStepBody": "Tilføj eller gennemgå en fil, og færdiggør derefter næste punkt på tjeklisten.",
     "plusActive": "Plus aktiv",
     "plusChecking": "Kontrollerer Plus",
     "stepsComplete": "{{completed}}/{{total}} trin",

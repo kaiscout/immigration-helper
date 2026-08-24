@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, RADII, SHADOW, SPACING, TYPE } from "../constants/theme";
@@ -12,6 +12,7 @@ import {
 } from "../data/subscriptionService";
 import { OFFICIAL_LINKS } from "../constants/officialLinks";
 import { openExternalLink } from "../data/externalLinks";
+import { showAlert } from "../data/appAlert";
 
 const benefitIcons = [
   "chatbubble-ellipses-outline",
@@ -97,11 +98,11 @@ export default function PaywallScreen({ navigation, route }) {
       if (state.isPlus) {
         finishPlusNavigation();
       } else {
-        Alert.alert(t("plus.purchaseErrorTitle"), t("plus.purchaseErrorBody"));
+        showAlert(t("plus.purchaseErrorTitle"), t("plus.purchaseErrorBody"));
       }
     } catch (error) {
       if (!String(error?.message || "").includes("cancel")) {
-        Alert.alert(t("plus.purchaseErrorTitle"), t("plus.purchaseErrorBody"));
+        showAlert(t("plus.purchaseErrorTitle"), t("plus.purchaseErrorBody"));
       }
     } finally {
       setBusy(null);
@@ -113,13 +114,13 @@ export default function PaywallScreen({ navigation, route }) {
     try {
       const state = await restorePlusPurchases();
       setSubscription(state);
-      Alert.alert(
+      showAlert(
         state.isPlus ? t("plus.restoreSuccessTitle") : t("plus.restoreMissingTitle"),
         state.isPlus ? t("plus.restoreSuccessBody") : t("plus.restoreMissingBody")
       );
       if (state.isPlus) finishPlusNavigation();
     } catch {
-      Alert.alert(t("plus.purchaseErrorTitle"), t("plus.storeUnavailableBody"));
+      showAlert(t("plus.purchaseErrorTitle"), t("plus.storeUnavailableBody"));
     } finally {
       setBusy(null);
     }
@@ -284,7 +285,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: COLORS.bg
   },
-  wrap: { padding: SPACING.lg, paddingBottom: SPACING.xxl, gap: SPACING.md },
+  wrap: {
+    width: "100%",
+    maxWidth: 900,
+    alignSelf: "center",
+    padding: SPACING.lg,
+    paddingBottom: SPACING.xxl,
+    gap: SPACING.md
+  },
   hero: {
     backgroundColor: COLORS.inkSoft,
     borderRadius: RADII.xl,

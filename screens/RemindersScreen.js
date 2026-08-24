@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
 import {
@@ -8,6 +8,7 @@ import {
   getNotificationEnvironment,
   loadNotificationsAsync
 } from "../data/notificationService";
+import { showAlert } from "../data/appAlert";
 
 export default function RemindersScreen() {
   const { t } = useTranslation();
@@ -36,12 +37,12 @@ export default function RemindersScreen() {
       const { environment, Notifications } = await loadNotificationsAsync();
 
       if (environment === "web") {
-        Alert.alert(t("alerts.webReminderTitle"), t("alerts.webReminderBody"));
+        showAlert(t("alerts.webReminderTitle"), t("alerts.webReminderBody"));
         return null;
       }
 
       if (environment === "expoGo") {
-        Alert.alert(t("alerts.expoGoNotificationsTitle"), t("alerts.expoGoNotificationsBody"));
+        showAlert(t("alerts.expoGoNotificationsTitle"), t("alerts.expoGoNotificationsBody"));
         setPermission("expoGo");
         return null;
       }
@@ -56,13 +57,13 @@ export default function RemindersScreen() {
       setPermission(requested.granted ? "granted" : "denied");
 
       if (!requested.granted) {
-        Alert.alert(t("reminders.permissionTitle"), t("reminders.permissionBody"));
+        showAlert(t("reminders.permissionTitle"), t("reminders.permissionBody"));
         return null;
       }
 
       return Notifications;
     } catch {
-      Alert.alert(t("alerts.reminderErrorTitle"), t("alerts.reminderErrorBody"));
+      showAlert(t("alerts.reminderErrorTitle"), t("alerts.reminderErrorBody"));
       return null;
     }
   };
@@ -81,9 +82,9 @@ export default function RemindersScreen() {
         trigger: createNotificationTrigger({ type: "timeInterval", seconds: 3, repeats: false })
       });
 
-      Alert.alert(t("reminders.scheduledTitle"), t("reminders.scheduledBody"));
+      showAlert(t("reminders.scheduledTitle"), t("reminders.scheduledBody"));
     } catch {
-      Alert.alert(t("alerts.reminderErrorTitle"), t("alerts.reminderErrorBody"));
+      showAlert(t("alerts.reminderErrorTitle"), t("alerts.reminderErrorBody"));
     }
   };
 
@@ -101,9 +102,9 @@ export default function RemindersScreen() {
         trigger: createNotificationTrigger({ type: "timeInterval", seconds, repeats: false })
       });
 
-      Alert.alert(t("reminders.scheduledTitle"), t("reminders.quickScheduled"));
+      showAlert(t("reminders.scheduledTitle"), t("reminders.quickScheduled"));
     } catch {
-      Alert.alert(t("alerts.reminderErrorTitle"), t("alerts.reminderErrorBody"));
+      showAlert(t("alerts.reminderErrorTitle"), t("alerts.reminderErrorBody"));
     }
   };
 
@@ -112,20 +113,20 @@ export default function RemindersScreen() {
       const { environment, Notifications } = await loadNotificationsAsync();
 
       if (environment === "web") {
-        Alert.alert(t("alerts.webReminderTitle"), t("alerts.webReminderBody"));
+        showAlert(t("alerts.webReminderTitle"), t("alerts.webReminderBody"));
         return;
       }
 
       if (environment === "expoGo") {
-        Alert.alert(t("alerts.expoGoNotificationsTitle"), t("alerts.expoGoNotificationsBody"));
+        showAlert(t("alerts.expoGoNotificationsTitle"), t("alerts.expoGoNotificationsBody"));
         setPermission("expoGo");
         return;
       }
 
       await Notifications.cancelAllScheduledNotificationsAsync();
-      Alert.alert(t("notifications.clearedTitle"), t("notifications.clearedBody"));
+      showAlert(t("notifications.clearedTitle"), t("notifications.clearedBody"));
     } catch {
-      Alert.alert(t("alerts.reminderErrorTitle"), t("alerts.reminderErrorBody"));
+      showAlert(t("alerts.reminderErrorTitle"), t("alerts.reminderErrorBody"));
     }
   };
 
@@ -151,7 +152,12 @@ export default function RemindersScreen() {
         <Text style={styles.title}>{t("reminders.title")}</Text>
         <Text style={styles.subtitle}>{t("reminders.subtitle")}</Text>
 
-        <TouchableOpacity style={styles.btn} onPress={testNotif}>
+        <TouchableOpacity
+          style={styles.btn}
+          onPress={testNotif}
+          accessibilityRole="button"
+          accessibilityLabel={t("reminders.test")}
+        >
           <Ionicons name="send-outline" size={18} color={COLORS.primaryTextOn} />
           <Text style={styles.btnText}>{t("reminders.test")}</Text>
         </TouchableOpacity>
@@ -164,6 +170,8 @@ export default function RemindersScreen() {
           key={item.key}
           style={styles.option}
           onPress={() => scheduleQuick(item.key, item.seconds)}
+          accessibilityRole="button"
+          accessibilityLabel={t(`reminders.${item.key}Title`)}
         >
           <View style={styles.optionIcon}>
             <Ionicons name={item.icon} size={21} color={COLORS.primary} />
@@ -176,7 +184,12 @@ export default function RemindersScreen() {
         </TouchableOpacity>
       ))}
 
-      <TouchableOpacity style={styles.clearBtn} onPress={clearAll}>
+      <TouchableOpacity
+        style={styles.clearBtn}
+        onPress={clearAll}
+        accessibilityRole="button"
+        accessibilityLabel={t("common.clearReminder")}
+      >
         <Ionicons name="trash-outline" size={18} color={COLORS.danger} />
         <Text style={styles.clearText}>{t("common.clearReminder")}</Text>
       </TouchableOpacity>
@@ -188,7 +201,14 @@ export default function RemindersScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: COLORS.bg },
-  wrap: { padding: SPACING.lg, paddingBottom: SPACING.xxl, gap: SPACING.md },
+  wrap: {
+    width: "100%",
+    maxWidth: 900,
+    alignSelf: "center",
+    padding: SPACING.lg,
+    paddingBottom: SPACING.xxl,
+    gap: SPACING.md
+  },
   headerCard: {
     backgroundColor: COLORS.card,
     borderRadius: RADII.xl,

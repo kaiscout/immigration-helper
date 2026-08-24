@@ -2,7 +2,6 @@ import { useCallback, useEffect, useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
-  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -27,6 +26,7 @@ import {
   updateVaultFile
 } from "../data/fileVaultService";
 import { loadSubscriptionState } from "../data/subscriptionService";
+import { showAlert } from "../data/appAlert";
 
 const STATUS_STYLES = {
   Ready: { backgroundColor: "#ECFDF3", color: COLORS.success },
@@ -108,7 +108,7 @@ const errorMessage = (t, code) => {
   });
 };
 
-const showVaultError = (t, error) => Alert.alert(
+const showVaultError = (t, error) => showAlert(
   t("fileVault.errorTitle", { defaultValue: "File Vault" }),
   errorMessage(t, error?.code)
 );
@@ -136,7 +136,7 @@ function VaultFileCard({ file, busy, onDelete, onShare, onUpdate }) {
   };
 
   const chooseStatus = () => {
-    Alert.alert(
+    showAlert(
       t("fileVault.changeStatus", { defaultValue: "Change status" }),
       file.name,
       [
@@ -335,7 +335,7 @@ export default function FileVaultScreen({ navigation }) {
   };
 
   const removeFile = (file) => {
-    Alert.alert(
+    showAlert(
       t("fileVault.deleteTitle", { defaultValue: "Delete this file?" }),
       t("fileVault.deleteBody", {
         defaultValue: `“${file.name}” and its private note will be permanently removed from this device.`
@@ -495,7 +495,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: COLORS.bg
   },
-  wrap: { padding: SPACING.lg, paddingBottom: SPACING.xxl, gap: SPACING.md },
+  wrap: {
+    width: "100%",
+    maxWidth: 900,
+    alignSelf: "center",
+    padding: SPACING.lg,
+    paddingBottom: SPACING.xxl,
+    gap: SPACING.md
+  },
   hero: {
     backgroundColor: COLORS.primary,
     borderRadius: RADII.xl,

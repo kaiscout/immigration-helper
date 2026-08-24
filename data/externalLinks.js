@@ -1,4 +1,5 @@
-import { Alert, Linking } from "react-native";
+import { Linking } from "react-native";
+import { showAlert } from "./appAlert";
 
 export async function openExternalLink(url, t) {
   try {
@@ -7,7 +8,7 @@ export async function openExternalLink(url, t) {
     await Linking.openURL(url);
     return true;
   } catch {
-    Alert.alert(t("alerts.linkErrorTitle"), t("alerts.linkErrorBody"));
+    showAlert(t("alerts.linkErrorTitle"), t("alerts.linkErrorBody"));
     return false;
   }
 }

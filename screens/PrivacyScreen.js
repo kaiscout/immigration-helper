@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Alert, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
 import { PRIVACY_POINTS } from "../data/resources";
@@ -7,10 +7,8 @@ import { loadAiConsent, revokeAiConsent, updateChecklistSharing } from "../data/
 import { OFFICIAL_LINKS } from "../constants/officialLinks";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
 import { openExternalLink } from "../data/externalLinks";
-import {
-  loadSubscriptionState,
-  restorePlusPurchases
-} from "../data/subscriptionService";
+import { showAlert } from "../data/appAlert";
+import { loadSubscriptionState } from "../data/subscriptionService";
 
 export default function PrivacyScreen({ navigation }) {
   const { t } = useTranslation();
@@ -26,7 +24,7 @@ export default function PrivacyScreen({ navigation }) {
       setConsent(nextConsent);
       setSubscription(nextSubscription);
     } catch {
-      Alert.alert(t("alerts.loadingErrorTitle"), t("alerts.loadingErrorBody"));
+      showAlert(t("alerts.loadingErrorTitle"), t("alerts.loadingErrorBody"));
       setConsent(null);
     }
   }, [t]);
@@ -47,25 +45,12 @@ export default function PrivacyScreen({ navigation }) {
       const next = await updateChecklistSharing(value);
       setConsent(next);
     } catch {
-      Alert.alert(t("alerts.saveErrorTitle"), t("alerts.saveErrorBody"));
-    }
-  };
-
-  const restorePurchases = async () => {
-    try {
-      const next = await restorePlusPurchases();
-      setSubscription(next);
-      Alert.alert(
-        next.isPlus ? t("plus.restoreSuccessTitle") : t("plus.restoreMissingTitle"),
-        next.isPlus ? t("plus.restoreSuccessBody") : t("plus.restoreMissingBody")
-      );
-    } catch {
-      Alert.alert(t("plus.purchaseErrorTitle"), t("plus.storeUnavailableBody"));
+      showAlert(t("alerts.saveErrorTitle"), t("alerts.saveErrorBody"));
     }
   };
 
   const withdrawConsent = () => {
-    Alert.alert(
+    showAlert(
       t("privacy.revokeTitle"),
       t("privacy.revokeBody"),
       [
@@ -78,7 +63,7 @@ export default function PrivacyScreen({ navigation }) {
               await revokeAiConsent();
               setConsent(null);
             } catch {
-              Alert.alert(t("alerts.saveErrorTitle"), t("alerts.saveErrorBody"));
+              showAlert(t("alerts.saveErrorTitle"), t("alerts.saveErrorBody"));
             }
           }
         }
@@ -108,6 +93,16 @@ export default function PrivacyScreen({ navigation }) {
         </View>
       ))}
 
+      <View style={styles.card}>
+        <View style={styles.iconBox}>
+          <Ionicons name="folder-open-outline" size={22} color={COLORS.primary} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.cardTitle}>{t("fileVault.localTitle")}</Text>
+          <Text style={styles.cardBody}>{t("fileVault.localBody")}</Text>
+        </View>
+      </View>
+
       <View style={styles.plusCard}>
         <View style={styles.iconBox}>
           <Ionicons name="sparkles-outline" size={22} color={COLORS.primary} />
@@ -120,11 +115,11 @@ export default function PrivacyScreen({ navigation }) {
         </View>
         <TouchableOpacity
           style={styles.plusButton}
-          onPress={() => subscription?.isPlus ? restorePurchases() : navigation.navigate("Paywall")}
+          onPress={() => navigation.navigate(subscription?.isPlus ? "PlusWorkspace" : "Paywall")}
           accessibilityRole="button"
         >
           <Text style={styles.plusButtonText}>
-            {subscription?.isPlus ? t("plus.restore") : t("plus.shortTitle")}
+            {subscription?.isPlus ? t("workspace.title") : t("plus.shortTitle")}
           </Text>
         </TouchableOpacity>
       </View>
@@ -161,6 +156,7 @@ export default function PrivacyScreen({ navigation }) {
         <TouchableOpacity
           style={styles.controlButton}
           onPress={() => consent ? withdrawConsent() : navigation.navigate("AIAdvisor")}
+          accessibilityRole="button"
         >
           <Text style={[styles.controlButtonText, consent && styles.dangerText]}>
             {consent ? t("privacy.revokeButton") : t("privacy.reviewConsent")}
@@ -187,7 +183,14 @@ export default function PrivacyScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: COLORS.bg },
-  wrap: { padding: SPACING.lg, paddingBottom: SPACING.xxl, gap: SPACING.md },
+  wrap: {
+    width: "100%",
+    maxWidth: 900,
+    alignSelf: "center",
+    padding: SPACING.lg,
+    paddingBottom: SPACING.xxl,
+    gap: SPACING.md
+  },
   header: {
     backgroundColor: COLORS.ai,
     borderRadius: RADII.xl,

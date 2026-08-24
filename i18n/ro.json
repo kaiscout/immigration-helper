@@ -306,7 +306,7 @@
     "suggestedNextStep": "Următorul pas sugerat",
     "vaultSubtitle": "Organizați PDF-uri, imagini, notițe și stările fișierelor.",
     "aiSubtitle": "Puneți întrebări folosind contextul listei salvate.",
-    "suggestedNextStepBody": "Verificați fișierele marcate „Necesită verificare”, apoi finalizați următorul element din listă.",
+    "suggestedNextStepBody": "Adăugați sau verificați un fișier, apoi finalizați următorul element din listă.",
     "plusActive": "Plus activ",
     "plusChecking": "Se verifică Plus",
     "stepsComplete": "{{completed}}/{{total}} pași",
