@@ -9,7 +9,7 @@ Use this checklist before building the next TestFlight/App Store binary.
 - RevenueCat entitlement ID: `immigration_helper_plus`
 - Monthly product ID: `immigration_helper_plus_monthly`
 - Yearly product ID: `immigration_helper_plus_yearly`
-- Free AI questions per month: `5`
+- Free CasePilot questions per month: `10`
 
 Keep these identifiers exactly the same across App Store Connect, RevenueCat, EAS, and the app code.
 
@@ -32,8 +32,8 @@ Keep these identifiers exactly the same across App Store Connect, RevenueCat, EA
    - Suggested starting price: `39.99 USD`
 7. Add localized display information for each subscription:
    - Display name: `Immigration Helper Plus`
-   - Description: `Expanded AI Helper access and checklist-aware immigration planning tools.`
-8. Add a 7-day free trial as an introductory offer if Apple allows it for the subscription.
+   - Description: `Expanded CasePilot access and private workspace tools.`
+8. Add a 7-day free trial to the monthly subscription only. The yearly subscription has no trial and is labeled as the best-value option in the app.
 9. Make sure Paid Apps Agreement, tax, and banking are complete. Apple will not sell subscriptions until those are ready.
 
 ## RevenueCat
@@ -63,7 +63,8 @@ EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY=<RevenueCat public Android SDK key later>
 EXPO_PUBLIC_PLUS_ENTITLEMENT_ID=immigration_helper_plus
 EXPO_PUBLIC_PLUS_MONTHLY_PRODUCT_ID=immigration_helper_plus_monthly
 EXPO_PUBLIC_PLUS_YEARLY_PRODUCT_ID=immigration_helper_plus_yearly
-EXPO_PUBLIC_FREE_AI_QUESTION_LIMIT=5
+EXPO_PUBLIC_FREE_AI_QUESTION_LIMIT=10
+EXPO_PUBLIC_ENABLE_PLUS_PREVIEW_UNLOCK=false
 ```
 
 The RevenueCat SDK keys are public app configuration values, not private secrets. The private OpenAI key stays server-side only.
@@ -89,6 +90,9 @@ The RevenueCat SDK keys are public app configuration values, not private secrets
    - Free user is paywalled when asking AI for checklist progress.
    - Purchased sandbox user sees Plus active.
    - Checklist sharing can be enabled only when Plus is active.
+   - Plus Workspace shows live saved-file, date, checklist, and status summaries.
+   - File Vault imports a PDF and an image, persists both after relaunch, edits notes/status, shares through the system sheet, and deletes locally.
+   - The yearly plan says Best value; only the monthly plan advertises the 7-day trial.
 
 ## App Review Notes
 
@@ -96,6 +100,6 @@ Tell reviewers:
 
 - No login is required.
 - Immigration Helper Plus is optional.
-- Free users can use checklists, dates, resources, reminders, privacy controls, and limited general AI questions.
-- Plus unlocks expanded AI access and checklist-aware AI features.
+- Free users can use checklists, dates, resources, reminders, privacy controls, and up to 10 general CasePilot questions per month.
+- Plus unlocks expanded CasePilot access, checklist-aware help, Plus Workspace, and the local File Vault.
 - Restore Purchases is available from the paywall and Privacy & Safety.

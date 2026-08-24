@@ -1,14 +1,20 @@
 # Immigration Helper Privacy Policy
 
-Effective date: June 16, 2026
+Effective date: August 24, 2026
 
 Immigration Helper is an independent checklist, reminder, and official-resource app. It is not affiliated with USCIS, DHS, or any government agency. It provides general information only and does not provide legal advice.
 
 ## Information Stored On Your Device
 
-The app can save checklist progress, dates, language preference, onboarding status, AI consent choices, and reminder-related choices locally on your device. This information is used to show your progress and preferences and help you organize reminders.
+The app can save checklist progress, dates, language preference, onboarding status, AI consent choices, reminder-related choices, and File Vault metadata locally on your device. This information is used to show your progress and preferences and help you organize reminders and documents.
 
 The app does not operate a user account system. Locally stored checklist data is not sent to the online AI unless you separately enable the optional checklist-sharing setting.
+
+## File Vault
+
+If you choose to import a PDF or image into File Vault, the app copies that file into its private on-device app storage and saves the category, status, and private note you choose. Immigration Helper does not upload File Vault files or metadata to its backend, Render, OpenAI, RevenueCat, or a government agency.
+
+A File Vault file leaves the app only when you deliberately use the share function. Your device's operating system or backup provider may include app data in a device or cloud backup according to your device settings; Immigration Helper does not itself initiate that upload.
 
 ## Notifications
 
@@ -16,17 +22,17 @@ If you choose to set reminders, the app asks for notification permission and sch
 
 ## Optional Subscriptions
 
-Immigration Helper may offer an optional auto-renewable subscription called Immigration Helper Plus. Purchases, subscription status, free trials, renewals, cancellations, and restore-purchase requests are handled by the app stores and RevenueCat. RevenueCat may process purchase identifiers, subscription status, product identifiers, transaction information, timestamps, and device or diagnostic information needed to operate subscriptions.
+Immigration Helper may offer an optional auto-renewable subscription called Immigration Helper Plus. Purchases, subscription status, free trials, renewals, cancellations, and restore-purchase requests are handled by the app stores and RevenueCat. RevenueCat may process purchase history, product and transaction identifiers, subscription status, timestamps, an anonymous RevenueCat app user identifier, and device or app information needed to operate subscriptions.
 
-The app does not use subscription information for advertising or cross-app tracking. Subscription status is used only to unlock paid app features and support restore-purchase functionality.
+Purchase information is used for app functionality, entitlement and fraud checks, restore-purchase functionality, and RevenueCat subscription analytics such as customer history and charts. It is not used for advertising or cross-app tracking.
 
-## Online AI Helper And Consent
+## Online CasePilot And Consent
 
 Before online AI is enabled, the app presents a disclosure and asks for your permission. If you agree and submit a question, the app sends your question and recent AI conversation through Immigration Helper's backend hosted by Render to OpenAI to generate a response.
 
 Sharing saved checklist dates and completed steps with the online AI is optional, starts turned off, and can be changed at any time in Privacy & Safety. You can also withdraw online AI permission. Withdrawing permission stops future online AI transmissions and does not delete your local checklists.
 
-Do not enter an A-Number, USCIS receipt number, passport number, Social Security number, payment information, or private legal details into the AI Helper.
+Do not enter an A-Number, USCIS receipt number, passport number, Social Security number, payment information, or private legal details into CasePilot.
 
 AI responses are for general information only. They are not legal advice and do not determine eligibility or predict an immigration outcome.
 
@@ -47,19 +53,19 @@ The app links to official resources such as USCIS pages and legal-help resources
 
 ## Service Providers And Data Sharing
 
-Render hosts the Immigration Helper backend, and OpenAI processes AI requests and generates responses. Information is shared with these providers only to operate the AI Helper, maintain security, and provide the requested response.
+Render hosts the Immigration Helper backend, and OpenAI processes AI requests and generates responses. Information is shared with these providers only to operate CasePilot, maintain security, and provide the requested response.
 
 OpenAI states that API data is not used to train or improve its models unless the API customer explicitly opts in. OpenAI's standard abuse-monitoring logs may retain API inputs and outputs for up to 30 days, unless longer retention is required by law or needed to protect the service or others.
 
-RevenueCat processes subscription-related information to operate Immigration Helper Plus purchases, entitlement checks, and restore-purchase functionality.
+RevenueCat processes subscription-related information to operate Immigration Helper Plus purchases, entitlement checks, fraud prevention, restore-purchase functionality, and subscription analytics.
 
-The app does not include advertising SDKs, analytics SDKs, tracking SDKs, or third-party sign-in. The developer does not sell user data or use it for cross-app tracking or advertising.
+The app does not include advertising SDKs, behavioral analytics SDKs, tracking SDKs, or third-party sign-in. RevenueCat analytics are limited to subscription and purchase information. The developer does not sell user data or use it for cross-app tracking or advertising.
 
 If you contact the developer for support by email or another external method, you may choose to provide contact information and support details. That information is used only to respond to your request.
 
 ## Data Retention, Controls, And Deletion
 
-Checklist, consent, and reminder data stored locally remains on your device until you change or clear it, clear app data, or delete the app. AI chat is not saved as an account history by Immigration Helper and is cleared when the in-memory app session ends.
+Checklist, consent, reminder, and File Vault data stored locally remains in the app until you change or delete it, clear app data, or delete the app. Deleting a File Vault item deletes the app's private copy. Deleting the app may delete all locally stored File Vault files, so keep separate copies of important documents. AI chat is not saved as an account history by Immigration Helper and is cleared when the in-memory app session ends.
 
 The Immigration Helper backend is designed to process AI request content without intentionally storing the question or answer in an application database. Render and OpenAI may process technical logs and content under their own security and retention practices, including OpenAI's retention described above.
 

@@ -17,6 +17,8 @@ import AIAdvisorScreen from "./screens/AIAdvisorScreen";
 import ResourcesScreen from "./screens/ResourcesScreen";
 import PrivacyScreen from "./screens/PrivacyScreen";
 import PaywallScreen from "./screens/PaywallScreen";
+import FileVaultScreen from "./screens/FileVaultScreen";
+import PlusWorkspaceScreen from "./screens/PlusWorkspaceScreen";
 import { COLORS } from "./constants/theme";
 import { loadPreferredLanguage } from "./data/languagePreference";
 import LanguageDropdown from "./components/LanguageDropdown";
@@ -128,6 +130,16 @@ export default function App() {
           name="Paywall"
           component={PaywallScreen}
           options={{ title: t("plus.shortTitle") }}
+        />
+        <Stack.Screen
+          name="PlusWorkspace"
+          component={PlusWorkspaceScreen}
+          options={{ title: t("workspace.title") }}
+        />
+        <Stack.Screen
+          name="FileVault"
+          component={FileVaultScreen}
+          options={{ title: t("vault.title") }}
         />
       </Stack.Navigator>
     </NavigationContainer>

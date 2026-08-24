@@ -15,8 +15,9 @@ Suggested review path:
 7. Open Resources to verify official links.
 8. Open Reminders and send a test notification.
 9. Open Privacy & Safety to review disclosures.
-10. Open AI Helper. The first-use screen discloses Render and OpenAI processing and offers optional checklist sharing, which is off by default.
+10. Open CasePilot. The first-use screen discloses Render and OpenAI processing and offers optional checklist sharing, which is off by default.
 11. Open Immigration Helper Plus from Home or Privacy & Safety to review the subscription paywall.
+12. With Plus active, open Plus Workspace and File Vault. Choose a category, import a PDF or image, change its status, add a private note, and open the system share sheet.
 
 ## Safety Positioning
 
@@ -26,7 +27,7 @@ The app does not provide legal advice, does not determine eligibility, and does 
 
 ## Helper Notes
 
-The in-app helper is framed as general information only. It can answer general immigration questions from official sources and can summarize or update local checklist progress at the user's request. The interface warns users not to rely on it for legal advice and points users to official government and legal-help resources.
+The in-app helper, CasePilot, is framed as general information only. It can answer general immigration questions from official sources and can summarize or update local checklist progress at the user's request. The interface warns users not to rely on it for legal advice and points users to official government and legal-help resources.
 
 Online answers use a developer-operated HTTPS backend hosted by Render, which calls OpenAI with a server-side API key. No OpenAI API key is included in the app binary.
 
@@ -38,17 +39,20 @@ No login is required. AI requests are not attached to an account, advertising id
 
 The app uses an optional auto-renewable subscription called Immigration Helper Plus. No account login is required.
 
-Free users can use checklists, dates, resources, reminders, privacy controls, and a limited number of general AI Helper questions each month.
+Free users can use checklists, dates, resources, reminders, privacy controls, and up to 10 general CasePilot questions each month.
 
-Plus unlocks expanded AI Helper access and checklist-aware AI features, including asking the assistant to summarize saved progress, save target dates, schedule reminders from chat, and mark checklist steps complete. Optional checklist sharing remains off by default and only works when Plus is active.
+Plus unlocks expanded CasePilot access, optional checklist-aware help, Plus Workspace, and the local File Vault. File Vault supports PDF/image import, five categories, Ready/Needs review/Submitted statuses, private notes, and manual sharing. File contents and notes are never sent to Render, OpenAI, RevenueCat, USCIS, or Immigration Helper servers.
+
+The monthly plan includes a 7-day free trial for eligible new subscribers and then renews monthly unless canceled. The yearly plan has no free trial and is the best-value annual option.
 
 Review path for the subscription:
 
 1. Open Home.
 2. Tap Immigration Helper Plus.
-3. Review the yearly and monthly subscription choices.
+3. Confirm the yearly option is labeled Best value and the monthly option shows the 7-day trial.
 4. Tap Restore purchases to verify the restore path.
-5. You can also trigger the paywall by opening AI Helper and asking for checklist progress as a free user.
+5. You can also trigger the paywall by opening CasePilot and asking for checklist progress as a free user.
+6. After purchase or restore, open Plus Workspace and File Vault.
 
 ## Notification Notes
 

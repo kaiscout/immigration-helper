@@ -1,15 +1,52 @@
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
 import { OFFICIAL_LINKS } from "../constants/officialLinks";
 import { openExternalLink } from "../data/externalLinks";
 import eadFlow from "../data/flows/ead.json";
 import tpsFlow from "../data/flows/tps_renewal.json";
 import travelFlow from "../data/flows/travel_auth.json";
+import { loadSubscriptionState } from "../data/subscriptionService";
 
 export default function HomeScreen({ navigation }) {
   const { t } = useTranslation();
+  const [subscription, setSubscription] = useState(null);
+
+  const refreshSubscription = useCallback(() => {
+    let active = true;
+    loadSubscriptionState()
+      .then((state) => {
+        if (active) setSubscription(state);
+      })
+      .catch(() => {
+        if (active) setSubscription({ isPlus: false });
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useFocusEffect(refreshSubscription);
+
+  const openPlus = async () => {
+    let state = subscription;
+    if (!state) {
+      try {
+        state = await loadSubscriptionState();
+        setSubscription(state);
+      } catch {
+        state = { isPlus: false };
+      }
+    }
+    if (state?.isPlus) {
+      navigation.navigate("PlusWorkspace");
+    } else {
+      navigation.navigate("Paywall", { feature: "workspace" });
+    }
+  };
 
   const processCards = [
     {
@@ -86,16 +123,20 @@ export default function HomeScreen({ navigation }) {
 
       <TouchableOpacity
         style={styles.plusCard}
-        onPress={() => navigation.navigate("Paywall")}
+        onPress={openPlus}
         accessibilityRole="button"
-        accessibilityLabel={t("plus.title")}
+        accessibilityLabel={subscription?.isPlus ? t("workspace.title") : t("plus.title")}
       >
         <View style={styles.plusIcon}>
           <Ionicons name="sparkles-outline" size={20} color={COLORS.primary} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.plusTitle}>{t("plus.homeTitle")}</Text>
-          <Text style={styles.plusBody}>{t("plus.homeBody")}</Text>
+          <Text style={styles.plusTitle}>
+            {subscription?.isPlus ? t("workspace.title") : t("plus.homeTitle")}
+          </Text>
+          <Text style={styles.plusBody}>
+            {subscription?.isPlus ? t("workspace.heroBody") : t("plus.homeBody")}
+          </Text>
         </View>
         <Ionicons name="chevron-forward" size={20} color={COLORS.subtext} />
       </TouchableOpacity>

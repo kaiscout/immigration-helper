@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { COLORS, RADII, SHADOW, SPACING, TYPE } from "../constants/theme";
 import {
   getPlusOfferings,
+  findPlusPackage,
   loadSubscriptionState,
   purchasePlus,
   restorePlusPurchases
@@ -15,8 +16,8 @@ import { openExternalLink } from "../data/externalLinks";
 const benefitIcons = [
   "chatbubble-ellipses-outline",
   "checkmark-done-outline",
-  "alarm-outline",
-  "shield-checkmark-outline"
+  "folder-open-outline",
+  "lock-closed-outline"
 ];
 
 export default function PaywallScreen({ navigation, route }) {
@@ -30,17 +31,12 @@ export default function PaywallScreen({ navigation, route }) {
   const benefits = useMemo(() => [
     t("plus.featureAi"),
     t("plus.featureChecklist"),
-    t("plus.featureReminders"),
-    t("plus.featureSources")
+    t("plus.featureWorkspace"),
+    t("plus.featureVault")
   ], [t]);
 
   const priceFor = useCallback((kind) => {
-    const match = offerings.packages.find((item) => {
-      const id = `${item?.identifier || ""} ${item?.product?.identifier || ""}`.toLowerCase();
-      return kind === "yearly"
-        ? id.includes("year") || id.includes("annual")
-        : id.includes("month");
-    });
+    const match = findPlusPackage(offerings.packages, kind);
     return match?.product?.priceString || t("plus.pricePending");
   }, [offerings.packages, t]);
 
@@ -49,19 +45,21 @@ export default function PaywallScreen({ navigation, route }) {
       key: "yearly",
       title: t("plus.yearly"),
       price: priceFor("yearly"),
-      helper: t("plus.trial"),
+      helper: t("plus.bestValue"),
       cta: t("plus.subscribeYearly"),
-      featured: true
+      featured: true,
+      available: Boolean(findPlusPackage(offerings.packages, "yearly"))
     },
     {
       key: "monthly",
       title: t("plus.monthly"),
       price: priceFor("monthly"),
-      helper: "",
+      helper: t("plus.trial"),
       cta: t("plus.subscribeMonthly"),
-      featured: false
+      featured: false,
+      available: Boolean(findPlusPackage(offerings.packages, "monthly"))
     }
-  ], [priceFor, t]);
+  ], [offerings.packages, priceFor, t]);
 
   const loadPaywall = useCallback(async () => {
     try {
@@ -83,13 +81,21 @@ export default function PaywallScreen({ navigation, route }) {
     loadPaywall();
   }, [loadPaywall]);
 
+  const finishPlusNavigation = () => {
+    if (feature === "workspace") {
+      navigation.replace("PlusWorkspace");
+    } else {
+      navigation.goBack();
+    }
+  };
+
   const handlePurchase = async (kind) => {
     setBusy(kind);
     try {
       const state = await purchasePlus(kind);
       setSubscription(state);
       if (state.isPlus) {
-        navigation.goBack();
+        finishPlusNavigation();
       } else {
         Alert.alert(t("plus.purchaseErrorTitle"), t("plus.purchaseErrorBody"));
       }
@@ -111,7 +117,7 @@ export default function PaywallScreen({ navigation, route }) {
         state.isPlus ? t("plus.restoreSuccessTitle") : t("plus.restoreMissingTitle"),
         state.isPlus ? t("plus.restoreSuccessBody") : t("plus.restoreMissingBody")
       );
-      if (state.isPlus) navigation.goBack();
+      if (state.isPlus) finishPlusNavigation();
     } catch {
       Alert.alert(t("plus.purchaseErrorTitle"), t("plus.storeUnavailableBody"));
     } finally {
@@ -182,7 +188,7 @@ export default function PaywallScreen({ navigation, route }) {
             {plan.featured ? (
               <View style={styles.planBadge}>
                 <Ionicons name="star" size={12} color={COLORS.gold} />
-                <Text style={styles.planBadgeText}>{t("plus.trial")}</Text>
+                <Text style={styles.planBadgeText}>{plan.helper}</Text>
               </View>
             ) : null}
 
@@ -212,10 +218,10 @@ export default function PaywallScreen({ navigation, route }) {
             <TouchableOpacity
               style={[
                 plan.featured ? styles.primaryButton : styles.secondaryButton,
-                (!offerings.available || busy) && styles.disabledButton
+                (!plan.available || busy) && styles.disabledButton
               ]}
               onPress={() => handlePurchase(plan.key)}
-              disabled={!offerings.available || Boolean(busy)}
+              disabled={!plan.available || Boolean(busy)}
               accessibilityRole="button"
             >
               {busy === plan.key ? (

@@ -8,8 +8,13 @@ export const PLUS_MONTHLY_PRODUCT_ID =
 export const PLUS_YEARLY_PRODUCT_ID =
   (process.env.EXPO_PUBLIC_PLUS_YEARLY_PRODUCT_ID || "immigration_helper_plus_yearly").trim();
 export const FREE_AI_QUESTION_LIMIT = Number.parseInt(
-  process.env.EXPO_PUBLIC_FREE_AI_QUESTION_LIMIT || "5",
+  process.env.EXPO_PUBLIC_FREE_AI_QUESTION_LIMIT || "10",
   10
+);
+export const PLUS_PREVIEW_UNLOCKED = Boolean(
+  typeof __DEV__ !== "undefined" &&
+  __DEV__ &&
+  String(process.env.EXPO_PUBLIC_ENABLE_PLUS_PREVIEW_UNLOCK || "").trim().toLowerCase() === "true"
 );
 
 const PLUS_STATUS_KEY = "immigrationHelperPlusStatusV1";
@@ -26,6 +31,7 @@ const usageMonth = () => new Date().toISOString().slice(0, 7);
 
 const defaultSubscriptionState = {
   isPlus: false,
+  isPreview: false,
   storeAvailable: false,
   configured: false,
   checkedAt: null,
@@ -34,12 +40,36 @@ const defaultSubscriptionState = {
   managementUrl: null
 };
 
+const hasUnexpiredCachedEntitlement = (state) => {
+  const expirationTime = Date.parse(state?.expirationDate || "");
+  return state?.isPlus === true &&
+    state?.isPreview !== true &&
+    Number.isFinite(expirationTime) &&
+    expirationTime > Date.now();
+};
+
+const withPreviewUnlock = (state) => PLUS_PREVIEW_UNLOCKED
+  ? {
+      ...state,
+      isPlus: true,
+      isPreview: true,
+      storeAvailable: false
+    }
+  : state;
+
 async function loadCachedSubscriptionState() {
   try {
     const raw = await AsyncStorage.getItem(PLUS_STATUS_KEY);
-    return raw ? { ...defaultSubscriptionState, ...JSON.parse(raw) } : defaultSubscriptionState;
+    const stored = raw ? JSON.parse(raw) : {};
+    const sanitized = {
+      ...defaultSubscriptionState,
+      ...stored,
+      isPlus: hasUnexpiredCachedEntitlement(stored),
+      isPreview: false
+    };
+    return withPreviewUnlock(sanitized);
   } catch {
-    return defaultSubscriptionState;
+    return withPreviewUnlock(defaultSubscriptionState);
   }
 }
 
@@ -47,10 +77,12 @@ async function saveSubscriptionState(next) {
   const state = {
     ...defaultSubscriptionState,
     ...next,
+    isPlus: next?.isPreview === true ? false : next?.isPlus === true,
+    isPreview: false,
     checkedAt: new Date().toISOString()
   };
   await AsyncStorage.setItem(PLUS_STATUS_KEY, JSON.stringify(state));
-  return state;
+  return withPreviewUnlock(state);
 }
 
 let purchasesModulePromise = null;
@@ -145,6 +177,9 @@ const packageMatchesKind = (item, kind) => {
     type.includes("month");
 };
 
+export const findPlusPackage = (packages, kind) =>
+  (Array.isArray(packages) ? packages : []).find((item) => packageMatchesKind(item, kind)) || null;
+
 export async function purchasePlus(kind = "monthly") {
   const Purchases = await configurePurchases();
   if (!Purchases?.purchasePackage) {
@@ -152,11 +187,9 @@ export async function purchasePlus(kind = "monthly") {
   }
 
   const offerings = await getPlusOfferings();
-  const selected =
-    offerings.packages.find((item) => packageMatchesKind(item, kind)) ||
-    offerings.packages[0];
+  const selected = findPlusPackage(offerings.packages, kind);
 
-  if (!selected) throw new Error("store_unavailable");
+  if (!selected) throw new Error("product_unavailable");
 
   const result = await Purchases.purchasePackage(selected);
   return saveSubscriptionState(stateFromCustomerInfo(result?.customerInfo));
