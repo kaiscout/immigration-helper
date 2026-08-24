@@ -278,7 +278,10 @@ async function main() {
   }
   await startPhoneLauncher(expoPort);
   console.log("Starting Expo Go over LAN. Keep the computer and phone on the same Wi-Fi network.");
-  spawnChild([expoCli, "start", "--lan", "--clear", "--port", String(expoPort)], "Expo");
+  const expoArgs = [expoCli, "start", "--lan"];
+  if (process.argv.includes("--clear")) expoArgs.push("--clear");
+  expoArgs.push("--port", String(expoPort));
+  spawnChild(expoArgs, "Expo");
 }
 
 process.on("SIGINT", () => shutdown(0));

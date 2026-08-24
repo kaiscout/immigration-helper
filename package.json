@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "start": "node ./scripts/start-project.js",
+    "start:clear": "node ./scripts/start-project.js --clear",
     "stop": "node ./scripts/stop-expo.js",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo start --android --clear",
