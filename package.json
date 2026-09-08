@@ -20,6 +20,7 @@
     "test:localization": "node --test tests/localization.test.mjs",
     "test:privacy": "node --test tests/privacy-consent.test.mjs",
     "eval:casepilot": "node --env-file-if-exists=.env ./scripts/evaluate-casepilot.mjs",
+    "test:casepilot-live": "node --test tests/casepilot-live-acceptance.test.mjs",
     "uscis:plan": "node ./scripts/scrape-uscis.mjs --dry-run",
     "uscis:scrape": "node ./scripts/scrape-uscis.mjs",
     "uscis:package": "node ./scripts/package-uscis-corpus.mjs",
@@ -47,6 +48,7 @@
     "expo-symbols": "~1.0.7",
     "expo-system-ui": "~6.0.8",
     "expo-web-browser": "~15.0.8",
+    "franc": "6.2.0",
     "htmlparser2": "^10.1.0",
     "i18next": "^25.6.0",
     "react": "19.1.0",
@@ -69,7 +71,27 @@
     "typescript": "~5.9.2"
   },
   "overrides": {
-    "postcss": "8.5.10",
+    "postcss": "8.5.28",
+    "nanoid": "3.3.18",
+    "shell-quote": "1.10.0",
+    "@expo/plist": {
+      "@xmldom/xmldom": "0.8.15"
+    },
+    "plist": {
+      "@xmldom/xmldom": "0.9.12"
+    },
+    "@istanbuljs/load-nyc-config": {
+      "js-yaml": "3.15.2"
+    },
+    "@eslint/eslintrc": {
+      "js-yaml": "4.3.2"
+    },
+    "minimatch@3.1.5": {
+      "brace-expansion": "1.1.18"
+    },
+    "minimatch@10.2.5": {
+      "brace-expansion": "5.0.9"
+    },
     "uuid": "11.1.1"
   },
   "private": true

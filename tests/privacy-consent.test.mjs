@@ -12,6 +12,7 @@ test("AI Helper requires stored consent before rendering the chat", async () => 
   assert.match(screen, /saveAiConsent\(\{ shareChecklist: isPlus && consentChecklist \}\)/);
   assert.match(screen, /isPlus && aiConsent\?\.shareChecklist \? contextText : ""/);
   assert.match(screen, /navigation\.navigate\("Paywall", \{ feature: "checklistAi" \}\)/);
+  assert.match(screen, /redactAllowedEmailAddressesForPrivacyScan\([\s\S]*?KNOWN_PUBLIC_AGENCY_EMAILS/);
 });
 
 test("checklist sharing is optional and disabled by default", async () => {
@@ -65,7 +66,7 @@ test("subscription plans advertise the monthly trial and yearly best value accur
   );
   assert.match(
     paywall,
-    /key: "monthly"[\s\S]*?helper: t\("plus\.trial"\)/
+    /key: "monthly"[\s\S]*?offerings\.monthlyTrialEligibility === "eligible"[\s\S]*?t\("plus\.trial", \{ price: priceFor\("monthly"\) \}\)[\s\S]*?t\("plus\.monthlyTerms"/
   );
   assert.match(paywall, /disabled=\{!plan\.available/);
   assert.match(service, /const selected = findPlusPackage\(offerings\.packages, kind\)/);
@@ -78,9 +79,11 @@ test("Plus preview access is restricted to development builds", async () => {
   assert.match(subscriptionService, /typeof __DEV__ !== "undefined"/);
   assert.match(subscriptionService, /__DEV__ &&/);
   assert.match(subscriptionService, /EXPO_PUBLIC_ENABLE_PLUS_PREVIEW_UNLOCK/);
-  assert.match(subscriptionService, /isPlus: hasUnexpiredCachedEntitlement\(stored\)/);
-  assert.match(subscriptionService, /state\?\.isPreview !== true/);
-  assert.match(subscriptionService, /expirationTime > Date\.now\(\)/);
+  assert.match(subscriptionService, /hasUnexpiredCachedEntitlement\(stored\)/);
+  assert.match(subscriptionService, /import \{[\s\S]*hasUnexpiredCachedEntitlement/);
+  const subscriptionCore = await readProjectFile("data/subscriptionCore.mjs");
+  assert.match(subscriptionCore, /state\?\.isPreview !== true/);
+  assert.match(subscriptionCore, /expirationTime > now/);
   assert.match(subscriptionService, /isPlus: next\?\.isPreview === true \? false/);
   assert.match(subscriptionService, /isPreview: false,[\s\S]*?checkedAt:/);
 });

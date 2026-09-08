@@ -146,27 +146,23 @@ export const loadAllFlowStates = async () => {
   return Object.fromEntries(entries);
 };
 
-export const findFlowByText = (text) => {
+const scoredFlowsByText = (text) => {
   const q = normalizeText(text);
-  let best = null;
-  let bestScore = 0;
-
-  FLOWS.forEach((item) => {
+  return FLOWS.map((item) => {
     const score = scoreTextMatch(q, [
       item.key,
       item.data?.id,
       ...item.aliases,
       ...(item.data?.forms || []).flatMap((form) => localizedValues(form, "title"))
     ]);
-
-    if (score > bestScore) {
-      best = item;
-      bestScore = score;
-    }
-  });
-
-  return bestScore >= 4 ? best : null;
+    return { item, score };
+  }).filter(({ score }) => score >= 4)
+    .sort((left, right) => right.score - left.score);
 };
+
+export const findFlowsByText = (text) => scoredFlowsByText(text).map(({ item }) => item);
+
+export const findFlowByText = (text) => findFlowsByText(text)[0] || null;
 
 export const normalizeText = (value) =>
   String(value || "")

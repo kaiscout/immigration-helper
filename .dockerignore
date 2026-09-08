@@ -4,3 +4,6 @@
 !server/**
 !data/
 !data/euLanguageSupport.json
+!data/sensitiveIdentifiers.js
+!data/casePilotLanguageGate.mjs
+!data/casePilotReleaseGate.mjs

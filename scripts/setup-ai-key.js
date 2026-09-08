@@ -3,7 +3,7 @@ const path = require("path");
 
 const root = path.resolve(__dirname, "..");
 const envPath = path.join(root, ".env");
-const model = "gpt-5.4-mini";
+const model = "gpt-5.6-sol";
 
 function readHidden(prompt) {
   return new Promise((resolve) => {

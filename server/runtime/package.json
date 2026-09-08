@@ -1,0 +1,8 @@
+{
+  "name": "casepilot-ai-runtime",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "franc": "6.2.0"
+  }
+}

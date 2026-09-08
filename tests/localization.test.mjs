@@ -93,6 +93,23 @@ test("Every translation preserves the English interpolation placeholders", () =>
   }
 });
 
+test("Every Plus paywall string is localized instead of using the English fallback", () => {
+  const englishPlus = readJson("../i18n/en.json").plus;
+  const brandedKeys = new Set(["shortTitle", "title"]);
+
+  for (const language of supportedLanguages.filter((code) => code !== "en")) {
+    const translatedPlus = readJson(`../i18n/${language}.json`).plus;
+    for (const [key, englishValue] of Object.entries(englishPlus)) {
+      if (brandedKeys.has(key)) continue;
+      assert.notEqual(
+        translatedPlus[key],
+        englishValue,
+        `${language}.plus.${key} must not use the English fallback`
+      );
+    }
+  }
+});
+
 test("Every supported language is registered in the picker and i18n resources", () => {
   const languageSource = fs.readFileSync(new URL("../i18n/languages.js", import.meta.url), "utf8");
   const i18nSource = fs.readFileSync(new URL("../i18n/index.js", import.meta.url), "utf8");

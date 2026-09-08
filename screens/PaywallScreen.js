@@ -6,6 +6,7 @@ import { COLORS, RADII, SHADOW, SPACING, TYPE } from "../constants/theme";
 import {
   getPlusOfferings,
   findPlusPackage,
+  isPurchaseCancelled,
   loadSubscriptionState,
   purchasePlus,
   restorePlusPurchases
@@ -24,7 +25,11 @@ const benefitIcons = [
 export default function PaywallScreen({ navigation, route }) {
   const { t } = useTranslation();
   const [subscription, setSubscription] = useState(null);
-  const [offerings, setOfferings] = useState({ available: false, packages: [] });
+  const [offerings, setOfferings] = useState({
+    available: false,
+    packages: [],
+    monthlyTrialEligibility: "unknown"
+  });
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(null);
 
@@ -55,12 +60,14 @@ export default function PaywallScreen({ navigation, route }) {
       key: "monthly",
       title: t("plus.monthly"),
       price: priceFor("monthly"),
-      helper: t("plus.trial"),
+      helper: offerings.monthlyTrialEligibility === "eligible"
+        ? t("plus.trial", { price: priceFor("monthly") })
+        : t("plus.monthlyTerms", { price: priceFor("monthly") }),
       cta: t("plus.subscribeMonthly"),
       featured: false,
       available: Boolean(findPlusPackage(offerings.packages, "monthly"))
     }
-  ], [offerings.packages, priceFor, t]);
+  ], [offerings.monthlyTrialEligibility, offerings.packages, priceFor, t]);
 
   const loadPaywall = useCallback(async () => {
     try {
@@ -72,7 +79,7 @@ export default function PaywallScreen({ navigation, route }) {
       setOfferings(storeOfferings);
     } catch {
       setSubscription({ isPlus: false, storeAvailable: false });
-      setOfferings({ available: false, packages: [] });
+      setOfferings({ available: false, packages: [], monthlyTrialEligibility: "unknown" });
     } finally {
       setLoading(false);
     }
@@ -101,7 +108,7 @@ export default function PaywallScreen({ navigation, route }) {
         showAlert(t("plus.purchaseErrorTitle"), t("plus.purchaseErrorBody"));
       }
     } catch (error) {
-      if (!String(error?.message || "").includes("cancel")) {
+      if (!isPurchaseCancelled(error)) {
         showAlert(t("plus.purchaseErrorTitle"), t("plus.purchaseErrorBody"));
       }
     } finally {

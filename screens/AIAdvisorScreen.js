@@ -9,22 +9,28 @@ import { loadAiConsent, saveAiConsent } from "../data/aiConsent";
 import { scoreExactIntent } from "../data/aiIntent";
 import { buildCasePilotRequestContext } from "../data/casePilotContext";
 import { normalizeCasePilotFollowups } from "../data/casePilotFollowups";
-import { isExplicitSavedChecklistSummary } from "../data/casePilotIntent";
+import {
+  isExplicitSavedChecklistSummary,
+  localCasePilotReadIntent,
+  shouldHandleSavedChecklistDateQuery,
+} from "../data/casePilotIntent";
 import { shouldCountCasePilotQuestion } from "../data/casePilotResponse";
 import {
+  containsSensitiveIdentifier,
+  KNOWN_PUBLIC_AGENCY_EMAILS,
+  redactAllowedEmailAddressesForPrivacyScan
+} from "../data/sensitiveIdentifiers";
+import {
   FLOWS,
-  computeDueDate,
   computeKeyDates,
   findFlowByText,
-  findStepByText,
+  findFlowsByText,
   getFlowProgress,
   loadAllFlowStates,
   normalizeText,
   pickLocalized,
-  saveFlowState,
   scoreTextMatch
 } from "../data/flowState";
-import { createNotificationTrigger, loadNotificationsAsync } from "../data/notificationService";
 import { openExternalLink } from "../data/externalLinks";
 import { showAlert } from "../data/appAlert";
 import {
@@ -86,16 +92,6 @@ const FOLLOWUP_TRANSLATION_KEYS = {
   forms: "ai.followupForms",
   checklist: "ai.followupChecklist"
 };
-const SENSITIVE_IDENTIFIER_PATTERNS = [
-  /\bA[-\s]?\d{7,9}\b/i,
-  /\b[A-Z]{3}\d{10}\b/i,
-  /\b\d{3}-\d{2}-\d{4}\b/,
-  /\b(?:\d[ -]*?){13,19}\b/
-];
-
-const containsSensitiveIdentifier = (value) =>
-  SENSITIVE_IDENTIFIER_PATTERNS.some((pattern) => pattern.test(String(value || "")));
-
 const INTENT_TERMS = {
   open: [
     "open", "go to", "take me", "navigate", "show", "show me", "view", "bring up",
@@ -350,14 +346,6 @@ const QUESTION_TERMS = [
   ...euSupportTerms("intents", "question")
 ];
 
-const ALL_TERMS = [
-  "all", "everything", "todos", "todas", "todo", "tudo", "tutto", "tutti", "tutte", "hepsi", "tum", "tüm", "tout", "tous", "toutes",
-  "全部", "所有", "सभी", "सब", "كل", "সব", "সবগুলো", "все", "всё",
-  ...euSupportTerms("intents", "all")
-];
-
-const ACTION_INTENT_THRESHOLD = 4;
-
 const scoreTerms = (normalized, terms) => scoreTextMatch(normalized, terms);
 
 const scoreIntentTerms = (normalized, terms) => scoreExactIntent(normalized, terms);
@@ -383,13 +371,6 @@ const ITALIAN_TOPIC_TERMS = {
   tps: ["tps", "status di protezione temporanea", "rinnovo tps"],
   ead: ["ead", "permesso di lavoro", "autorizzazione al lavoro", "modulo i 765"],
   travel: ["autorizzazione al viaggio", "advance parole", "documento di viaggio", "modulo i 131"]
-};
-
-const intentSnapshot = (text) => {
-  const q = normalizeText(text);
-  return Object.fromEntries(
-    Object.keys(INTENT_TERMS).map((key) => [key, scoreIntentTerms(q, intentTerms(key))])
-  );
 };
 
 const bestTopicKey = (question) => {
@@ -534,12 +515,6 @@ const bestTopicKey = (question) => {
   });
 
   return bestScore >= 1 ? bestKey : "general";
-};
-
-const isValidYMD = (value) => {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  const date = new Date(value);
-  return !isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
 };
 
 function titleForFlow(flow, t) {
@@ -915,185 +890,52 @@ export default function AIAdvisorScreen({ navigation }) {
     setConsentChecklist(value);
   };
 
-  const refreshAndSetStates = async () => {
-    const next = await loadAllFlowStates();
-    setFlowStates(next);
-    return next;
-  };
-
-  const openOfficialLink = (question) => {
+  const handleLocalTask = async (question, { trustedPreset = false } = {}) => {
     const q = normalizeText(question);
-    const generatedTopics = [
-      ["caseStatus", OFFICIAL_LINKS.status],
-      ["processing", OFFICIAL_LINKS.processing],
-      ["fees", OFFICIAL_LINKS.fees],
-      ["address", OFFICIAL_LINKS.address],
-      ["legal", OFFICIAL_LINKS.legal],
-      ["scams", OFFICIAL_LINKS.scams],
-      ["forms", OFFICIAL_LINKS.forms]
-    ];
-    for (const [topic, url] of generatedTopics) {
-      if (hasAnyTerm(q, euSupportTerms("topics", topic))) return url;
-    }
-    if (hasAnyTerm(q, ["case", "receipt", "status", "caso", "recibo", "estado", "stato del caso", "ricevuta", "durum", "makbuz", "dossier", "recu", "reçu", "案件", "收据", "状态", "केस", "रसीद", "स्थिति", "قضية", "إيصال", "حالة", "কেস", "রসিদ", "অবস্থা", "дело", "квитанц", "статус"])) return OFFICIAL_LINKS.status;
-    if (hasAnyTerm(q, ["processing", "procesamiento", "processamento", "elaborazione", "islem", "işlem", "traitement", "处理", "प्रोसेसिंग", "معالجة", "প্রসেসিং", "обработ"])) return OFFICIAL_LINKS.processing;
-    if (hasAnyTerm(q, ["fee", "cost", "payment", "tarifa", "costo", "pago", "taxa", "custo", "pagamento", "tariffa", "ucret", "ücret", "odeme", "ödeme", "frais", "费用", "付款", "फीस", "भुगतान", "رسوم", "دفع", "ফি", "পেমেন্ট", "сбор", "оплата"])) return OFFICIAL_LINKS.fees;
-    if (hasAnyTerm(q, ["address", "move", "ar 11", "direccion", "dirección", "mudanza", "endereço", "mudar", "indirizzo", "trasferito", "adres", "adresse", "地址", "पता", "عنوان", "ঠিকানা", "адрес"])) return OFFICIAL_LINKS.address;
-    if (hasAnyTerm(q, ["legal", "lawyer", "attorney", "ayuda legal", "abogado", "jurídico", "advogado", "assistenza legale", "avvocato", "hukuki", "avukat", "juridique", "avocat", "法律", "律师", "कानूनी", "वकील", "قانوني", "محامي", "আইনি", "আইনজীবী", "юрид", "адвокат"])) return OFFICIAL_LINKS.legal;
-    if (hasAnyTerm(q, ["scam", "fraud", "notario", "estafa", "fraude", "golpe", "truffa", "frode", "dolandirici", "dolandırıcı", "arnaque", "诈骗", "धोखाधड़ी", "احتيال", "প্রতারণা", "мошеннич"])) return OFFICIAL_LINKS.scams;
-    if (hasAnyTerm(q, ["form", "formulario", "formulário", "modulo", "formulaire", "表格", "फॉर्म", "نموذج", "ফর্ম", "форма"])) return OFFICIAL_LINKS.forms;
-    return OFFICIAL_LINKS.uscis;
-  };
-
-  const ensureNotificationPermission = async () => {
-    try {
-      const { environment, Notifications } = await loadNotificationsAsync();
-
-      if (environment === "web") {
-        showAlert(t("alerts.webReminderTitle"), t("alerts.webReminderBody"));
-        return null;
-      }
-
-      if (environment === "expoGo") {
-        showAlert(t("alerts.expoGoNotificationsTitle"), t("alerts.expoGoNotificationsBody"));
-        return null;
-      }
-
-      const current = await Notifications.getPermissionsAsync();
-      if (current.granted) return Notifications;
-
-      const requested = await Notifications.requestPermissionsAsync();
-      if (!requested.granted) {
-        showAlert(t("reminders.permissionTitle"), t("reminders.permissionBody"));
-        return null;
-      }
-
-      return Notifications;
-    } catch {
-      showAlert(t("alerts.reminderErrorTitle"), t("alerts.reminderErrorBody"));
-      return null;
-    }
-  };
-
-  const scheduleFlowReminder = async (flow, state, daysBefore) => {
-    if (!state?.dueDate) return t("ai.taskNeedComputedDate", { flow: titleForFlow(flow, t) });
-
-    const Notifications = await ensureNotificationPermission();
-    if (!Notifications) return t("reminders.permissionBody");
-
-    const [y, m, d] = state.dueDate.split("-").map((n) => parseInt(n, 10));
-    const fire = new Date(y, m - 1, d, 9, 0, 0);
-    fire.setDate(fire.getDate() - daysBefore);
-
-    if (fire.getTime() <= Date.now()) {
-      return t("alerts.pastDateBody");
-    }
-
-    try {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: t("notifications.mailingTitle"),
-          body: daysBefore ? `${t("notifications.beforeDue")} ${state.dueDate}` : state.dueDate,
-          sound: "default"
-        },
-        trigger: createNotificationTrigger({ type: "date", date: fire })
-      });
-
-      return t("ai.taskReminderSet", {
-        flow: titleForFlow(flow, t),
-        date: fire.toLocaleDateString(lang)
-      });
-    } catch {
-      return t("alerts.reminderErrorBody");
-    }
-  };
-
-  const handleLocalTask = async (question) => {
-    const q = normalizeText(question);
-    const scores = intentSnapshot(question);
-    const flowMatch = findFlowByText(question);
+    const flowMatches = findFlowsByText(question);
+    const flowMatch = flowMatches[0] || findFlowByText(question);
     const flow = flowMatch?.data;
     const flowKey = flowMatch?.key;
     const explicitQuestion = hasAnyTerm(q, QUESTION_TERMS, 1);
-    const wantsOpen = scores.open >= ACTION_INTENT_THRESHOLD && !explicitQuestion;
     const wantsSummary = isExplicitSavedChecklistSummary(question, [
       t("ai.promptProgress"),
       t("ai.followupChecklist")
-    ]);
+    ], lang, { trustedPreset, matchedFlowCount: flowMatches.length });
     const hasDateLiteral = /\b\d{4}-\d{2}-\d{2}\b/.test(question);
-    const wantsDateQuery = flow && scores.dateNoun >= 1 && explicitQuestion && !hasDateLiteral;
-    const wantsDate = flow && (
-      (hasDateLiteral && (scores.dateVerb >= 1 || scores.dateNoun >= 1)) ||
-      (!explicitQuestion && scores.dateVerb >= 1 && scores.dateNoun >= 1)
-    );
-    const wantsUndo = flow && scores.undo >= ACTION_INTENT_THRESHOLD;
-    const wantsMarkDone = flow && scores.markDone >= ACTION_INTENT_THRESHOLD && !explicitQuestion;
-    const wantsClear =
-      flow &&
-      scores.clear >= ACTION_INTENT_THRESHOLD &&
-      scores.checklist >= ACTION_INTENT_THRESHOLD;
-    const wantsReminder =
-      flow &&
-      scores.reminder >= ACTION_INTENT_THRESHOLD &&
-      scores.create >= ACTION_INTENT_THRESHOLD;
-    const checklistAutomationNeedsPlus =
-      wantsSummary ||
-      wantsReminder ||
-      wantsDateQuery ||
-      wantsDate ||
-      wantsUndo ||
-      wantsMarkDone ||
-      wantsClear;
+    const wantsDateQuery = shouldHandleSavedChecklistDateQuery({
+      question,
+      locale: lang,
+      hasFlow: Boolean(flow),
+      hasDateNoun: scoreIntentTerms(q, intentTerms("dateNoun")) >= 1,
+      explicitQuestion,
+      hasDateLiteral,
+      matchedFlowCount: flowMatches.length
+    });
+    const localReadIntent = localCasePilotReadIntent({
+      savedSummary: wantsSummary,
+      savedDateQuery: wantsDateQuery
+    });
 
-    if (checklistAutomationNeedsPlus && !isPlus) {
+    // Conversational input is research-first. Only these two read-only,
+    // explicitly user-owned checklist requests stay local; navigation and all
+    // checklist mutations remain in their dedicated UI controls.
+    if (!localReadIntent) return null;
+
+    if (!isPlus) {
       return {
         requiresPlus: true,
         message: t("plus.checklistRequired")
       };
     }
 
-    if (wantsOpen) {
-      if (flow) {
-        navigation.navigate("Flow", { flow });
-        return t("ai.taskOpenedFlow", { flow: titleForFlow(flow, t) });
-      }
-
-      if (hasAnyTerm(q, intentTerms("link"))) {
-        const url = openOfficialLink(question);
-        const opened = await openExternalLink(url, t);
-        return opened ? t("ai.taskOpenedLink") : t("alerts.linkErrorBody");
-      }
-
-      if (hasAnyTerm(q, intentTerms("resource"))) {
-        navigation.navigate("Resources");
-        return t("ai.taskOpenedResources");
-      }
-
-      if (hasAnyTerm(q, intentTerms("privacy"))) {
-        navigation.navigate("Privacy");
-        return t("ai.taskOpenedPrivacy");
-      }
-
-      if (hasAnyTerm(q, intentTerms("reminder"))) {
-        navigation.navigate("Reminders");
-        return t("ai.taskOpenedReminders");
-      }
-    }
-
-    if (wantsSummary) {
+    if (localReadIntent === "saved-summary") {
       if (flow) {
         return buildFlowSummary(flow, flowStates[flowKey] || {}, lang, t);
       }
-
       return `${t("ai.progressIntro")}\n\n${contextText}`;
     }
 
-    if (wantsReminder && flow) {
-      const daysBefore = q.includes("30") ? 30 : q.includes("7") ? 7 : 0;
-      return await scheduleFlowReminder(flow, flowStates[flowKey] || {}, daysBefore);
-    }
-
-    if (wantsDateQuery && flow) {
+    if (localReadIntent === "saved-date" && flow) {
       const labels = summaryLabels(lang);
       const current = flowStates[flowKey] || {};
       const dates = computeKeyDates(flow, current.noticeDate)
@@ -1107,84 +949,16 @@ export default function AIAdvisorScreen({ navigation }) {
       ].join("\n");
     }
 
-    if (wantsDate && flow) {
-      const date = question.match(/\b\d{4}-\d{2}-\d{2}\b/)?.[0];
-      if (!date || !isValidYMD(date)) {
-        return t("ai.taskNeedDate");
-      }
-
-      const current = flowStates[flowKey] || {};
-      const dueDate = computeDueDate(flow, date);
-      await saveFlowState(flow, {
-        noticeDate: date,
-        dueDate,
-        done: current.done || {}
-      });
-      await refreshAndSetStates();
-
-      const dates = computeKeyDates(flow, date)
-        .map((item) => `${t(item.labelKey)}: ${item.iso}`)
-        .join("\n");
-      return `${t("ai.taskDateSaved", { flow: titleForFlow(flow, t), date })}\n${dates}`;
-    }
-
-    if ((wantsMarkDone || wantsUndo) && flow) {
-      const current = flowStates[flowKey] || {};
-      const allSteps = Array.isArray(flow.steps) ? flow.steps : [];
-      const markAll = hasAnyTerm(q, ALL_TERMS) && wantsMarkDone && !wantsUndo;
-      const step = markAll ? null : findStepByText(flow, question, lang);
-
-      if (!markAll && !step) {
-        return t("ai.taskNeedStep", { flow: titleForFlow(flow, t) });
-      }
-
-      const done = { ...(current.done || {}) };
-      if (markAll) {
-        allSteps.forEach((item) => {
-          done[item.id] = true;
-        });
-      } else {
-        done[step.id] = !wantsUndo;
-      }
-
-      await saveFlowState(flow, {
-        noticeDate: current.noticeDate || "",
-        dueDate: current.dueDate || "",
-        done
-      });
-      const nextStates = await refreshAndSetStates();
-      const progress = getFlowProgress(flow, nextStates[flowKey] || {});
-      const stepName = markAll ? t("ai.allSteps") : pickLocalized(step, "title", lang);
-      return t(wantsUndo ? "ai.taskStepUnchecked" : "ai.taskStepChecked", {
-        step: stepName,
-        flow: titleForFlow(flow, t),
-        completed: progress.completed.length,
-        total: progress.total
-      });
-    }
-
-    if (wantsClear && flow) {
-      const current = flowStates[flowKey] || {};
-      await saveFlowState(flow, {
-        noticeDate: current.noticeDate || "",
-        dueDate: current.dueDate || "",
-        done: {}
-      });
-      await refreshAndSetStates();
-      return t("ai.taskChecklistCleared", { flow: titleForFlow(flow, t) });
-    }
-
-    if (scores.capability >= ACTION_INTENT_THRESHOLD) {
-      return t("ai.capabilities");
-    }
-
     return null;
   };
-
-  const sendMessage = async (preset) => {
+  const sendMessage = async (preset, { trustedPreset = false } = {}) => {
     const question = (preset ?? input).trim();
     if (!question || loading) return;
-    if (containsSensitiveIdentifier(question)) {
+    const privacyScanQuestion = redactAllowedEmailAddressesForPrivacyScan(
+      question,
+      KNOWN_PUBLIC_AGENCY_EMAILS
+    );
+    if (containsSensitiveIdentifier(privacyScanQuestion)) {
       showAlert(t("ai.errorTitle"), t("privacy.consentSensitive"));
       return;
     }
@@ -1195,7 +969,7 @@ export default function AIAdvisorScreen({ navigation }) {
     setLoading(true);
 
     try {
-      const localResult = await handleLocalTask(question);
+      const localResult = await handleLocalTask(question, { trustedPreset });
       if (localResult) {
         if (localResult.requiresPlus) {
           appendAssistant(localResult.message);
@@ -1444,7 +1218,7 @@ export default function AIAdvisorScreen({ navigation }) {
             <TouchableOpacity
               key={prompt.key}
               style={[styles.promptChip, loading && styles.disabledControl]}
-              onPress={() => sendMessage(prompt.text)}
+              onPress={() => sendMessage(prompt.text, { trustedPreset: true })}
               disabled={loading}
               accessibilityRole="button"
               accessibilityLabel={prompt.text}
@@ -1537,7 +1311,10 @@ export default function AIAdvisorScreen({ navigation }) {
                   <TouchableOpacity
                     key={followup.id}
                     style={[styles.followupChip, loading && styles.disabledControl]}
-                    onPress={() => sendMessage(followup.prompt || followup.label)}
+                    onPress={() => sendMessage(
+                      followup.prompt || followup.label,
+                      { trustedPreset: true }
+                    )}
                     disabled={loading}
                     accessibilityRole="button"
                     accessibilityLabel={followup.label}

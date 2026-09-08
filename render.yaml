@@ -12,7 +12,7 @@ services:
       - key: OPENAI_API_KEY
         sync: false
       - key: OPENAI_MODEL
-        value: gpt-5.4-mini
+        value: gpt-5.6-sol
       - key: REQUIRE_AI_GENERATION
         value: "true"
       - key: AI_PROXY_CLIENT_TOKEN

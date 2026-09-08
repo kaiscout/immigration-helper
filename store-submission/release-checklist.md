@@ -23,8 +23,9 @@
 - [x] Add privacy policy URL to App Store Connect.
 - [x] Add support URL to App Store Connect.
 - [x] Update App Privacy questionnaire for online AI user content.
-- [x] Prepare refreshed final iPhone screenshots at `1242 x 2688`.
-- [x] Replace the previously uploaded screenshots with the refreshed files in `store-submission/screenshots/iphone-6.5/final`.
+- [ ] Capture a fresh seven-image iPhone screenshot set at `1242 x 2688` from the final TestFlight build.
+- [ ] Replace the stale App Store Connect screenshots with that verified final-build set.
+- [ ] Capture a real final-build paywall screenshot showing the eligibility-aware monthly trial copy and yearly option; do not use a marketing mockup.
 - [x] Add age rating.
 - [x] Add review notes from `store-submission/review-notes.md`.
 - [ ] Create App Store Connect auto-renewable subscription products matching `store-submission/subscription-setup.md`.
@@ -49,6 +50,8 @@
 ## Production AI
 
 - [x] Deploy AI backend with the OpenAI key stored server-side.
+- [ ] Deploy the hardened CasePilot backend and verify server version `2026-09-08.1` in production.
+- [ ] Run `npm run eval:casepilot` against the deployed endpoint and pass all 30 languages.
 - [x] Add first-use AI disclosure and explicit consent.
 - [x] Keep optional checklist sharing off by default.
 - [x] Allow users to withdraw AI permission.

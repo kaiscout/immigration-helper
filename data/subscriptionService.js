@@ -1,5 +1,16 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
+import {
+  checkMonthlyTrialEligibility,
+  findConfiguredPlusPackage,
+  hasUnexpiredCachedEntitlement,
+  isPurchaseCancelled,
+  purchaseConfiguredPlus,
+  restoreConfiguredPlus,
+  subscriptionStateFromCustomerInfo
+} from "./subscriptionCore.mjs";
+
+export { isPurchaseCancelled };
 
 export const PLUS_ENTITLEMENT_ID =
   (process.env.EXPO_PUBLIC_PLUS_ENTITLEMENT_ID || "immigration_helper_plus").trim();
@@ -38,14 +49,6 @@ const defaultSubscriptionState = {
   expirationDate: null,
   productIdentifier: null,
   managementUrl: null
-};
-
-const hasUnexpiredCachedEntitlement = (state) => {
-  const expirationTime = Date.parse(state?.expirationDate || "");
-  return state?.isPlus === true &&
-    state?.isPreview !== true &&
-    Number.isFinite(expirationTime) &&
-    expirationTime > Date.now();
 };
 
 const withPreviewUnlock = (state) => PLUS_PREVIEW_UNLOCKED
@@ -113,18 +116,6 @@ async function configurePurchases() {
   return Purchases;
 }
 
-function stateFromCustomerInfo(customerInfo) {
-  const activeEntitlement = customerInfo?.entitlements?.active?.[PLUS_ENTITLEMENT_ID];
-  return {
-    isPlus: Boolean(activeEntitlement),
-    storeAvailable: true,
-    configured: true,
-    expirationDate: activeEntitlement?.expirationDate || null,
-    productIdentifier: activeEntitlement?.productIdentifier || null,
-    managementUrl: customerInfo?.managementURL || null
-  };
-}
-
 export async function loadSubscriptionState() {
   const cached = await loadCachedSubscriptionState();
   try {
@@ -145,7 +136,9 @@ export async function refreshSubscriptionState() {
   }
 
   const customerInfo = await Purchases.getCustomerInfo();
-  return saveSubscriptionState(stateFromCustomerInfo(customerInfo));
+  return saveSubscriptionState(
+    subscriptionStateFromCustomerInfo(customerInfo, PLUS_ENTITLEMENT_ID)
+  );
 }
 
 export async function getPlusOfferings() {
@@ -155,30 +148,27 @@ export async function getPlusOfferings() {
   }
 
   const offerings = await Purchases.getOfferings();
+  const packages = offerings?.current?.availablePackages || [];
+  const monthlyPackage = findPlusPackage(packages, "monthly");
+  const monthlyTrialEligibility = await checkMonthlyTrialEligibility(
+    Purchases,
+    monthlyPackage,
+    PLUS_MONTHLY_PRODUCT_ID
+  );
   return {
-    available: Boolean(offerings?.current?.availablePackages?.length),
-    packages: offerings?.current?.availablePackages || []
+    available: Boolean(
+      findPlusPackage(packages, "monthly") || findPlusPackage(packages, "yearly")
+    ),
+    packages,
+    monthlyTrialEligibility
   };
 }
 
-const packageMatchesKind = (item, kind) => {
-  const productId = item?.product?.identifier || "";
-  const packageId = item?.identifier || "";
-  const type = String(item?.packageType || "").toLowerCase();
-
-  if (kind === "yearly") {
-    return productId === PLUS_YEARLY_PRODUCT_ID ||
-      packageId.toLowerCase().includes("annual") ||
-      type.includes("annual");
-  }
-
-  return productId === PLUS_MONTHLY_PRODUCT_ID ||
-    packageId.toLowerCase().includes("month") ||
-    type.includes("month");
-};
-
 export const findPlusPackage = (packages, kind) =>
-  (Array.isArray(packages) ? packages : []).find((item) => packageMatchesKind(item, kind)) || null;
+  findConfiguredPlusPackage(packages, kind, {
+    monthly: PLUS_MONTHLY_PRODUCT_ID,
+    yearly: PLUS_YEARLY_PRODUCT_ID
+  });
 
 export async function purchasePlus(kind = "monthly") {
   const Purchases = await configurePurchases();
@@ -191,8 +181,17 @@ export async function purchasePlus(kind = "monthly") {
 
   if (!selected) throw new Error("product_unavailable");
 
-  const result = await Purchases.purchasePackage(selected);
-  return saveSubscriptionState(stateFromCustomerInfo(result?.customerInfo));
+  const state = await purchaseConfiguredPlus({
+    Purchases,
+    packages: offerings.packages,
+    kind,
+    productIds: {
+      monthly: PLUS_MONTHLY_PRODUCT_ID,
+      yearly: PLUS_YEARLY_PRODUCT_ID
+    },
+    entitlementId: PLUS_ENTITLEMENT_ID
+  });
+  return saveSubscriptionState(state);
 }
 
 export async function restorePlusPurchases() {
@@ -201,8 +200,11 @@ export async function restorePlusPurchases() {
     throw new Error("store_unavailable");
   }
 
-  const customerInfo = await Purchases.restorePurchases();
-  return saveSubscriptionState(stateFromCustomerInfo(customerInfo));
+  const state = await restoreConfiguredPlus({
+    Purchases,
+    entitlementId: PLUS_ENTITLEMENT_ID
+  });
+  return saveSubscriptionState(state);
 }
 
 export async function loadAiUsage() {

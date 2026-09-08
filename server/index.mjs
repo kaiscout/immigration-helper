@@ -6,7 +6,7 @@ import SERVER_VERSION from "./version.cjs";
 
 const PORT = Number.parseInt(process.env.PORT || "8787", 10);
 const OPENAI_API_KEY = (process.env.OPENAI_API_KEY || "").trim();
-const OPENAI_MODEL = (process.env.OPENAI_MODEL || "gpt-5.4-mini").trim();
+const OPENAI_MODEL = (process.env.OPENAI_MODEL || "gpt-5.6-sol").trim();
 const VECTOR_STORE_ID = (process.env.USCIS_VECTOR_STORE_ID || "").trim();
 const ALLOWED_ORIGIN = (process.env.ALLOWED_ORIGIN || "*").trim();
 const CLIENT_TOKEN = (

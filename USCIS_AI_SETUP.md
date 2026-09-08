@@ -13,7 +13,7 @@ Create a local `.env` file and set:
 
 ```bash
 OPENAI_API_KEY=your_server_side_key
-OPENAI_MODEL=gpt-5.4-mini
+OPENAI_MODEL=gpt-5.6-sol
 AI_PROXY_CLIENT_TOKEN=your_generated_app_access_token
 REQUIRE_AI_GENERATION=true
 REQUIRE_CLIENT_TOKEN=true

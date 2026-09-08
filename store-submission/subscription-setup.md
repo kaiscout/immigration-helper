@@ -32,7 +32,7 @@ Keep these identifiers exactly the same across App Store Connect, RevenueCat, EA
    - Suggested starting price: `39.99 USD`
 7. Add localized display information for each subscription:
    - Display name: `Immigration Helper Plus`
-   - Description: `Expanded CasePilot access and private workspace tools.`
+   - Description: `Expanded CasePilot and private workspace.`
 8. Add a 7-day free trial to the monthly subscription only. The yearly subscription has no trial and is labeled as the best-value option in the app.
 9. Make sure Paid Apps Agreement, tax, and banking are complete. Apple will not sell subscriptions until those are ready.
 

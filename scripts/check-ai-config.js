@@ -36,7 +36,7 @@ async function main() {
   const serverApiKey = read("OPENAI_API_KEY").trim();
   const proxyUrl = read("EXPO_PUBLIC_AI_PROXY_URL").trim();
   const proxyToken = read("EXPO_PUBLIC_AI_CLIENT_TOKEN").trim();
-  const model = read("OPENAI_MODEL").trim() || "gpt-5.4-mini";
+  const model = read("OPENAI_MODEL").trim() || "gpt-5.6-sol";
   const live = process.argv.includes("--live");
 
   if (proxyUrl) {

@@ -1,0 +1,61 @@
+# dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+*.icloud
+
+# local env files
+.env
+.env*.local
+
+# generated USCIS knowledge files
+server/data/*.json
+server/data/*.jsonl
+server/data/*.tmp
+!server/data/uscis-corpus.jsonl.gz
+
+# typescript
+*.tsbuildinfo
+
+app-example
+
+# generated native folders
+/ios
+/android
+
+# Backend, tests, and store materials are not part of the mobile bundle.
+/server
+/tests
+/store-submission
+/docs
+/Dockerfile
+/.dockerignore
+/render.yaml
+/USCIS_AI_SETUP.md
+/PRODUCTION_AI_DEPLOYMENT.md
+/README_UPGRADE.txt

@@ -6,7 +6,7 @@ Immigration Helper
 
 ## Subtitle
 
-Private checklists and reminders
+Private checklists & reminders
 
 ## Promotional Text
 
@@ -55,6 +55,12 @@ https://kaiscout.github.io/immigration-helper/support.html
 ## Privacy Policy URL
 
 https://kaiscout.github.io/immigration-helper/privacy-policy.html
+
+## Terms of Use (EULA)
+
+Apple Standard Terms of Use:
+
+https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 
 ## App Review Notes
 
