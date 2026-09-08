@@ -32,8 +32,7 @@ if (REQUIRE_CLIENT_TOKEN && !CLIENT_TOKEN) {
   );
 }
 
-const corpus = loadCorpus();
-const corpusIndex = createCorpusIndex(corpus);
+const corpusIndex = createCorpusIndex(loadCorpus());
 const answerQuestion = createAnswerService({
   corpusIndex,
   apiKey: OPENAI_API_KEY,

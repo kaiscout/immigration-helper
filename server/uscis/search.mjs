@@ -200,15 +200,25 @@ function splitOversizedChunk(value, maxLength = 2_000, overlap = 240) {
 export function createCorpusIndex(records) {
   const documents = [];
   const documentFrequency = new Map();
+  // Reuse vocabulary strings across passages instead of retaining a separate
+  // normalized string for every occurrence in each passage's frequency map.
+  const vocabulary = new Map();
+  const intern = (token) => {
+    const existing = vocabulary.get(token);
+    if (existing !== undefined) return existing;
+    vocabulary.set(token, token);
+    return token;
+  };
   let totalLength = 0;
 
   records.forEach((record) => {
     if (/^(?:page not found|access denied)$/i.test(record.title || "")) return;
     const rawChunks = record.chunks?.length ? record.chunks : [record.text || ""];
+    const titleTokens = new Set(tokens(`${record.title || ""} ${record.description || ""}`).map(intern));
+    const normalizedTitle = normalize(record.title);
     rawChunks.flatMap((chunk) => splitOversizedChunk(chunk)).forEach((text, chunkIndex) => {
       if (!text.trim()) return;
-      const bodyTokens = tokens(text);
-      const titleTokens = tokens(`${record.title || ""} ${record.description || ""}`);
+      const bodyTokens = tokens(text).map(intern);
       const frequencies = new Map();
       bodyTokens.forEach((token) => frequencies.set(token, (frequencies.get(token) || 0) + 1));
       const unique = new Set([...bodyTokens, ...titleTokens]);
@@ -223,8 +233,8 @@ export function createCorpusIndex(records) {
         lastModified: record.lastModified,
         text,
         normalizedText: normalize(text),
-        normalizedTitle: normalize(record.title),
-        titleTokens: new Set(titleTokens),
+        normalizedTitle,
+        titleTokens,
         frequencies,
         length: bodyTokens.length,
         chunkIndex
