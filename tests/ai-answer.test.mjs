@@ -2736,6 +2736,7 @@ test("an unsafe generated draft may be repaired but only the safe reviewed text 
   assert.equal(calls,2);
   assert.equal(result.body.degraded,false);
   assert.equal(result.body.output_text,safeText);
+  assert.equal(Object.hasOwn(result.body,"safety_failures"),false);
   assert.doesNotMatch(result.body.output_text,/approval is certain/);
 });
 
@@ -2752,7 +2753,8 @@ test("a failed review of an unsafe draft falls back without ever serving that dr
   assert.equal(calls,2);
   assert.equal(result.body.degraded,true);
   assert.equal(result.body.degraded_reason,"citation_gate");
-  assert.doesNotMatch(result.body.output_text,/approval is certain/);
+  assert.equal(Object.hasOwn(result.body,"safety_failures"),false);
+  assert.doesNotMatch(JSON.stringify(result.body),/approval is certain/);
 });
 
 test("evidence repair cannot bypass runtime safety or introduce an approval guarantee", async () => {
@@ -2776,7 +2778,8 @@ test("evidence repair cannot bypass runtime safety or introduce an approval guar
   assert.equal(calls,2);
   assert.equal(result.body.degraded,true);
   assert.equal(result.body.degraded_reason,"runtime_safety_gate");
-  assert.doesNotMatch(result.body.output_text,/approval is certain/);
+  assert.deepEqual(result.body.safety_failures,["localized_lawyer_impersonation_or_guarantee"]);
+  assert.doesNotMatch(JSON.stringify(result.body),/approval is certain|Invalid reviewer approval/);
 });
 
 test("identifier examples are repaired before they can poison the next conversation turn", async () => {
@@ -2809,7 +2812,8 @@ test("an allegedly supported reply with an identifier example still fails final 
   const result=await answer({question:"How do I check my USCIS case status?",language:"en"});
   assert.equal(result.body.degraded,true);
   assert.equal(result.body.degraded_reason,"runtime_safety_gate");
-  assert.doesNotMatch(result.body.output_text,/IOE1234567890/);
+  assert.deepEqual(result.body.safety_failures,["sensitive_identifier_in_output"]);
+  assert.doesNotMatch(JSON.stringify(result.body),/IOE1234567890/);
 });
 
 test("topically plausible citations cannot bypass independent factual verification", async () => {

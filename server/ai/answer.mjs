@@ -2800,6 +2800,23 @@ Passage: ${item.excerpt}`
   ).join("\n\n");
 }
 
+// Only stable, server-generated detector codes may leave this boundary. Never
+// expose rejected answer text, reviewer reasons, or request content for diagnosis.
+const SAFE_RUNTIME_FAILURE_CODES = new Set([
+  "saved_checklist_dump",
+  "internal_or_robotic_language",
+  "lawyer_impersonation_or_guarantee",
+  "localized_lawyer_impersonation_or_guarantee",
+  "unsupported_current_case_status_claim",
+  "visitor_work_authorization_contradiction",
+  "student_work_authorization_contradiction",
+  "route_form_contradiction",
+  "response_language_mismatch",
+  "question_echo_non_answer",
+  "low_diversity_non_answer",
+  "sensitive_identifier_in_output"
+]);
+
 function safeUpstreamFailureReason(error) {
   const code = error?.code || error?.cause?.code;
   if (["TimeoutError", "AbortError"].includes(error?.name) ||
@@ -3035,18 +3052,23 @@ export function createAnswerService({
         }
       }
       if (!openAIResponse.ok || !outputText || incompleteResponse || citationFailure || !runtimeSafety.pass) {
+        const degradedReason = !openAIResponse.ok
+          ? "upstream_error"
+          : incompleteResponse
+            ? "incomplete_upstream_response"
+            : citationFailure
+              ? (planningQuestion ? "planning_citation_gate" : "citation_gate")
+              : !runtimeSafety.pass
+                ? "runtime_safety_gate"
+                : "upstream_error";
         const body = withAssistantMetadata({
           ...localFallback,
           upstream_status: openAIResponse.status,
-          degraded_reason: !openAIResponse.ok
-            ? "upstream_error"
-            : incompleteResponse
-            ? "incomplete_upstream_response"
-            : (citationFailure
-              ? (planningQuestion ? "planning_citation_gate" : "citation_gate")
-            : (!runtimeSafety.pass
-              ? "runtime_safety_gate"
-              : "upstream_error"))
+          degraded_reason: degradedReason,
+          ...(degradedReason === "runtime_safety_gate" ? {
+            safety_failures: [...new Set(runtimeSafety.failures)]
+              .filter(code => SAFE_RUNTIME_FAILURE_CODES.has(code))
+          } : {})
         }, metadataContext);
         writeCachedAnswer(answerCache, cacheKey, body);
         return {
