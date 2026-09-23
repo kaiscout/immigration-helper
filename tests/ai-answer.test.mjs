@@ -363,6 +363,21 @@ function completedCitedResponse(text, {
   };
 }
 
+// Use only for deliberately pre-verified success fixtures below. Rejection
+// tests supply independent failing reviewer responses instead of this helper.
+function withVerifiedFixtureReview(data, options) {
+  const request=JSON.parse(options.body);
+  if (request.text?.format?.name !== "official_evidence_review") return data;
+  const sections=extractAnswerSections(data);
+  return {status:"completed",output:[
+    {type:"web_search_call",status:"completed",action:{type:"search",sources:sections.flatMap(section=>section.sources)}},
+    {type:"message",content:[{type:"output_text",text:JSON.stringify({approved:true,sections:sections.map((section,index)=>({
+      index,text:section.text,status:section.sources.length ? "supported" : "non_factual",
+      sourceUrls:section.sources.map(source=>source.url),reason:"This test fixture has separately verified support."
+    }))})}]}
+  ]};
+}
+
 test("creates a source-backed corpus answer without an API key", async () => {
   const answer = createAnswerService({ corpusIndex: index });
   const result = await answer({
@@ -905,7 +920,8 @@ test("retains the newest conversation and user-fact tails for corrections", asyn
     corpusIndex: planningIndex,
     apiKey: "test-key",
     fetchImpl: async (_url, options) => {
-      requestBodies.push(JSON.parse(options.body));
+      const body=JSON.parse(options.body);
+      if (!body.text?.format) requestBodies.push(body);
       return new Response(JSON.stringify(completedCitedResponse(
         "The newest user facts remain authoritative."
       )), { status: 200, headers: { "Content-Type": "application/json" } });
@@ -1158,10 +1174,10 @@ test("configures the exact Italian and Portugal scenario for researched personal
     apiKey: "test-key",
     model: "gpt-5.4-mini",
     fetchImpl: async (_url, options) => {
-      requestBody = JSON.parse(options.body);
-      return new Response(JSON.stringify(completedCitedResponse(
+      requestBody ||= JSON.parse(options.body);
+      return new Response(JSON.stringify(withVerifiedFixtureReview(completedCitedResponse(
         "Your Italian citizenship and residence in Portugal are important facts, but the best route depends on your goal and immigration basis."
-      )), { status: 200, headers: { "Content-Type": "application/json" } });
+      ),options)), { status: 200, headers: { "Content-Type": "application/json" } });
     }
   });
 
@@ -1190,12 +1206,13 @@ test("configures the exact Italian and Portugal scenario for researched personal
   assert.match(requestBody.instructions, /temporary nonimmigrant options from permanent/i);
   assert.match(requestBody.instructions, /exactly three concrete next actions/i);
   assert.match(requestBody.instructions, /exactly one high-value follow-up question/i);
-  assert.deepEqual(requestBody.reasoning, { effort: "medium" });
+  assert.match(requestBody.instructions, /aim for 250-400 words and at most three relevant branches/);
+  assert.deepEqual(requestBody.reasoning, { effort: "low" });
   assert.deepEqual(requestBody.text, { verbosity: "medium" });
   assert.equal(requestBody.max_output_tokens, 4_800);
-  assert.equal(requestBody.tools[0].search_context_size, "medium");
+  assert.equal(requestBody.tools[0].search_context_size, "low");
   assert.deepEqual(requestBody.tools[0].filters.allowed_domains, OFFICIAL_IMMIGRATION_DOMAINS);
-  assert.equal(requestBody.tool_choice, "required");
+  assert.equal(requestBody.tool_choice, "auto");
   assert.equal(requestBody.store, false);
   assert.equal(result.body.degraded, false);
   assert.equal(result.body.followups.length, 3);
@@ -1213,14 +1230,14 @@ test("retains prior personal facts and planning settings for an investor follow-
     corpusIndex: planningIndex,
     apiKey: "test-key",
     fetchImpl: async (_url, options) => {
-      requestBody = JSON.parse(options.body);
-      return new Response(JSON.stringify(completedCitedResponse(
+      requestBody ||= JSON.parse(options.body);
+      return new Response(JSON.stringify(withVerifiedFixtureReview(completedCitedResponse(
         "Your investment detail narrows the research, while Italy and Portugal remain relevant context.",
         {
           title: "EB-5 Immigrant Investor Program",
           url: "https://www.uscis.gov/working-in-the-united-states/permanent-workers/eb-5-immigrant-investor-program"
         }
-      )), { status: 200, headers: { "Content-Type": "application/json" } });
+      ),options)), { status: 200, headers: { "Content-Type": "application/json" } });
     }
   });
 
@@ -1233,8 +1250,8 @@ test("retains prior personal facts and planning settings for an investor follow-
   });
 
   assert.equal(requestBody.model, "gpt-5.6-sol");
-  assert.deepEqual(requestBody.reasoning, { effort: "medium" });
-  assert.equal(requestBody.tools[0].search_context_size, "medium");
+  assert.deepEqual(requestBody.reasoning, { effort: "low" });
+  assert.equal(requestBody.tools[0].search_context_size, "low");
   assert.equal(requestBody.max_output_tokens, 4_800);
   assert.match(requestBody.instructions, /Case-planning contract/);
   assert.match(requestBody.input, /Citizenship: Italy.*Current residence: Portugal/s);
@@ -2276,13 +2293,13 @@ test("serves a correctly cited CBP I-94 answer without degrading it", async () =
   const answer = createAnswerService({
     corpusIndex: index,
     apiKey: "test-key",
-    fetchImpl: async () => new Response(JSON.stringify(completedCitedResponse(
+    fetchImpl: async (_url,options) => new Response(JSON.stringify(withVerifiedFixtureReview(completedCitedResponse(
       "CBP lets travelers retrieve their official Form I-94 admission record.",
       {
         title: "Form I-94",
         url: "https://www.cbp.gov/travel/international-visitors/i-94"
       }
-    )), { status: 200, headers: { "Content-Type": "application/json" } })
+    ),options)), { status: 200, headers: { "Content-Type": "application/json" } })
   });
 
   const result = await answer({
@@ -2517,7 +2534,7 @@ test("sends retrieved USCIS passages to the model and keeps official sources", a
     apiKey: "test-key",
     model: "gpt-5.4-mini",
     fetchImpl: async (_url, options) => {
-      requestBody = JSON.parse(options.body);
+      requestBody ||= JSON.parse(options.body);
       const response = completedCitedResponse(
         "You can usually update it through your USCIS online account.",
         {
@@ -2534,7 +2551,7 @@ test("sends retrieved USCIS passages to the model and keeps official sources", a
             ]
           }
         });
-      return new Response(JSON.stringify(response), {
+      return new Response(JSON.stringify(withVerifiedFixtureReview(response,options)), {
         status: 200,
         headers: { "Content-Type": "application/json" }
       });
@@ -2555,11 +2572,11 @@ test("sends retrieved USCIS passages to the model and keeps official sources", a
   assert.match(requestBody.input, /I currently live in New York/);
   assert.match(requestBody.input, /ignore unless the user asks about it/i);
   assert.match(requestBody.input, /TPS: 1\/5 complete/);
-  assert.equal(requestBody.tool_choice, "required");
-  assert.deepEqual(requestBody.reasoning, { effort: "medium" });
+  assert.equal(requestBody.tool_choice, "auto");
+  assert.deepEqual(requestBody.reasoning, { effort: "low" });
   assert.deepEqual(requestBody.text, { verbosity: "medium" });
   assert.equal(requestBody.max_output_tokens, 1_800);
-  assert.equal(requestBody.tools[0].search_context_size, "medium");
+  assert.equal(requestBody.tools[0].search_context_size, "low");
   assert.equal(requestBody.store, false);
   assert.deepEqual(requestBody.tools[0].filters.allowed_domains, OFFICIAL_IMMIGRATION_DOMAINS);
   assert.equal(result.body.output_text, "You can usually update it through your USCIS online account.");
@@ -2583,6 +2600,51 @@ test("falls back to the USCIS corpus when the model service fails", async () => 
   assert.equal(result.status, 200);
   assert.equal(result.body.grounded_on, "local_uscis_corpus");
   assert.match(result.body.output_text, /reschedule a biometric services appointment/i);
+});
+
+test("thrown upstream failures expose stable categories without raw error details", async () => {
+  const secret="private-request-detail-must-not-escape";
+  const cases=[
+    [new DOMException(secret,"TimeoutError"),"upstream_timeout"],
+    [new DOMException(secret,"AbortError"),"upstream_timeout"],
+    [new TypeError(secret,{cause:{code:"UND_ERR_CONNECT_TIMEOUT"}}),"upstream_timeout"],
+    [new TypeError(secret,{cause:{code:"ECONNRESET"}}),"upstream_network_error"],
+    [new TypeError("fetch failed"),"upstream_network_error"],
+    [new SyntaxError(secret),"invalid_upstream_response"],
+    [new Error(secret),"upstream_error"]
+  ];
+  for (const [error,reason] of cases) {
+    let calls=0;
+    const answer=createAnswerService({corpusIndex:index,apiKey:"test-key",fetchImpl:async()=>{
+      calls+=1;
+      throw error;
+    }});
+    const result=await answer({question:"Can I reschedule biometrics?",language:"en"});
+    assert.equal(result.status,200);
+    assert.equal(result.body.degraded,true);
+    assert.equal(result.body.degraded_reason,reason);
+    assert.doesNotMatch(JSON.stringify(result.body),new RegExp(secret));
+    assert.equal(calls,1); // Thrown requests are not blindly replayed.
+  }
+});
+
+test("a timeout while reading the upstream body is classified without revealing the body", async () => {
+  const answer=createAnswerService({corpusIndex:index,apiKey:"test-key",fetchImpl:async()=>({
+    ok:true,status:200,json:async()=>{throw new DOMException("private-response-body","TimeoutError");}
+  })});
+  const result=await answer({question:"Can I reschedule biometrics?",language:"en"});
+  assert.equal(result.body.degraded_reason,"upstream_timeout");
+  assert.doesNotMatch(JSON.stringify(result.body),/private-response-body/);
+});
+
+test("an upstream HTTP failure is not mislabeled as a citation failure", async () => {
+  const answer=createAnswerService({corpusIndex:index,apiKey:"test-key",fetchImpl:async()=>
+    new Response(JSON.stringify({error:{message:"private-upstream-error"}}),{status:401})
+  });
+  const result=await answer({question:"Can I reschedule biometrics?",language:"en"});
+  assert.equal(result.body.degraded_reason,"upstream_error");
+  assert.equal(result.body.upstream_status,401);
+  assert.doesNotMatch(JSON.stringify(result.body),/private-upstream-error/);
 });
 
 test("degrades a model answer whose official citation is topically unrelated", async () => {
@@ -2627,6 +2689,168 @@ test("degrades a model answer whose official citation is topically unrelated", a
     title: "Avoid Scams",
     url: "https://www.uscis.gov/avoid-scams"
   }]);
+});
+
+test("one evidence repair replaces an unsupported candidate with checked conversational text", async () => {
+  const candidate=completedCitedResponse("You can use an online tool to check case progress.",{
+    title:"USCIS",url:"https://egov.uscis.gov/"
+  });
+  const checkedUrl="https://www.uscis.gov/tools/checking-your-case-status-online";
+  const repairedText="Check your case status using USCIS Case Status Online. Enter your receipt number privately on that official website, not here.";
+  let calls=0;
+  const answer=createAnswerService({corpusIndex:index,apiKey:"test-key",fetchImpl:async()=>{
+    calls+=1;
+    return new Response(JSON.stringify(calls===1 ? candidate : {
+      status:"completed",output:[
+        {type:"web_search_call",status:"completed",action:{type:"search",sources:[{url:checkedUrl,title:"Checking Your Case Status Online"}]}},
+        {type:"message",content:[{type:"output_text",text:JSON.stringify({approved:true,sections:[{
+          index:0,text:repairedText,status:"supported",sourceUrls:[checkedUrl],reason:"The checked page describes the case-status tool and using a receipt number."
+        }]})}]}
+      ]
+    }),{status:200});
+  }});
+  const result=await answer({question:"How do I check my case status?",language:"en"});
+  assert.equal(calls,2);
+  assert.equal(result.body.degraded,false);
+  assert.equal(result.body.output_text,repairedText);
+  assert.equal(result.body.sections[0].text,repairedText);
+  assert.equal(result.body.sources[0].url,checkedUrl);
+  assert.equal(result.body.grounded_on,"live_official_sources");
+  assert.doesNotMatch(result.body.output_text,/online tool to check case progress/);
+});
+
+test("an unsafe generated draft may be repaired but only the safe reviewed text is served", async () => {
+  const url="https://www.uscis.gov/tools/checking-your-case-status-online";
+  const candidate=completedCitedResponse("Your immigration approval is certain.",{url});
+  const safeText="You can check the latest action on your case using USCIS Case Status Online.";
+  let calls=0;
+  const answer=createAnswerService({corpusIndex:index,apiKey:"test-key",fetchImpl:async(_url,options)=>{
+    calls+=1;
+    const request=JSON.parse(options.body);
+    const data=request.text?.format
+      ? withVerifiedFixtureReview(completedCitedResponse(safeText,{url}),options)
+      : candidate;
+    return new Response(JSON.stringify(data),{status:200});
+  }});
+  const result=await answer({question:"How do I check my case status?",language:"en"});
+  assert.equal(calls,2);
+  assert.equal(result.body.degraded,false);
+  assert.equal(result.body.output_text,safeText);
+  assert.doesNotMatch(result.body.output_text,/approval is certain/);
+});
+
+test("a failed review of an unsafe draft falls back without ever serving that draft", async () => {
+  const candidate=completedCitedResponse("Your immigration approval is certain.");
+  let calls=0;
+  const answer=createAnswerService({corpusIndex:index,apiKey:"test-key",fetchImpl:async()=>{
+    calls+=1;
+    return new Response(JSON.stringify(calls===1 ? candidate : {status:"completed",output:[{
+      type:"message",content:[{type:"output_text",text:JSON.stringify({approved:false,sections:[]})}]
+    }]}),{status:200});
+  }});
+  const result=await answer({question:"How do I check my case status?",language:"en"});
+  assert.equal(calls,2);
+  assert.equal(result.body.degraded,true);
+  assert.equal(result.body.degraded_reason,"citation_gate");
+  assert.doesNotMatch(result.body.output_text,/approval is certain/);
+});
+
+test("evidence repair cannot bypass runtime safety or introduce an approval guarantee", async () => {
+  const candidate=completedCitedResponse("You can use an online tool to check case progress.",{
+    title:"USCIS",url:"https://egov.uscis.gov/"
+  });
+  const checkedUrl="https://www.uscis.gov/tools/checking-your-case-status-online";
+  let calls=0;
+  const answer=createAnswerService({corpusIndex:index,apiKey:"test-key",fetchImpl:async()=>{
+    calls+=1;
+    return new Response(JSON.stringify(calls===1 ? candidate : {
+      status:"completed",output:[
+        {type:"web_search_call",status:"completed",action:{type:"open_page",url:checkedUrl}},
+        {type:"message",content:[{type:"output_text",text:JSON.stringify({approved:true,sections:[{
+          index:0,text:"Your immigration approval is certain.",status:"supported",sourceUrls:[checkedUrl],reason:"Invalid reviewer approval."
+        }]})}]}
+      ]
+    }),{status:200});
+  }});
+  const result=await answer({question:"How do I check my case status?",language:"en"});
+  assert.equal(calls,2);
+  assert.equal(result.body.degraded,true);
+  assert.equal(result.body.degraded_reason,"runtime_safety_gate");
+  assert.doesNotMatch(result.body.output_text,/approval is certain/);
+});
+
+test("identifier examples are repaired before they can poison the next conversation turn", async () => {
+  const url="https://www.uscis.gov/tools/checking-your-case-status-online";
+  const candidate=completedCitedResponse("To check the progress of your application, open USCIS Case Status Online and enter your receipt number, for example IOE1234567890, on that official website. Do not send your number in this chat.",{url});
+  const safeText="Use your receipt number privately on USCIS Case Status Online; do not send it here.";
+  let calls=0;
+  const answer=createAnswerService({corpusIndex:index,apiKey:"test-key",fetchImpl:async(_url,options)=>{
+    calls+=1;
+    const request=JSON.parse(options.body);
+    if (!request.text?.format) return new Response(JSON.stringify(candidate),{status:200});
+    assert.match(request.instructions,/Never ask for, repeat, or invent example sensitive identifier/);
+    return new Response(JSON.stringify(withVerifiedFixtureReview(completedCitedResponse(safeText,{url}),options)),{status:200});
+  }});
+  const first=await answer({question:"How do I check my USCIS case status?",language:"en"});
+  assert.equal(first.body.degraded,false);
+  assert.equal(containsSensitiveIdentifier(first.body.output_text),false);
+  const next=await answer({question:"What should I check next?",conversation:`Assistant: ${first.body.output_text}`,language:"en"});
+  assert.equal(next.status,200);
+  assert.equal(next.body.degraded,false);
+  assert.equal(calls,4);
+});
+
+test("an allegedly supported reply with an identifier example still fails final output privacy", async () => {
+  const url="https://www.uscis.gov/tools/checking-your-case-status-online";
+  const candidate=completedCitedResponse("To check the progress of your application, open USCIS Case Status Online and enter your receipt number, for example IOE1234567890, on that official website. Do not send your number in this chat.",{url});
+  const answer=createAnswerService({corpusIndex:index,apiKey:"test-key",fetchImpl:async(_url,options)=>
+    new Response(JSON.stringify(withVerifiedFixtureReview(candidate,options)),{status:200})
+  });
+  const result=await answer({question:"How do I check my USCIS case status?",language:"en"});
+  assert.equal(result.body.degraded,true);
+  assert.equal(result.body.degraded_reason,"runtime_safety_gate");
+  assert.doesNotMatch(result.body.output_text,/IOE1234567890/);
+});
+
+test("topically plausible citations cannot bypass independent factual verification", async () => {
+  const candidate=completedCitedResponse("The current Form I-765 fee is $42.",{
+    url:"https://www.uscis.gov/i-765",title:"Application for Employment Authorization"
+  });
+  assert.equal(responsePassesCitationGate(candidate,extractAnswerSections(candidate),"What is the I-765 fee?","en"),true);
+  let calls=0;
+  const answer=createAnswerService({corpusIndex:index,apiKey:"test-key",fetchImpl:async()=>{
+    calls+=1;
+    return new Response(JSON.stringify(calls===1 ? candidate : {status:"completed",output:[{
+      type:"message",content:[{type:"output_text",text:JSON.stringify({approved:false,sections:[{
+        index:0,text:candidate.output_text,status:"unsupported",sourceUrls:[],reason:"The cited form page does not support this invented fee."
+      }]})}]
+    }]}),{status:200});
+  }});
+  const result=await answer({question:"What is the I-765 fee?",language:"en"});
+  assert.equal(calls,2);
+  assert.equal(result.body.degraded,true);
+  assert.doesNotMatch(result.body.output_text,/\$42/);
+});
+
+test("independently reviewed conversational replies do not inherit unrelated research sources", async () => {
+  const text="Hello! I can help you work through your immigration questions.";
+  const candidate=completedCitedResponse(text);
+  candidate.output[0].content[0].annotations=[];
+  let calls=0;
+  const answer=createAnswerService({corpusIndex:index,apiKey:"test-key",fetchImpl:async()=>{
+    calls+=1;
+    return new Response(JSON.stringify(calls===1 ? candidate : {
+      status:"completed",output:[{type:"message",content:[{type:"output_text",text:JSON.stringify({approved:true,sections:[{
+        index:0,text,status:"non_factual",sourceUrls:[],reason:"Only a greeting and an offer to help, without legal assertions."
+      }]})}]}]
+    }),{status:200});
+  }});
+  const result=await answer({question:"Hello",language:"en"});
+  assert.equal(calls,2);
+  assert.equal(result.body.degraded,false);
+  assert.equal(result.body.output_text,text);
+  assert.deepEqual(result.body.sources,[]);
+  assert.equal(result.body.grounded_on,"conversation");
 });
 
 test("degrades an uncited ordinary answer instead of attaching a guessed source", async () => {
@@ -2719,12 +2943,12 @@ test("does not treat an assistant-provided public agency email as user-sensitive
   const answer = createAnswerService({
     corpusIndex: index,
     apiKey: "test-key",
-    fetchImpl: async () => {
+    fetchImpl: async (_url,options) => {
       calls += 1;
-      return new Response(JSON.stringify(completedCitedResponse(
+      return new Response(JSON.stringify(withVerifiedFixtureReview(completedCitedResponse(
         "Use USCIS's official address-change process.",
         { title: "Change Your Address", url: "https://www.uscis.gov/addresschange" }
-      )), { status: 200, headers: { "Content-Type": "application/json" } });
+      ),options)), { status: 200, headers: { "Content-Type": "application/json" } });
     }
   });
   const result = await answer({
@@ -2735,7 +2959,7 @@ test("does not treat an assistant-provided public agency email as user-sensitive
 
   assert.equal(result.status, 200);
   assert.equal(result.body.degraded, false);
-  assert.equal(calls, 1);
+  assert.equal(calls, 2);
 });
 
 test("allows exact public agency contacts found in the trusted official corpus", async () => {
@@ -2764,7 +2988,7 @@ test("allows exact public agency contacts found in the trusted official corpus",
   });
 
   assert.equal(result.status, 200);
-  assert.equal(calls, 1);
+  assert.equal(calls, 2); // Generation and independent citation review both pass privacy.
 });
 
 test("privacy labels cannot bind values from a different payload field", async () => {
@@ -2787,7 +3011,7 @@ test("privacy labels cannot bind values from a different payload field", async (
   });
 
   assert.equal(result.status, 200);
-  assert.equal(calls, 1);
+  assert.equal(calls, 2); // Generation and independent citation review both pass privacy.
 });
 
 test("rejects explicit identifier disclosures completed in a later user turn", async () => {
@@ -2930,12 +3154,12 @@ test("never shares cached answers when any conversation context is present", asy
   const answer = createAnswerService({
     corpusIndex: index,
     apiKey: "test-key",
-    fetchImpl: async () => {
+    fetchImpl: async (_url,options) => {
       calls += 1;
-      return new Response(JSON.stringify(completedCitedResponse(
+      return new Response(JSON.stringify(withVerifiedFixtureReview(completedCitedResponse(
         "Use USCIS's official address-change process.",
         { title: "Change Your Address", url: "https://www.uscis.gov/addresschange" }
-      )), { status: 200, headers: { "Content-Type": "application/json" } });
+      ),options)), { status: 200, headers: { "Content-Type": "application/json" } });
     }
   });
 
@@ -2950,7 +3174,24 @@ test("never shares cached answers when any conversation context is present", asy
     language: "en"
   });
 
-  assert.equal(calls, 2);
+  assert.equal(calls, 4);
+});
+
+test("a degraded answer is not cached and a recovered grounded answer is cached", async () => {
+  let calls=0;
+  const answer=createAnswerService({corpusIndex:index,apiKey:"test-key",fetchImpl:async(_url,options)=>{
+    calls+=1;
+    const data=calls===1 ? {status:"incomplete"} : completedCitedResponse(
+      "Use USCIS's official address-change process.",
+      {title:"Change Your Address",url:"https://www.uscis.gov/addresschange"}
+    );
+    return new Response(JSON.stringify(withVerifiedFixtureReview(data,options)),{status:200});
+  }});
+  const payload={question:"How do I change my address with USCIS?",language:"en"};
+  assert.equal((await answer(payload)).body.degraded,true);
+  assert.equal((await answer(payload)).body.degraded,false);
+  assert.equal((await answer(payload)).body.answer_profile.cached,true);
+  assert.equal(calls,3);
 });
 
 test("rejects sensitive identifiers in planning user facts", async () => {
@@ -2978,7 +3219,7 @@ test("retries a transient upstream failure once", async () => {
   const answer = createAnswerService({
     corpusIndex: index,
     apiKey: "test-key",
-    fetchImpl: async () => {
+    fetchImpl: async (_url,options) => {
       calls += 1;
       if (calls === 1) {
         return new Response(JSON.stringify({ error: { message: "Try again." } }), {
@@ -2986,7 +3227,7 @@ test("retries a transient upstream failure once", async () => {
           headers: { "Content-Type": "application/json" }
         });
       }
-      return new Response(JSON.stringify({
+      return new Response(JSON.stringify(withVerifiedFixtureReview({
         output_text: "Use the official USCIS address-change page.",
         output: [{
           type: "message",
@@ -3002,7 +3243,7 @@ test("retries a transient upstream failure once", async () => {
             }]
           }]
         }]
-      }), { status: 200, headers: { "Content-Type": "application/json" } });
+      },options)), { status: 200, headers: { "Content-Type": "application/json" } });
     }
   });
 
@@ -3011,7 +3252,7 @@ test("retries a transient upstream failure once", async () => {
     language: "en"
   });
 
-  assert.equal(calls, 2);
+  assert.equal(calls, 3);
   assert.equal(result.body.degraded, false);
   assert.equal(result.body.grounded_on, "live_official_sources");
 });
@@ -3232,7 +3473,7 @@ test("supports every app language with an explicit response language", async () 
       corpusIndex: index,
       apiKey: "test-key",
       fetchImpl: async (_url, options) => {
-        requestBody = JSON.parse(options.body);
+        requestBody ||= JSON.parse(options.body);
         const response = completedCitedResponse(
           localizedAnswer,
           {
@@ -3253,7 +3494,7 @@ test("supports every app language with an explicit response language", async () 
           title: "EB-5 Immigrant Investor Program",
           url: "https://www.uscis.gov/working-in-the-united-states/permanent-workers/eb-5-immigrant-investor-program"
         });
-        return new Response(JSON.stringify(response), {
+        return new Response(JSON.stringify(withVerifiedFixtureReview(response,options)), {
           status: 200,
           headers: { "Content-Type": "application/json" }
         });
@@ -3312,14 +3553,14 @@ test("gives non-English users the same conversational contract and agency access
     corpusIndex: index,
     apiKey: "test-key",
     fetchImpl: async (_url, options) => {
-      requestBody = JSON.parse(options.body);
-      return new Response(JSON.stringify(completedCitedResponse(
+      requestBody ||= JSON.parse(options.body);
+      return new Response(JSON.stringify(withVerifiedFixtureReview(completedCitedResponse(
         "Il devrait commencer par vérifier les instructions du visa de visiteur.",
         {
           title: "Visitor Visa",
           url: "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html"
         }
-      )), { status: 200, headers: { "Content-Type": "application/json" } });
+      ),options)), { status: 200, headers: { "Content-Type": "application/json" } });
     }
   });
 

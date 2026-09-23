@@ -358,7 +358,7 @@ const CATEGORICAL_RISK_LEXICON = Object.freeze({
   zh: Object.freeze({ automatic: riskTerms("自动|自动地|直接赋予|必然带来|保证"), certainty: riskTerms("保证|必定|一定|肯定|必然|稳获"), benefit: riskTerms("批准|获批|绿卡|永久居留|移民签证|符合资格|资格"), categorical: riskTerms("将批准|会批准|必获批准|一定获批|将获得绿卡|会拿到绿卡|符合所有条件"), negative: riskTerms("不|不会|不能|没有|无人|并非|未必|不一定|可能|取决于|如果|是否") }),
   hi: Object.freeze({ automatic: riskTerms("स्वतः|अपने आप|स्वचालित रूप से|सीधे अधिकार|गारंटी"), certainty: riskTerms("गारंटीकृत|निश्चित|पक्का|अवश्य|तय"), benefit: riskTerms("मंजूरी|मंजूर|ग्रीन कार्ड|स्थायी निवास|आप्रवासी वीज़ा|पात्र|योग्य"), categorical: riskTerms("मंजूर होगा|मंजूर होगी|मंजूरी देगा|स्वीकृत होगा|मिल जाएगा|आप पात्र हैं|सभी शर्तें पूरी करते"), negative: riskTerms("नहीं|नही|कभी नहीं|कोई नहीं|न तो|संभव|हो सकता|निर्भर|यदि|क्या") }),
   fr: Object.freeze({ automatic: riskTerms("automatiquement|automatique|de plein droit|donne directement droit|ouvre automatiquement|garantit"), certainty: riskTerms("garantie|garanti|certaine|certain|inévitable|assurée|assuré"), benefit: riskTerms("approbation|résidence permanente|carte verte|visa immigrant|éligible|admissible"), categorical: riskTerms("approuvera|sera approuvée|sera approuvé|obtiendra la résidence|vous êtes éligible|remplissez toutes les conditions"), negative: riskTerms("ne|n’|n'|pas|jamais|aucun|aucune|personne|pourrait|peut-être|dépend|incertain|incertaine|si|selon") }),
-  ar: Object.freeze({ automatic: riskTerms("تلقائيا|تلقائيًا|تلقائياً|آلياً|مباشرة|يمنح الحق|يضمن"), certainty: riskTerms("مضمون|مضمونة|مؤكد|مؤكدة|حتمي|حتماً|بالتأكيد"), benefit: riskTerms("الموافقة|الإقامة الدائمة|البطاقة الخضراء|تأشيرة هجرة|مؤهل|أهلية"), categorical: riskTerms("سيوافق|ستوافق|سيتم قبول|سيتم منح|ستحصل|سوف تحصل|مؤهل بالتأكيد"), negative: riskTerms("لا|ليس|ليست|لن|لم|غير|بدون|قد|ربما|يعتمد|إذا|ما إذا") }),
+  ar: Object.freeze({ automatic: riskTerms("تلقائيا|تلقائيًا|تلقائياً|آلياً|مباشرة|يمنح الحق|يضمن"), certainty: riskTerms("مضمون|مضمونة|مؤكد|مؤكدة|حتمي|حتماً|بالتأكيد"), benefit: riskTerms("الموافقة|الإقامة الدائمة|البطاقة الخضراء|تأشيرة هجرة|مؤهل|أهلية"), categorical: riskTerms("سيوافق|ستوافق|سيتم قبول|سيتم منح|ستحصل|سوف تحصل|مؤهل بالتأكيد"), negative: riskTerms("لا|ولا|فلا|ليس|ليست|لن|لم|غير|بدون|قد|ربما|يعتمد|إذا|ما إذا") }),
   bn: Object.freeze({ automatic: riskTerms("স্বয়ংক্রিয়ভাবে|আপনা থেকেই|সরাসরি অধিকার|নিশ্চিত করে"), certainty: riskTerms("নিশ্চিত|নিশ্চিতভাবে|গ্যারান্টিযুক্ত|অবশ্যম্ভাবী|অবশ্যই"), benefit: riskTerms("অনুমোদন|অনুমোদিত|গ্রিন কার্ড|স্থায়ী বসবাস|অভিবাসী ভিসা|যোগ্য|যোগ্যতা"), categorical: riskTerms("অনুমোদন করবে|অনুমোদিত হবে|পেয়ে যাবেন|আপনি যোগ্য|সব শর্ত পূরণ করেন"), negative: riskTerms("না|নয়|নেই|হবে না|কেউ না|সম্ভবত|হতে পারে|নির্ভর|যদি|কিনা") }),
   ru: Object.freeze({ automatic: riskTerms("автоматически|автоматический|автоматическая|дает прямое право|гарантирует"), certainty: riskTerms("гарантировано|гарантирована|гарантирован|неизбежно|точно|несомненно"), benefit: riskTerms("одобрение|грин-карта|грин-карты|грин-карту|постоянное проживание|иммиграционная виза|имеете право|соответствуете"), categorical: riskTerms("одобрит|одобрят|будет одобрено|будет одобрена|получите грин-карту|имеете право|соответствуете всем требованиям"), negative: riskTerms("не|нет|никто|никогда|ни|может|возможно|зависит|неясно|если|ли") }),
   pt: Object.freeze({ automatic: riskTerms("automaticamente|automático|automática|dá direito|confere diretamente|garante"), certainty: riskTerms("garantida|garantido|assegurada|assegurado|certa|certo|inevitável"), benefit: riskTerms("aprovação|residência permanente|green card|cartão verde|visto de imigrante|elegível|qualificado"), categorical: riskTerms("aprovará|será aprovada|será aprovado|obterá a residência|é elegível|cumpre todos os requisitos"), negative: riskTerms("não|nunca|ninguém|nenhum|nenhuma|nem|poderia|pode ser|depende|incerto|incerta|se") }),
@@ -525,9 +525,12 @@ const termOccurrences = (text, terms, { wordBoundaries = false } = {}) => {
   for (const term of terms || []) {
     const normalizedTerm = normalize(term);
     if (!normalizedTerm) continue;
-    const needsLeadingBoundary = wordBoundaries && !/\p{Script=Han}/u.test(normalizedTerm) &&
+    // The Arabic adverb آلياً (automatically) normalizes to اليا, which also
+    // occurs inside إيطاليا (Italy). It is a word, not an inflectional stem.
+    const exactWord = wordBoundaries || normalizedTerm === normalize("آلياً");
+    const needsLeadingBoundary = exactWord && !/\p{Script=Han}/u.test(normalizedTerm) &&
       /[\p{L}\p{N}]/u.test(normalizedTerm[0]);
-    const needsTrailingBoundary = wordBoundaries && !/\p{Script=Han}/u.test(normalizedTerm) &&
+    const needsTrailingBoundary = exactWord && !/\p{Script=Han}/u.test(normalizedTerm) &&
       /[\p{L}\p{N}]/u.test(normalizedTerm[normalizedTerm.length - 1]);
     let offset = 0;
     while (offset < text.length) {
@@ -550,7 +553,11 @@ const termOccurrences = (text, terms, { wordBoundaries = false } = {}) => {
 const isAffirmingPseudoNegation = (text, { index, term }) => {
   const tail = text.slice(index, index + 32);
   return (term === "no" && /^no\s+(?:doubt|question|uncertainty)\b/u.test(tail)) ||
-    (term === "not" && /^not\s+(?:only|merely|just|simply)\b/u.test(tail));
+    (term === "not" && /^not\s+(?:only|merely|just|simply)\b/u.test(tail)) ||
+    // Arabic attaches conjunctions to negation (ولا / فلا). They are still
+    // complete tokens, but "no doubt" affirms rather than negates a guarantee.
+    (["لا", "ولا", "فلا"].includes(term) &&
+      /^(?:و|ف)?لا\s+(?:شك|ريب)(?=$|[^\p{L}\p{N}])/u.test(tail));
 };
 
 const containsUnnegatedPair = (
@@ -561,7 +568,10 @@ const containsUnnegatedPair = (
   maxDistance = 180,
   allowTrailingNegation = false
 ) => {
-  const leftMatches = termOccurrences(text, leftTerms);
+  const leftMatches = termOccurrences(text, leftTerms).filter(({term, end}) =>
+    // "Certain people" means some people, not a certain immigration outcome.
+    !(term === "certain" && /^\s+(?:people|persons|individuals|applicants|workers|categories|cases|circumstances)\b/u.test(text.slice(end)))
+  );
   const rightMatches = termOccurrences(text, rightTerms);
   const negativeMatches = termOccurrences(text, negativeTerms, { wordBoundaries: true })
     .filter((match) => !isAffirmingPseudoNegation(text, match));
@@ -698,15 +708,27 @@ const containsLocalizedStatusTriple = (clause, rules) => {
   );
 };
 
+// A future process condition is not a claim that approval happened. Mask only
+// this subordinate clause, leaving separate actual-status claims in the same
+// sentence available to both guards. Past-tense claims stay intact.
+const maskEnglishFutureApprovalCondition = (text) => String(text || "").replace(
+  /\bafter\s+(?:a|an|the|your|my|our)\s+(?:(?:relevant|immigrant|nonimmigrant)\s+){0,2}(?:application|petition|visa|case|request)\s+is\s+(?:approved|granted|issued|awarded)\b/giu,
+  (condition) => " ".repeat(condition.length)
+);
+
 const hasLocalizedUnsupportedCurrentCaseStatusClaim = (language, question, answer) => {
   const rules = localizedFactualRules(language);
+  const isEnglish = String(language || "en").toLowerCase().split(/[-_]/)[0] === "en";
+  const statusClauses = (text) => localizedFactualClauses(text).map((clause) => isEnglish
+    ? maskEnglishFutureApprovalCondition(clause)
+    : clause);
   // If the user expressly supplied the same completed agency action, repeating
   // that fact with attribution is not an invented status. Conditional questions
   // do not count as a supplied fact.
-  const questionSuppliesStatus = localizedFactualClauses(question)
+  const questionSuppliesStatus = statusClauses(question)
     .some((clause) => containsLocalizedStatusTriple(clause, rules));
   if (questionSuppliesStatus) return false;
-  return localizedFactualClauses(answer)
+  return statusClauses(answer)
     .some((clause) => containsLocalizedStatusTriple(clause, rules));
 };
 
@@ -1013,9 +1035,10 @@ const userAssertedStatusExpression = (status) => new RegExp(
 
 const hasUnsupportedCurrentCaseStatusClaim = (question, answer) =>
   CURRENT_CASE_STATUS_TERMS.some((status) => {
-    if (userAssertedStatusExpression(status).test(question)) return false;
-    return [...String(answer || "").matchAll(statusExpression(status))].some((match) => {
-      const prefix = String(answer).slice(Math.max(0, match.index - 40), match.index);
+    if (userAssertedStatusExpression(status).test(maskEnglishFutureApprovalCondition(question))) return false;
+    const actualStatusText = maskEnglishFutureApprovalCondition(answer);
+    return [...actualStatusText.matchAll(statusExpression(status))].some((match) => {
+      const prefix = actualStatusText.slice(Math.max(0, match.index - 40), match.index);
       return !/\b(?:if|when|once|assuming|provided(?:\s+that)?)\b[^.!?;]{0,28}$/iu.test(prefix);
     });
   });
@@ -1203,7 +1226,8 @@ const isPureQuestionSection = (section) => {
 
 const requiresCitation = (section) => {
   const text = String(section?.text || "").trim();
-  return Boolean(text) && !isStructurallyHeading(section) && !isPureQuestionSection(section);
+  return Boolean(text) && !isStructurallyHeading(section) && !isPureQuestionSection(section) &&
+    !(section?.evidence?.method === "official_source_review" && section.evidence.status === "non_factual");
 };
 
 export function evaluateCasePilotRuntimeSafety({
@@ -1302,7 +1326,10 @@ export function evaluateCasePilotReleaseAnswer({
     .filter(requiresCitation);
   const citedSections = factualSections.filter((section) =>
     Array.isArray(section?.sources) &&
-    sourceSupportsSection(section.sources, section?.text)
+    (sourceSupportsSection(section.sources, section?.text) ||
+      (section?.evidence?.method === "official_source_review" && section.evidence.status === "supported" &&
+        Array.isArray(section.evidence.sourceUrls) && section.evidence.sourceUrls.length > 0 &&
+        section.evidence.sourceUrls.every(url => hostnameIsOfficial(url) && section.sources.some(source => source.url === url))))
   );
   if (!factualSections.length || citedSections.length !== factualSections.length) {
     failures.push("insufficient_paragraph_citations");

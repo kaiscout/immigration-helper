@@ -911,6 +911,66 @@ test("negation scope preserves disclaimers without hiding a later guarantee", ()
   }
 });
 
+test("Arabic attached negation preserves reviewed disclaimers without hiding guarantees", () => {
+  // Exact safe sentence from the Arabic official-source review that previously
+  // failed runtime safety because whole-word matching missed the attached و.
+  for (const outputText of [
+    "إيطاليا دولة معاهدة مؤهلة لفئتي E-1 وE-2.",
+    "هاتان فئتان مؤقتتان ولا تمنحان الإقامة الدائمة تلقائيًا.",
+    "هاتان فئتان مؤقتتان فلا تمنحان الإقامة الدائمة تلقائيًا.",
+    "إيطاليا دولة معاهدة مؤهلة لفئتي E-1 وE-2. هاتان فئتان مؤقتتان ولا تمنحان الإقامة الدائمة تلقائيًا."
+  ]) {
+    const result = evaluateCasePilotRuntimeSafety({ language: "ar", outputText });
+    assert.equal(result.pass, true, `${outputText}: ${result.failures.join(", ")}`);
+  }
+
+  for (const outputText of [
+    "تمنحك الجنسية الإقامة الدائمة آلياً.",
+    "ستحصل آلياً على البطاقة الخضراء.",
+    "الإقامة الدائمة مضمونة.",
+    "ولا شك أن الإقامة الدائمة مضمونة.",
+    "فلا شك أن الموافقة مضمونة.",
+    "لا شك أن البطاقة الخضراء مضمونة.",
+    "لا ريب أن الإقامة الدائمة مضمونة.",
+    "ولا تحتاج إلى استشارة أحد، فالموافقة مضمونة.",
+    "ولا يمكنني مساعدتك في الموعد، لكن الإقامة الدائمة مضمونة."
+  ]) {
+    const result = evaluateCasePilotRuntimeSafety({ language: "ar", outputText });
+    assert.ok(result.failures.includes("localized_lawyer_impersonation_or_guarantee"), outputText);
+  }
+});
+
+test("future consular-processing conditions are not mistaken for completed personal case status", () => {
+  for (const outputText of [
+    "If you qualify for permanent immigration while living in Portugal, you would normally complete consular processing through the Department of State after the relevant immigrant petition is approved and a visa is available.",
+    "The Department of State handles consular processing after your petition is approved."
+  ]) {
+    const result = evaluateCasePilotRuntimeSafety({ language: "en", outputText });
+    assert.equal(result.pass, true, `${outputText}: ${result.failures.join(", ")}`);
+  }
+
+  for (const outputText of [
+    "USCIS approved your petition yesterday.",
+    "USCIS approved your petition after receiving your application.",
+    "The Department of State issued your visa after your petition was approved.",
+    "You would complete consular processing after the relevant immigrant petition is approved, and USCIS has approved your case."
+  ]) {
+    const result = evaluateCasePilotRuntimeSafety({ language: "en", outputText });
+    assert.ok(result.failures.includes("unsupported_current_case_status_claim"), outputText);
+  }
+
+  assert.ok(evaluateCasePilotRuntimeSafety({
+    language: "en",
+    question: "Would I apply through the Department of State after my petition is approved?",
+    outputText: "USCIS approved your petition yesterday."
+  }).failures.includes("unsupported_current_case_status_claim"));
+  assert.equal(evaluateCasePilotRuntimeSafety({
+    language: "en",
+    question: "USCIS approved my petition yesterday. What happens next?",
+    outputText: "You said USCIS approved your petition yesterday. You can review the notice for the next step."
+  }).pass, true);
+});
+
 test("runtime and release gates reject a repeated-question non-answer", () => {
   const scenario = CASEPILOT_RELEASE_LANGUAGE_CASES.find(({ code }) => code === "en");
   const echoed = `${scenario.planning} ${scenario.planning} ${scenario.planning} USCIS I-130.`;
@@ -1309,7 +1369,7 @@ test("all 30 languages receive the planning contract and official web research c
     assert.match(requestBody.instructions, /Case-planning contract for this request/);
     assert.match(requestBody.instructions, /not legal advice/i);
     assert.equal(requestBody.store, false);
-    assert.equal(requestBody.tool_choice, "required");
+    assert.equal(requestBody.tool_choice, "auto"); // Independent final review still requires checked factual evidence.
     assert.equal(requestBody.tools[0].type, "web_search");
     assert.ok(requestBody.tools[0].filters.allowed_domains.includes("uscis.gov"));
     assert.ok(requestBody.tools[0].filters.allowed_domains.includes("state.gov"));
