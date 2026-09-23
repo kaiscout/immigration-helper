@@ -200,6 +200,8 @@ export default function FlowScreen({ route, navigation }) {
     const fire = new Date(y, m - 1, d, 9, 0, 0);
     fire.setDate(fire.getDate() - daysBefore);
 
+    // Check the current time when the user schedules a reminder.
+    // eslint-disable-next-line react-hooks/purity
     if (fire.getTime() <= Date.now()) {
       showAlert(t("alerts.pastDateTitle"), t("alerts.pastDateBody"));
       return;

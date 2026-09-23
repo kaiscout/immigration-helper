@@ -8,7 +8,7 @@ import { OFFICIAL_LINKS } from "../constants/officialLinks";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
 import { openExternalLink } from "../data/externalLinks";
 import { showAlert } from "../data/appAlert";
-import { loadSubscriptionState } from "../data/subscriptionService";
+import { loadSubscriptionState, useSubscriptionPreviewRefresh } from "../data/subscriptionService";
 
 export default function PrivacyScreen({ navigation }) {
   const { t } = useTranslation();
@@ -30,10 +30,13 @@ export default function PrivacyScreen({ navigation }) {
   }, [t]);
 
   useEffect(() => {
+    // Hydrate consent and subscription state from asynchronous storage on mount.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadConsent();
     const unsubscribe = navigation.addListener?.("focus", loadConsent);
     return unsubscribe;
   }, [navigation, loadConsent]);
+  useSubscriptionPreviewRefresh(navigation, loadConsent);
 
   const changeChecklistSharing = async (value) => {
     if (value && !subscription?.isPlus) {

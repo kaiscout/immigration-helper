@@ -9,7 +9,7 @@ import { openExternalLink } from "../data/externalLinks";
 import eadFlow from "../data/flows/ead.json";
 import tpsFlow from "../data/flows/tps_renewal.json";
 import travelFlow from "../data/flows/travel_auth.json";
-import { loadSubscriptionState } from "../data/subscriptionService";
+import { loadSubscriptionState, useSubscriptionPreviewRefresh } from "../data/subscriptionService";
 
 export default function HomeScreen({ navigation }) {
   const { t } = useTranslation();
@@ -30,6 +30,7 @@ export default function HomeScreen({ navigation }) {
   }, []);
 
   useFocusEffect(refreshSubscription);
+  useSubscriptionPreviewRefresh(navigation, refreshSubscription);
 
   const openPlus = async () => {
     let state = subscription;

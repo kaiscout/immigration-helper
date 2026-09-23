@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
+import { useEffect, useSyncExternalStore } from "react";
 import {
   checkMonthlyTrialEligibility,
   findConfiguredPlusPackage,
@@ -30,6 +31,39 @@ export const PLUS_PREVIEW_UNLOCKED = Boolean(
 
 const PLUS_STATUS_KEY = "immigrationHelperPlusStatusV1";
 const AI_USAGE_KEY = "immigrationHelperAiUsageV1";
+export const SUBSCRIPTION_PREVIEW_ENABLED = typeof __DEV__ !== "undefined" && __DEV__;
+let previewMode = PLUS_PREVIEW_UNLOCKED ? "plus" : null;
+const previewListeners = new Set();
+const subscribePreview = (listener) => {
+  previewListeners.add(listener);
+  return () => previewListeners.delete(listener);
+};
+const previewSnapshot = () => SUBSCRIPTION_PREVIEW_ENABLED ? previewMode : null;
+export const useSubscriptionPreviewMode = () =>
+  useSyncExternalStore(subscribePreview, previewSnapshot, () => null);
+
+export function setSubscriptionPreviewMode(mode) {
+  if (!SUBSCRIPTION_PREVIEW_ENABLED || !["free", "plus"].includes(mode)) return;
+  previewMode = mode;
+  previewListeners.forEach((listener) => listener());
+}
+
+// Refresh only the visible screen; hidden paid screens must not redirect the
+// currently visible route. Switching modes preserves chat and form state.
+export function useSubscriptionPreviewRefresh(navigation, refresh) {
+  useEffect(() => {
+    let cleanup;
+    const unsubscribe = subscribePreview(() => {
+      if (navigation?.isFocused && !navigation.isFocused()) return;
+      if (typeof cleanup === "function") cleanup();
+      cleanup = refresh();
+    });
+    return () => {
+      unsubscribe();
+      if (typeof cleanup === "function") cleanup();
+    };
+  }, [navigation, refresh]);
+}
 
 const revenueCatKey = () => {
   const key = Platform.OS === "ios"
@@ -51,10 +85,10 @@ const defaultSubscriptionState = {
   managementUrl: null
 };
 
-const withPreviewUnlock = (state) => PLUS_PREVIEW_UNLOCKED
+const withPreviewUnlock = (state) => SUBSCRIPTION_PREVIEW_ENABLED && previewMode !== null
   ? {
       ...state,
-      isPlus: true,
+      isPlus: previewMode === "plus",
       isPreview: true,
       storeAvailable: false
     }
@@ -126,6 +160,9 @@ export async function loadSubscriptionState() {
 }
 
 export async function refreshSubscriptionState() {
+  if (SUBSCRIPTION_PREVIEW_ENABLED && previewMode !== null) {
+    return withPreviewUnlock(defaultSubscriptionState);
+  }
   const Purchases = await configurePurchases();
   if (!Purchases?.getCustomerInfo) {
     return saveSubscriptionState({

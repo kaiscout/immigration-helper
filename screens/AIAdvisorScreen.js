@@ -14,7 +14,12 @@ import {
   localCasePilotReadIntent,
   shouldHandleSavedChecklistDateQuery,
 } from "../data/casePilotIntent";
-import { shouldCountCasePilotQuestion } from "../data/casePilotResponse";
+import {
+  casePilotResponseText as responseOutputText,
+  fetchCasePilotResponse,
+  recordCasePilotQuestionSafely,
+  shouldCountCasePilotQuestion
+} from "../data/casePilotResponse";
 import {
   containsSensitiveIdentifier,
   KNOWN_PUBLIC_AGENCY_EMAILS,
@@ -28,8 +33,7 @@ import {
   getFlowProgress,
   loadAllFlowStates,
   normalizeText,
-  pickLocalized,
-  scoreTextMatch
+  pickLocalized
 } from "../data/flowState";
 import { openExternalLink } from "../data/externalLinks";
 import { showAlert } from "../data/appAlert";
@@ -37,6 +41,7 @@ import {
   FREE_AI_QUESTION_LIMIT,
   loadAiUsage,
   loadSubscriptionState,
+  useSubscriptionPreviewRefresh,
   recordAiQuestion
 } from "../data/subscriptionService";
 import euLanguageSupport from "../data/euLanguageSupport.json";
@@ -346,8 +351,6 @@ const QUESTION_TERMS = [
   ...euSupportTerms("intents", "question")
 ];
 
-const scoreTerms = (normalized, terms) => scoreTextMatch(normalized, terms);
-
 const scoreIntentTerms = (normalized, terms) => scoreExactIntent(normalized, terms);
 
 const hasAnyTerm = (normalized, terms, threshold = 1) =>
@@ -359,163 +362,6 @@ const intentTerms = (key) => [
   ...(ITALIAN_INTENT_TERMS[key] || []),
   ...euSupportTerms("intents", key)
 ];
-
-const ITALIAN_TOPIC_TERMS = {
-  caseStatus: ["stato del caso", "ricevuta", "numero di ricevuta", "la mia domanda", "pratica"],
-  fees: ["tariffa", "tariffe", "costo", "pagamento", "quanto costa"],
-  rfe: ["richiesta di prove", "richiesta di documenti", "altri documenti", "prove aggiuntive"],
-  biometrics: ["dati biometrici", "biometria", "impronte digitali", "appuntamento"],
-  address: ["indirizzo", "cambiare indirizzo", "mi sono trasferito", "nuovo indirizzo"],
-  processing: ["tempo di elaborazione", "quanto tempo", "ritardo", "attesa"],
-  scams: ["truffa", "frode", "falso avvocato", "garanzia di approvazione"],
-  tps: ["tps", "status di protezione temporanea", "rinnovo tps"],
-  ead: ["ead", "permesso di lavoro", "autorizzazione al lavoro", "modulo i 765"],
-  travel: ["autorizzazione al viaggio", "advance parole", "documento di viaggio", "modulo i 131"]
-};
-
-const bestTopicKey = (question) => {
-  const q = normalizeText(question);
-  const topics = {
-    caseStatus: [
-      "case status", "receipt", "track case", "track my application", "where is my case",
-      "my case has not updated", "receipt number", "online account", "egov", "status check",
-      "case pending", "my application", "case number", "online status",
-      "estado del caso", "recibo", "caso", "numero de recibo", "número de recibo", "mi solicitud",
-      "status do caso", "número do recibo", "meu pedido", "minha solicitação",
-      "case durumu", "dosya durumu", "makbuz", "basvuru", "başvuru", "makbuz numarasi", "makbuz numarası",
-      "statut du dossier", "numero de recu", "numéro de reçu", "ma demande",
-      "案件状态", "收据", "收据号", "我的申请", "案件号",
-      "केस स्थिति", "रसीद", "रसीद नंबर", "मेरा आवेदन",
-      "حالة القضية", "إيصال", "ايصال", "رقم الإيصال", "رقم الايصال", "طلبي",
-      "কেস স্ট্যাটাস", "রসিদ", "রসিদ নম্বর", "আমার আবেদন",
-      "статус дела", "квитанц", "номер квитанции", "мое заявление", "моё заявление"
-    ],
-    fees: [
-      "fee", "fees", "filing fee", "cost", "payment", "money order", "check payable", "how much",
-      "pay for form", "filing cost", "tarifa", "costo", "pago", "cuanto cuesta", "cuánto cuesta",
-      "taxa", "taxas", "custo", "pagamento", "quanto custa", "taxa de envio",
-      "ucret", "ücret", "odeme", "ödeme", "ne kadar", "harc",
-      "frais", "cout", "coût", "paiement", "combien",
-      "费用", "付款", "多少钱", "申请费",
-      "फीस", "लागत", "भुगतान", "कितना", "फाइलिंग फीस",
-      "رسوم", "تكلفة", "دفع", "كم", "رسوم التقديم",
-      "ফি", "খরচ", "পেমেন্ট", "কত", "ফাইলিং ফি",
-      "сбор", "стоимость", "оплата", "сколько", "госпошлина"
-    ],
-    rfe: [
-      "rfe", "request for evidence", "evidence request", "they asked for more proof", "more documents",
-      "notice asking evidence", "extra evidence", "proof", "supporting evidence",
-      "solicitud de evidencia", "pruebas", "mas documentos", "más documentos", "evidencia adicional",
-      "pedido de provas", "solicitação de provas", "mais documentos", "provas adicionais",
-      "evidence talebi", "kanit", "kanıt", "ek belge", "delil",
-      "demande de preuves", "preuves", "documents supplementaires", "documents supplémentaires",
-      "补件", "证据请求", "更多材料", "补充证据",
-      "सबूत का अनुरोध", "अधिक दस्तावेज", "प्रमाण", "अतिरिक्त सबूत",
-      "طلب أدلة", "طلب ادلة", "أدلة", "ادلة", "مستندات إضافية", "مستندات اضافية",
-      "প্রমাণের অনুরোধ", "আরও নথি", "প্রমাণ", "অতিরিক্ত প্রমাণ",
-      "запрос доказательств", "доказательства", "дополнительные документы"
-    ],
-    biometrics: [
-      "biometric", "biometrics", "fingerprint", "fingerprints", "asc appointment", "photo appointment",
-      "appointment notice", "fingerprint appointment",
-      "biometria", "biometría", "huella", "cita de huellas", "cita biometrica", "cita biométrica",
-      "biometria", "impressões digitais", "agendamento",
-      "biyometri", "parmak izi", "randevu",
-      "biometrie", "biométrie", "empreinte", "rendez vous",
-      "生物识别", "指纹", "预约", "打指纹",
-      "बायोमेट्रिक", "फिंगरप्रिंट", "उंगलियों के निशान", "अपॉइंटमेंट",
-      "فحص بصمات", "بصمات", "موعد البصمات", "موعد",
-      "বায়োমেট্রিক", "ফিঙ্গারপ্রিন্ট", "আঙুলের ছাপ", "অ্যাপয়েন্টমেন্ট",
-      "биометр", "отпечатки", "назначение"
-    ],
-    address: [
-      "address", "change address", "moved", "moving", "new apartment", "ar 11", "mailing address",
-      "new home", "mail address",
-      "direccion", "dirección", "mudanza", "me mude", "me mudé", "nueva direccion", "nueva dirección",
-      "endereço", "mudar endereço", "me mudei", "novo endereço",
-      "adres", "tasindim", "taşındım", "yeni adres",
-      "adresse", "demenage", "déménagé", "nouvelle adresse",
-      "地址", "搬家", "新地址", "邮寄地址",
-      "पता", "पता बदल", "नया पता", "शिफ्ट",
-      "عنوان", "غيرت العنوان", "عنوان جديد", "انتقلت",
-      "ঠিকানা", "ঠিকানা পরিবর্তন", "নতুন ঠিকানা", "বাসা বদল",
-      "адрес", "переезд", "новый адрес", "смена адреса"
-    ],
-    processing: [
-      "processing time", "how long", "waiting", "delay", "delayed", "taking too long", "normal wait",
-      "when will uscis", "timeline", "tiempo de procesamiento", "cuanto tarda", "ne kadar surer",
-      "cuánto tarda", "demora", "retraso",
-      "tempo de processamento", "quanto tempo", "atraso", "espera",
-      "ne kadar surer", "ne kadar sürer", "gecikme", "bekleme", "sure", "süre",
-      "delai", "délai", "combien de temps", "retard", "attente",
-      "多久", "处理时间", "延迟", "等待",
-      "प्रोसेसिंग समय", "कितना समय", "देरी", "इंतजार",
-      "كم يستغرق", "وقت المعالجة", "تأخير", "انتظار",
-      "প্রসেসিং সময়", "কত সময়", "দেরি", "অপেক্ষা",
-      "срок обработки", "сколько ждать", "задержка", "ожидание"
-    ],
-    scams: [
-      "scam", "fraud", "notario", "fake lawyer", "guarantee approval", "sign blank forms",
-      "special access", "blank form", "too good to be true",
-      "estafa", "fraude", "notario", "abogado falso", "garantiza aprobacion", "garantiza aprobación",
-      "golpe", "fraude", "advogado falso", "garantia de aprovação",
-      "dolandirici", "dolandırıcı", "sahte avukat", "garanti onay",
-      "arnaque", "fraude", "faux avocat", "garantit approbation",
-      "诈骗", "欺诈", "假律师", "保证批准",
-      "धोखाधड़ी", "नकली वकील", "गारंटी",
-      "احتيال", "نصب", "محامي مزيف", "ضمان الموافقة",
-      "প্রতারণা", "নকল আইনজীবী", "গ্যারান্টি",
-      "мошеннич", "обман", "фальшивый адвокат", "гарантия одобрения"
-    ],
-    tps: [
-      "tps", "temporary protected", "protected status", "re register", "renew tps", "tps renewal",
-      "country designation", "temporary protected status", "estatus de proteccion temporal", "renovar tps",
-      "status de proteção temporária", "renovação do tps",
-      "gecici koruma", "geçici koruma", "tps yenileme",
-      "statut de protection temporaire", "renouveler tps",
-      "临时保护", "临时保护身份", "续期",
-      "टीपीएस", "अस्थायी संरक्षित", "नवीनीकरण",
-      "الحماية المؤقتة", "تجديد", "وضع الحماية المؤقتة",
-      "টিপিএস", "অস্থায়ী সুরক্ষিত", "নবায়ন",
-      "временный защищенный", "продление tps"
-    ],
-    ead: [
-      "ead", "work permit", "work card", "employment authorization", "permission to work", "i 765",
-      "job authorization", "card to work", "permiso de trabajo", "工作许可", "वर्क परमिट",
-      "تصريح العمل", "কাজের অনুমতি", "разрешение на работу",
-      "autorizacion de empleo", "autorización de empleo", "tarjeta de trabajo",
-      "autorização de trabalho", "permissão de trabalho",
-      "calisma izni", "çalışma izni", "permis de travail", "autorisation de travail",
-      "工作授权", "कार्य अनुमति", "إذن العمل", "اذن العمل", "ওয়ার্ক পারমিট", "разрешение на трудоустройство"
-    ],
-    travel: [
-      "travel authorization", "advance parole", "travel document", "permission to travel", "i 131",
-      "leave the us", "come back after travel", "travel while case pending", "旅行授权", "यात्रा अनुमति",
-      "تصريح السفر", "ভ্রমণ অনুমতি", "разрешение на поездку",
-      "autorizacion de viaje", "autorización de viaje", "permiso de viaje",
-      "autorização de viagem", "documento de viagem", "permissão para viajar",
-      "seyahat izni", "autorisation de voyage", "document de voyage",
-      "旅行许可", "回美纸", "यात्रा परमिट", "إذن السفر", "اذن السفر", "وثيقة سفر",
-      "ভ্রমণ পারমিট", "разрешение на путешествие", "проездной документ"
-    ]
-  };
-
-  let bestKey = "general";
-  let bestScore = 0;
-  Object.entries(topics).forEach(([key, terms]) => {
-    const score = scoreTerms(q, [
-      ...terms,
-      ...(ITALIAN_TOPIC_TERMS[key] || []),
-      ...euSupportTerms("topics", key)
-    ]);
-    if (score > bestScore) {
-      bestKey = key;
-      bestScore = score;
-    }
-  });
-
-  return bestScore >= 1 ? bestKey : "general";
-};
 
 function titleForFlow(flow, t) {
   return t(flow.titleKey);
@@ -568,24 +414,6 @@ function buildFlowSummary(flow, state, lang, t) {
 
 function buildAssistantContext(flowStates, lang, t) {
   return FLOWS.map((item) => buildFlowSummary(item.data, flowStates[item.key] || {}, lang, t)).join("\n\n");
-}
-
-function broadFallback(question, t) {
-  const topic = bestTopicKey(question);
-  const answers = {
-    caseStatus: "ai.fallbackCaseStatus",
-    fees: "ai.fallbackFees",
-    rfe: "ai.fallbackRfe",
-    biometrics: "ai.fallbackBiometrics",
-    address: "ai.fallbackAddress",
-    processing: "ai.fallbackProcessing",
-    scams: "ai.fallbackScam",
-    tps: "ai.fallbackTps",
-    ead: "ai.fallbackEad",
-    travel: "ai.fallbackTravel",
-    general: "ai.fallbackGeneral"
-  };
-  return t(answers[topic] || answers.general);
 }
 
 function aiErrorMessage(status, data, t) {
@@ -655,30 +483,6 @@ function responseSources(data) {
       return [];
     }
   }).slice(0, 6);
-}
-
-function responseOutputText(data, fallback) {
-  const text = typeof data?.output_text === "string" && data.output_text.trim()
-    ? data.output_text.trim()
-    : (data?.output || [])
-      .flatMap((item) => item?.content || [])
-      .filter((content) => content?.type === "output_text" && typeof content.text === "string")
-      .map((content) => content.text.trim())
-      .filter(Boolean)
-      .join("\n\n");
-
-  return (text || fallback)
-    .replace(/cite[^]+/g, "")
-    .replace(/\s*\(\s*\[\s*\]\(\s*\)\s*\)/g, "")
-    .replace(/\[\s*\]\(\s*(?:https?:\/\/[^)]*)?\s*\)/g, "")
-    .replace(/\[([^\]]+)\]\(https?:\/\/[^)]+\)/g, "$1")
-    .replace(/\s*\((?:[a-z0-9-]+\.)*(?:uscis|state|cbp|dhs|ice|justice|dol)\.gov\)/gi, "")
-    .replace(/\*\*([^*]+)\*\*/g, "$1")
-    .replace(/^#{1,6}\s+/gm, "")
-    .replace(/[ \t]+([,.;:!?])/g, "$1")
-    .replace(/[ \t]+\n/g, "\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
 }
 
 function responseSections(data) {
@@ -766,6 +570,7 @@ export default function AIAdvisorScreen({ navigation }) {
   const lang = (i18n.language || "en").toLowerCase();
   const isRtl = lang.split("-")[0] === "ar";
   const scrollRef = useRef(null);
+  const sendingRef = useRef(false);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingStageIndex, setLoadingStageIndex] = useState(0);
@@ -808,10 +613,13 @@ export default function AIAdvisorScreen({ navigation }) {
   }, [t]);
 
   useEffect(() => {
+    // Hydrate screen state from asynchronous storage on mount.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadScreenState();
     const unsubscribe = navigation.addListener?.("focus", loadScreenState);
     return unsubscribe;
   }, [navigation, loadScreenState]);
+  useSubscriptionPreviewRefresh(navigation, loadScreenState);
 
   useEffect(() => {
     scrollRef.current?.scrollToEnd?.({ animated: true });
@@ -819,6 +627,8 @@ export default function AIAdvisorScreen({ navigation }) {
 
   useEffect(() => {
     if (!loading) {
+      // Reset the staged loading message when an answer finishes.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoadingStageIndex(0);
       return undefined;
     }
@@ -844,6 +654,8 @@ export default function AIAdvisorScreen({ navigation }) {
   };
 
   const appendAssistantProgressively = async (text, sources = [], sections = [], followups = []) => {
+    // This runs after a user sends a message; each response needs a fresh ID.
+    // eslint-disable-next-line react-hooks/purity
     const id = `assistant-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const chunks = sectionsForProgressiveReveal(text, sources, sections);
 
@@ -953,7 +765,7 @@ export default function AIAdvisorScreen({ navigation }) {
   };
   const sendMessage = async (preset, { trustedPreset = false } = {}) => {
     const question = (preset ?? input).trim();
-    if (!question || loading) return;
+    if (!question || loading || sendingRef.current) return;
     const privacyScanQuestion = redactAllowedEmailAddressesForPrivacyScan(
       question,
       KNOWN_PUBLIC_AGENCY_EMAILS
@@ -963,6 +775,7 @@ export default function AIAdvisorScreen({ navigation }) {
       return;
     }
 
+    sendingRef.current = true;
     const userMessage = { role: "user", text: question };
     setMessages((current) => [...current, userMessage]);
     setInput("");
@@ -982,7 +795,7 @@ export default function AIAdvisorScreen({ navigation }) {
       }
 
       if (!openEndedAiConfigured) {
-        appendAssistant(`${broadFallback(question, t)}\n\n${t("ai.setupMissing")}`);
+        appendAssistant(t("ai.setupMissing"));
         return;
       }
 
@@ -998,36 +811,20 @@ export default function AIAdvisorScreen({ navigation }) {
       } = buildCasePilotRequestContext(messages, userMessage);
 
       const sharedChecklistContext = isPlus && aiConsent?.shareChecklist ? contextText : "";
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), AI_REQUEST_TIMEOUT_MS);
-      let response;
-      try {
-        response = await fetch(AI_PROXY_URL, {
-          method: "POST",
-          signal: controller.signal,
-          headers: {
-            "Content-Type": "application/json",
-            "X-Immigration-Helper-Token": AI_PROXY_CLIENT_TOKEN
-          },
-          body: JSON.stringify({
-            question,
-            conversation: recentConversation,
-            userContext,
-            checklistContext: sharedChecklistContext,
-            language: i18n.language
-          })
-        });
-      } finally {
-        clearTimeout(timeout);
-      }
-
-      const responseText = await response.text();
-      let data = {};
-      try {
-        data = responseText ? JSON.parse(responseText) : {};
-      } catch {
-        throw new Error(t("ai.requestFailed"));
-      }
+      const { response, data } = await fetchCasePilotResponse(AI_PROXY_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Immigration-Helper-Token": AI_PROXY_CLIENT_TOKEN
+        },
+        body: JSON.stringify({
+          question,
+          conversation: recentConversation,
+          userContext,
+          checklistContext: sharedChecklistContext,
+          language: i18n.language
+        })
+      }, { timeoutMs: AI_REQUEST_TIMEOUT_MS });
 
       if (!response.ok) {
         throw new Error(aiErrorMessage(response.status, data, t));
@@ -1039,18 +836,18 @@ export default function AIAdvisorScreen({ navigation }) {
       const followups = responseFollowups(data, t);
 
       if (!isPlus && shouldCountCasePilotQuestion(data)) {
-        setAiUsage(await recordAiQuestion());
+        setAiUsage(await recordCasePilotQuestionSafely(recordAiQuestion, aiUsage));
       }
 
-      setLoading(false);
       await appendAssistantProgressively(answer, sources, sections, followups);
     } catch (e) {
-      const message = e?.name === "AbortError"
+      const message = e?.name === "AbortError" || e instanceof SyntaxError
         ? t("ai.requestFailed")
         : String(e?.message || e || t("ai.requestFailed"));
       showAlert(t("ai.errorTitle"), message);
-      appendAssistant(`${broadFallback(question, t)}\n\n${t("ai.requestFallback")}`);
+      appendAssistant(t("ai.requestFailed"));
     } finally {
+      sendingRef.current = false;
       setLoading(false);
     }
   };

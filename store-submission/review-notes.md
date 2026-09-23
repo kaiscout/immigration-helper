@@ -27,7 +27,7 @@ The app does not provide legal advice, does not determine eligibility, and does 
 
 ## Helper Notes
 
-The in-app helper, CasePilot, is framed as general information only. It can answer general immigration questions from official sources and can summarize or update local checklist progress at the user's request. The interface warns users not to rely on it for legal advice and points users to official government and legal-help resources.
+The in-app helper, CasePilot, is framed as general information only. It can answer general immigration questions from official sources and, with Plus and optional checklist-sharing consent, summarize saved checklist progress and dates. Checklist changes are made in the dedicated checklist screens, not by chat. The interface warns users not to rely on it for legal advice and points users to official government and legal-help resources.
 
 Online answers use a developer-operated HTTPS backend hosted by Render, which calls OpenAI with a server-side API key. No OpenAI API key is included in the app binary.
 
@@ -49,7 +49,7 @@ Review path for the subscription:
 
 1. Open Home.
 2. Tap Immigration Helper Plus.
-3. Confirm the yearly option is labeled Best value and the monthly option shows the 7-day trial.
+3. Confirm the yearly option is labeled Best value. The monthly option shows the 7-day trial only when the store confirms the reviewer is eligible; otherwise it shows the ordinary monthly subscription price without promising a trial.
 4. Tap Restore purchases to verify the restore path.
 5. You can also trigger the paywall by opening CasePilot and asking for checklist progress as a free user.
 6. After purchase or restore, open Plus Workspace and File Vault.

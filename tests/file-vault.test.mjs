@@ -164,5 +164,6 @@ test("native import opens the picker URI and verifies its real size before copyi
   assert.match(service, /new File\(validation\.value\.uri\)/);
   assert.match(service, /source\.info\(\)/);
   assert.match(service, /copiedSize > MAX_VAULT_FILE_SIZE_BYTES/);
+  assert.match(service, /await source\.copy\(destination\)/, "SDK 56+ copies must finish before vault metadata is saved");
   assert.doesNotMatch(service, /new File\(asset\)/);
 });

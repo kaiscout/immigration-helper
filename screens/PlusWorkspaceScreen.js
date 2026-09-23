@@ -18,7 +18,7 @@ import {
   buildPlusWorkspaceSummary,
   WORKSPACE_FILE_STATUSES
 } from "../data/plusWorkspaceSummary";
-import { loadSubscriptionState } from "../data/subscriptionService";
+import { loadSubscriptionState, useSubscriptionPreviewRefresh } from "../data/subscriptionService";
 
 const EMPTY_FLOW_STATES = {};
 
@@ -63,6 +63,8 @@ export default function PlusWorkspaceScreen({ navigation }) {
       loadWorkspace();
     }, [loadWorkspace])
   );
+
+  useSubscriptionPreviewRefresh(navigation, loadWorkspace);
 
   const summary = useMemo(
     () => buildPlusWorkspaceSummary({ flows: FLOWS, flowStates, files }),

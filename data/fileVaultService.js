@@ -148,7 +148,7 @@ export async function importVaultFile(category) {
       if (copiedSize !== null && copiedSize > MAX_VAULT_FILE_SIZE_BYTES) {
         throw new FileVaultError("FILE_TOO_LARGE");
       }
-      source.copy(destination);
+      await source.copy(destination);
     } catch (error) {
       if (error instanceof FileVaultError) throw error;
       throw new FileVaultError("COPY_FAILED", error);

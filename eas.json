@@ -27,8 +27,7 @@
         "buildType": "app-bundle"
       },
       "ios": {
-        "simulator": false,
-        "image": "sdk-54"
+        "simulator": false
       }
     }
   },

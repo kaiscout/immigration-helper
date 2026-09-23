@@ -8,6 +8,7 @@ import {
   findPlusPackage,
   isPurchaseCancelled,
   loadSubscriptionState,
+  useSubscriptionPreviewRefresh,
   purchasePlus,
   restorePlusPurchases
 } from "../data/subscriptionService";
@@ -86,8 +87,11 @@ export default function PaywallScreen({ navigation, route }) {
   }, []);
 
   useEffect(() => {
+    // Hydrate subscription and offering state from asynchronous services on mount.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadPaywall();
   }, [loadPaywall]);
+  useSubscriptionPreviewRefresh(navigation, loadPaywall);
 
   const finishPlusNavigation = () => {
     if (feature === "workspace") {

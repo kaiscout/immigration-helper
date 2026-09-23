@@ -25,7 +25,7 @@ import {
   shareVaultFile,
   updateVaultFile
 } from "../data/fileVaultService";
-import { loadSubscriptionState } from "../data/subscriptionService";
+import { loadSubscriptionState, useSubscriptionPreviewRefresh } from "../data/subscriptionService";
 import { showAlert } from "../data/appAlert";
 
 const STATUS_STYLES = {
@@ -120,6 +120,8 @@ function VaultFileCard({ file, busy, onDelete, onShare, onUpdate }) {
   const isPdf = file.mimeType === "application/pdf";
 
   useEffect(() => {
+    // Refresh the saved note while keeping unsaved edits in local draft state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setNote(file.note || "");
   }, [file.id, file.note]);
 
@@ -283,10 +285,13 @@ export default function FileVaultScreen({ navigation }) {
   }, [navigation, t]);
 
   useEffect(() => {
+    // Start the asynchronous storage refresh and its loading indicator on mount.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     refresh();
     const unsubscribe = navigation?.addListener?.("focus", refresh);
     return unsubscribe;
   }, [navigation, refresh]);
+  useSubscriptionPreviewRefresh(navigation, refresh);
 
   if (loading || !accessGranted) {
     return (
