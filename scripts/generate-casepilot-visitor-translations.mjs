@@ -123,8 +123,12 @@ const runCase = async (code) => {
   const fixture = fixtures[code];
   const payload = {
     question: fixture.statements.at(-1),
-    conversation: fixture.statements.map(statement => `User: ${statement}`).join("\n"),
-    userContext: fixture.context.join("\n"),
+    // Mirror the weakest real client shape: prior turns carry the topic while
+    // the current question is a terse correction and structured facts are
+    // empty. The server must preserve route and personalization from history.
+    conversation: fixture.statements.slice(0, -1)
+      .map(statement => `User: ${statement}`).join("\n"),
+    userContext: "",
     checklistContext: "TPS Renewal: 0/5 complete. Work Permit (EAD): 0/3 complete. Travel Authorization: 0/3 complete.",
     language: code
   };

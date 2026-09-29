@@ -1281,12 +1281,50 @@ function annotationBelongsToRange(annotation, range) {
   return start < range.end && (Number.isFinite(end) ? end > range.start : start >= range.start);
 }
 
-export const officialReviewUrlsForQuestion = (question, userFacts, language = "en") => {
-  const combined = `${userFacts || ""}\n${question || ""}`;
-  const normalized = normalizeForRouting(combined);
-  const visitorQuestion = [...VISITOR_VISA_TERMS, ...VISITOR_ONLY_TERMS]
-    .some((term) => planningTermOccurrences(normalized, term).length > 0);
-  return visitorQuestion ? [...STATE_VISITOR_REVIEW_URLS] : [];
+export const officialReviewUrlsForQuestion = (
+  question,
+  userFacts,
+  language = "en",
+  conversation = ""
+) => {
+  const visitorTerms = [...VISITOR_VISA_TERMS, ...VISITOR_ONLY_TERMS];
+  const mentionsVisitor = value => {
+    const normalized = normalizeForRouting(value);
+    return visitorTerms.some((term) =>
+      planningTermOccurrences(normalized, term).length > 0
+    );
+  };
+  const hasCompetingTopic = value => [...ordinaryCitationTopics(value, language)]
+    .some(topic => !["visitor", "admission", "authorized-stay"].includes(topic));
+  const continuesPriorTopic = value => {
+    const normalized = normalizeForRouting(value);
+    return isBriefPlanningReply(value, language) ||
+      planningContinuationVocabulary(language).some((term) =>
+        planningTermOccurrences(normalized, term).length > 0
+      ) ||
+      queryTokens(value).length <= 12;
+  };
+
+  if (mentionsVisitor(question)) return [...STATE_VISITOR_REVIEW_URLS];
+  if (hasCompetingTopic(question) || !continuesPriorTopic(question)) return [];
+
+  // Walk only the active tail of user turns. This keeps a short correction such
+  // as "No, I only have Nigerian citizenship" on the visitor route without
+  // allowing an old visitor question—or words written by the assistant—to
+  // reopen that route after the user changes topics.
+  const recentUserTurns = dialogueTurns(conversation)
+    .filter(turn => turn.role === "user")
+    .slice(-3)
+    .reverse();
+  for (const turn of recentUserTurns) {
+    if (mentionsVisitor(turn.text)) return [...STATE_VISITOR_REVIEW_URLS];
+    if (hasCompetingTopic(turn.text) || !continuesPriorTopic(turn.text)) return [];
+  }
+
+  // Some older clients send only a user-fact summary. Use it solely when the
+  // current message is a continuation and recent dialogue did not close or
+  // replace the topic.
+  return mentionsVisitor(userFacts) ? [...STATE_VISITOR_REVIEW_URLS] : [];
 };
 
 const SECTION_HEADING = Symbol("casePilotSectionHeading");
@@ -2952,7 +2990,8 @@ export function createAnswerService({
     const officialReviewUrls = officialReviewUrlsForQuestion(
       question,
       suppliedUserFacts,
-      language.code
+      language.code,
+      conversation
     );
     const localResults = retrieveLocalResults(
       corpusIndex,
@@ -2999,9 +3038,12 @@ export function createAnswerService({
       return { status: 200, body };
     }
 
+    const visitorResearchRequired = officialReviewUrls.length > 0;
     const tools = [{
       type: "web_search",
-      filters: { allowed_domains: officialDomainsForQuestion(question, language.code) },
+      filters: { allowed_domains: visitorResearchRequired
+        ? ["state.gov", "cbp.gov"]
+        : officialDomainsForQuestion(question, language.code) },
       search_context_size: "low"
     }];
     if (vectorStoreId) {
@@ -3046,7 +3088,7 @@ export function createAnswerService({
         tools,
         // Let greetings and clarification-only replies avoid unnecessary web
         // research. Every generated answer still receives independent review.
-        tool_choice: "auto",
+        tool_choice: visitorResearchRequired ? "required" : "auto",
         include: [
           "web_search_call.action.sources",
           ...(vectorStoreId ? ["file_search_call.results"] : [])

@@ -3681,14 +3681,76 @@ test("routes the fixed four-turn visitor conversation in all 30 languages", () =
     assert.equal(scenario.statements.length, 4, code);
     const reviewUrls = officialReviewUrlsForQuestion(
       scenario.statements.at(-1),
-      scenario.context.join("\n"),
-      code
+      "",
+      code,
+      scenario.statements.slice(0, -1).map(text => `User: ${text}`).join("\n")
     );
     assert.ok(
       reviewUrls.some(url => new URL(url).hostname.endsWith("state.gov")),
       `${code} must retain visitor routing on the final citizenship correction`
     );
   }
+});
+
+test("a terse citizenship correction keeps the visitor route from conversation history", async () => {
+  const irrelevantCivicsIndex = createCorpusIndex([{
+    title: "Check for Test Updates",
+    url: "https://www.uscis.gov/citizenship/find-study-materials-and-resources/check-for-test-updates",
+    chunks: ["Naturalization civics test updates for Form N-400 applicants."]
+  }]);
+  const upstreamRequests = [];
+  const answer = createAnswerService({
+    corpusIndex: irrelevantCivicsIndex,
+    apiKey: "test-key",
+    fetchImpl: async (_url, options) => {
+      upstreamRequests.push(JSON.parse(options.body));
+      return new Response("upstream unavailable", {status: 503});
+    }
+  });
+  const conversation = [
+    "User: I am a Nigerian citizen living in Lisbon and I want to visit the United States. Where do I start?",
+    "User: I have never been to the US. I want to apply for a visa."
+  ].join("\n");
+
+  assert.ok(officialReviewUrlsForQuestion(
+    "No I only have a Nigerian citizenship",
+    "",
+    "en",
+    conversation
+  ).some(url => new URL(url).hostname.endsWith("state.gov")));
+  assert.deepEqual(officialReviewUrlsForQuestion(
+    "No, that is not what I meant.",
+    "",
+    "en",
+    "Assistant: You should apply for a tourist visa."
+  ), []);
+  assert.deepEqual(officialReviewUrlsForQuestion(
+    "What should I do next?",
+    "Goal: tourism",
+    "en",
+    [
+      "User: I want to visit the United States for tourism.",
+      "Assistant: Here are the visitor visa steps.",
+      "User: I actually need to renew my work permit."
+    ].join("\n")
+  ), []);
+
+  const result = await answer({
+    question: "No I only have a Nigerian citizenship",
+    conversation,
+    userContext: "",
+    language: "en"
+  });
+  assert.equal(result.status, 200);
+  assert.equal(result.body.grounded_on, "official_research_unavailable");
+  assert.deepEqual(result.body.sources, []);
+  assert.doesNotMatch(result.body.output_text, /civics|naturalization|N-400/i);
+  assert.ok(upstreamRequests.length >= 1);
+  assert.equal(upstreamRequests[0].tool_choice, "required");
+  assert.deepEqual(
+    upstreamRequests[0].tools[0].filters.allowed_domains,
+    ["state.gov", "cbp.gov"]
+  );
 });
 
 test("visitor audit recognizes accented and inflected country names", () => {
