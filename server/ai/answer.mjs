@@ -61,7 +61,7 @@ Expected outcome:
 Professional response standard for every request:
 - Bring the care, issue-spotting, precision, and practical judgment expected from an excellent U.S. immigration professional, while remaining an informational assistant and never implying an attorney-client relationship.
 - Tailor the answer to every concrete fact the user supplied that matters to the question. Reflect those facts naturally; do not merely repeat them or return generic category lists.
-- In a personal planning answer, briefly acknowledge the user's stated citizenship, current residence, and goal in a separate conversational paragraph. Those are user facts, not legal claims requiring outside proof; keep that acknowledgment when explaining conditional options.
+- In every personalized answer, explicitly retain each relevant user fact supplied in the current conversation, including citizenship, current residence, stated goal, and whether this is a first application. These are user facts, not legal claims requiring outside proof. Do not drop the current country of residence merely because a nationality-based rule controls the outcome.
 - Treat the current message as the newest and most authoritative user statement. If it corrects an earlier fact, use the correction and do not blend the old and new versions.
 - Separate what the official sources establish from what remains fact-dependent or unknown. Give conditional guidance where appropriate instead of guessing eligibility or presenting possibilities as conclusions.
 - Give useful guidance before asking for more information. When one missing fact materially changes the answer, finish with one focused, conversational question rather than an intake questionnaire. If you offer examples in that question, leave room for another basis or none of those circumstances; do not imply that the examples exhaust the person's options.
@@ -124,6 +124,14 @@ const VISITOR_VISA_TERMS = [
   "زيارة الولايات المتحدة", "تأشيرة زيارة", "تأشيرة سياحية", "السياحة", "السفارة", "القنصلية",
   "যুক্তরাষ্ট্রে বেড়াতে", "আমেরিকা বেড়াতে", "ভিজিটর ভিসা", "পর্যটন ভিসা", "দূতাবাস", "কনস্যুলেট",
   "посетить сша", "приехать в сша в гости", "гостевая виза", "туристическая виза", "туризм", "посольство", "консульство",
+  // Natural visitor-purpose nouns and common inflections. The structured user
+  // context often says only "Goal: tourism" in the selected language, so a
+  // route must not depend on an exact visa-name phrase.
+  "पर्यटन", "पर्यटन के लिए", "পর্যটন", "পর্যটনের", "turizm", "туризъм", "turizam", "turistika", "turistiky",
+  "turist", "turista", "turistički", "turističko", "turistický", "turistická cesta", "turismul",
+  "turisme", "toerisme", "turism", "matkailu", "tourismus", "τουρισμός", "τουρισμό",
+  "turizmus", "turasóireacht", "tūrisms", "tūrismam", "turizmas", "turiżmu", "turystyka",
+  "turistic", "turismului", "turistično", "turizem", "turism",
   ...euSupportTerms("topics", "visitorVisa")
 ];
 
@@ -1273,7 +1281,7 @@ function annotationBelongsToRange(annotation, range) {
   return start < range.end && (Number.isFinite(end) ? end > range.start : start >= range.start);
 }
 
-const officialReviewUrlsForQuestion = (question, userFacts, language = "en") => {
+export const officialReviewUrlsForQuestion = (question, userFacts, language = "en") => {
   const combined = `${userFacts || ""}\n${question || ""}`;
   const normalized = normalizeForRouting(combined);
   const visitorQuestion = [...VISITOR_VISA_TERMS, ...VISITOR_ONLY_TERMS]

@@ -18,6 +18,7 @@ import {
   isPlanningContinuation,
   OFFICIAL_IMMIGRATION_DOMAINS,
   officialDomainsForQuestion,
+  officialReviewUrlsForQuestion,
   PLANNING_LANGUAGE_SUPPORT,
   planningFollowUpsForQuestion,
   planningResponsePassesCitationGate,
@@ -29,6 +30,10 @@ import {
 } from "../server/ai/answer.mjs";
 import { createCorpusIndex } from "../server/uscis/search.mjs";
 import { shouldCountCasePilotQuestion } from "../data/casePilotResponse.js";
+import {
+  CASEPILOT_VISITOR_LANGUAGE_CASES,
+  CASEPILOT_VISITOR_LANGUAGE_CODES
+} from "../data/casePilotVisitorLanguageCases.mjs";
 
 const records = [{
   url: "https://www.uscis.gov/addresschange",
@@ -3622,6 +3627,65 @@ test("routes visitor-visa questions in every supported language to State and CBP
       isImmigrationPlanningQuestion(question, code),
       false,
       `${code} visitor trip should not become relocation planning`
+    );
+  }
+});
+
+test("recognizes a natural tourism goal in every language and fails closed without live research", () => {
+  const naturalTourismGoals = Object.freeze({
+    en: "tourism", tr: "turizm", es: "turismo", zh: "旅游", hi: "पर्यटन",
+    fr: "tourisme", ar: "السياحة", bn: "পর্যটন", ru: "туризм", pt: "turismo",
+    it: "turismo", bg: "туризъм", hr: "turizam", cs: "turistická cesta", da: "turisme",
+    nl: "toerisme", et: "turism", fi: "matkailu", de: "Tourismus", el: "τουρισμός",
+    hu: "turizmus", ga: "turasóireacht", lv: "tūrisms", lt: "turizmas", mt: "turiżmu",
+    pl: "turystyka", ro: "turism", sk: "turistika", sl: "turizem", sv: "turism"
+  });
+  const unrelatedNigeriaResult = [{
+    title: "Adoption Information: Nigeria",
+    url: "https://www.uscis.gov/adoption/country-information/adoption-information-nigeria",
+    excerpt: "An unrelated USCIS adoption passage about Nigeria."
+  }];
+
+  for (const code of Object.keys(SUPPORTED_AI_LANGUAGES)) {
+    const goal = naturalTourismGoals[code];
+    assert.ok(goal, `${code} needs a natural tourism goal`);
+    const context = `Goal: ${goal}`;
+    const reviewUrls = officialReviewUrlsForQuestion(
+      "No, I am only a citizen of Nigeria.",
+      context,
+      code
+    );
+    assert.ok(reviewUrls.some(url => new URL(url).hostname.endsWith("state.gov")), code);
+
+    const fallback = buildLocalFallback(
+      "No, I am only a citizen of Nigeria.",
+      code,
+      unrelatedNigeriaResult,
+      false,
+      reviewUrls.length > 0
+    );
+    assert.equal(fallback.grounded_on, "official_research_unavailable", code);
+    assert.deepEqual(fallback.sources, [], code);
+    assert.doesNotMatch(fallback.output_text, /Adoption Information|adoption passage/i, code);
+  }
+});
+
+test("routes the fixed four-turn visitor conversation in all 30 languages", () => {
+  assert.deepEqual(
+    new Set(CASEPILOT_VISITOR_LANGUAGE_CODES),
+    new Set(Object.keys(SUPPORTED_AI_LANGUAGES))
+  );
+
+  for (const [code, scenario] of Object.entries(CASEPILOT_VISITOR_LANGUAGE_CASES)) {
+    assert.equal(scenario.statements.length, 4, code);
+    const reviewUrls = officialReviewUrlsForQuestion(
+      scenario.statements.at(-1),
+      scenario.context.join("\n"),
+      code
+    );
+    assert.ok(
+      reviewUrls.some(url => new URL(url).hostname.endsWith("state.gov")),
+      `${code} must retain visitor routing on the final citizenship correction`
     );
   }
 });

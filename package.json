@@ -20,6 +20,7 @@
     "test:localization": "node --test tests/localization.test.mjs",
     "test:privacy": "node --test tests/privacy-consent.test.mjs",
     "eval:casepilot": "node --env-file-if-exists=.env ./scripts/evaluate-casepilot.mjs",
+    "eval:casepilot:visitor": "node --env-file-if-exists=.env --env-file-if-exists=.env.local ./scripts/generate-casepilot-visitor-translations.mjs",
     "test:casepilot-live": "node --test tests/casepilot-live-acceptance.test.mjs",
     "uscis:plan": "node ./scripts/scrape-uscis.mjs --dry-run",
     "uscis:scrape": "node ./scripts/scrape-uscis.mjs",
