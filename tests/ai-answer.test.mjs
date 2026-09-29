@@ -2824,6 +2824,50 @@ test("evidence repair cannot bypass runtime safety or introduce an approval guar
   assert.doesNotMatch(JSON.stringify(result.body),/approval is certain|Invalid reviewer approval/);
 });
 
+test("a visitor answer gets one bounded safety rephrase instead of a stochastic empty fallback", async () => {
+  const url="https://travel.state.gov/content/travel/en/News/visas-news/suspension-of-visa-issuance-to-foreign-nationals-to-protect-the-security-of-the-united-states.html";
+  const unsafeText="Your tourist visa approval is certain.";
+  const safeText="You are a Nigerian citizen living in Portugal and this is your first tourist-visa application. The current State Department restriction applies to Nigerian nationals seeking B-1/B-2 visitor visas, subject to the exceptions listed on the official page.";
+  const candidate=completedCitedResponse(unsafeText,{title:"Visa Issuance Suspension",url});
+  let calls=0;
+  const answer=createAnswerService({
+    corpusIndex:index,
+    apiKey:"test-key",
+    sourceFetchImpl:sourceFetchForFixtures({
+      [url]:"Effective January 1, 2026, visa issuance is suspended for nationals of Nigeria in B-1, B-2, and B-1/B-2 classifications, subject to the listed exceptions."
+    }),
+    fetchImpl:async(_requestUrl,options)=>{
+      calls+=1;
+      if(calls===1) return new Response(JSON.stringify(candidate),{status:200});
+      const request=JSON.parse(options.body);
+      if(calls===3) assert.match(request.instructions,/previous reviewed wording was rejected by the final conservative safety check/i);
+      const text=calls===2 ? unsafeText : safeText;
+      return new Response(JSON.stringify({status:"completed",output:[{
+        type:"message",content:[{type:"output_text",text:JSON.stringify({approved:true,outcome:"answered",sections:[{
+          index:0,text,status:"supported",sourceUrls:[url],reason:"The fetched State Department page supports this restriction."
+        }]})}]
+      }]}),{status:200});
+    }
+  });
+
+  const result=await answer({
+    question:"No, I am only a citizen of Nigeria.",
+    conversation:[
+      "User: I am a Nigerian citizen living in Portugal and want to visit the United States.",
+      "User: This is my first U.S. visa application.",
+      "User: The trip is for tourism."
+    ].join("\n"),
+    userContext:"",
+    language:"en"
+  });
+
+  assert.equal(calls,3);
+  assert.equal(result.body.degraded,false);
+  assert.equal(result.body.output_text,safeText);
+  assert.equal(result.body.grounded_on,"live_official_sources");
+  assert.equal(Object.hasOwn(result.body,"safety_failures"),false);
+});
+
 test("identifier examples are repaired before they can poison the next conversation turn", async () => {
   const url="https://www.uscis.gov/tools/checking-your-case-status-online";
   const candidate=completedCitedResponse("To check the progress of your application, open USCIS Case Status Online and enter your receipt number, for example IOE1234567890, on that official website. Do not send your number in this chat.",{url});

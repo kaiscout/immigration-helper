@@ -3138,6 +3138,38 @@ export function createAnswerService({
             runtimeSafety = {pass: false, failures: [...runtimeSafety.failures, "sensitive_identifier_in_output"]};
           }
           citationFailure = false;
+
+          const retryableProfessionalSafetyFailure =
+            visitorResearchRequired &&
+            runtimeSafety.failures.length > 0 &&
+            runtimeSafety.failures.every(code => [
+              "lawyer_impersonation_or_guarantee",
+              "localized_lawyer_impersonation_or_guarantee"
+            ].includes(code));
+          if (retryableProfessionalSafetyFailure) {
+            const repaired = await reviewOfficialEvidence({
+              apiKey, model, question, userFacts: suppliedUserFacts, conversation, language: language.code, corpusIndex,
+              referenceResults: localResults,
+              researchUrls: officialReviewUrls,
+              candidateWebSources,
+              safetyRepairFailures: runtimeSafety.failures,
+              sections: answerSections, timeoutMs: 118_000 - (Date.now() - requestStartedAt), fetchImpl, sourceFetchImpl
+            });
+            if (repaired) {
+              reviewedOutcome = repaired.outcome;
+              answerSections = repaired.sections.map(section => ({
+                ...section,
+                text: extractOutputText({output_text: section.text})
+              }));
+              outputText = answerSections.map(section => section.text).join("\n\n");
+              runtimeSafety = evaluateCasePilotRuntimeSafety({
+                language: language.code, outputText, question
+              });
+              if (containsSensitiveIdentifier(privacyScanText(outputText, publicAgencyEmails))) {
+                runtimeSafety = {pass: false, failures: [...runtimeSafety.failures, "sensitive_identifier_in_output"]};
+              }
+            }
+          }
         }
       }
       if (!openAIResponse.ok || !outputText || incompleteResponse || citationFailure || !runtimeSafety.pass) {

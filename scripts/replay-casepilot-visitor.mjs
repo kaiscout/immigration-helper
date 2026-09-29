@@ -1,4 +1,4 @@
-import { createAnswerService } from "../server/ai/answer.mjs";
+import { createAnswerService, extractOutputText } from "../server/ai/answer.mjs";
 import { createCorpusIndex, loadCorpus } from "../server/uscis/search.mjs";
 
 if (!process.env.OPENAI_API_KEY) {
@@ -21,7 +21,8 @@ const tracedModelFetch = async (...args) => {
     phase: upstreamCall === 1 ? "generation" : "evidence_review",
     httpStatus: response.status,
     responseStatus: data.status,
-    error: data.error ? {type: data.error.type, code: data.error.code} : undefined
+    error: data.error ? {type: data.error.type, code: data.error.code} : undefined,
+    outputText: extractOutputText(data)
   }, null, 2));
   return response;
 };
@@ -30,19 +31,16 @@ const answerQuestion = createAnswerService({
   corpusIndex: createCorpusIndex(loadCorpus()),
   apiKey: process.env.OPENAI_API_KEY,
   model: process.env.OPENAI_MODEL || "gpt-5.6-sol",
+  vectorStoreId: process.env.USCIS_VECTOR_STORE_ID || "",
   fetchImpl: tracedModelFetch,
   sourceFetchImpl: fetch
 });
 
 const result = await answerQuestion({
   question: userStatements.at(-1),
-  conversation: userStatements.map((statement) => `User: ${statement}`).join("\n"),
-  userContext: [
-    "Citizenship: Nigeria (no other citizenship)",
-    "Current residence: Portugal",
-    "Goal: temporary U.S. visit for tourism",
-    "First U.S. visa application"
-  ].join("\n"),
+  conversation: userStatements.slice(0, -1)
+    .map((statement) => `User: ${statement}`).join("\n"),
+  userContext: "",
   checklistContext: "",
   language: "en"
 });
