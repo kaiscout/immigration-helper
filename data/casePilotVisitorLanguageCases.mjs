@@ -217,3 +217,23 @@ export const CASEPILOT_VISITOR_LANGUAGE_CASES = Object.freeze(Object.fromEntries
 ));
 
 export const CASEPILOT_VISITOR_LANGUAGE_CODES = Object.freeze(Object.keys(cases));
+
+const normalizedFactText = (value) => String(value || "")
+  .normalize("NFKD")
+  .replace(/\p{M}/gu, "")
+  .toLocaleLowerCase();
+
+export function casePilotAnswerIncludesAnyFact(answer, tokens) {
+  const normalizedAnswer = normalizedFactText(answer);
+  return (tokens || []).some(token => {
+    const normalizedToken = normalizedFactText(token);
+    if (normalizedToken && normalizedAnswer.includes(normalizedToken)) return true;
+    // Country names are inflected in many supported languages. Match a stable
+    // five-letter stem from the longest meaningful word without weakening the
+    // short-token checks used for Chinese and other scripts.
+    const words = normalizedToken.match(/\p{L}+/gu) || [];
+    const longest = words.sort((a,b) => [...b].length - [...a].length)[0] || "";
+    const stem = [...longest].slice(0, 5).join("");
+    return [...longest].length >= 6 && normalizedAnswer.includes(stem);
+  });
+}

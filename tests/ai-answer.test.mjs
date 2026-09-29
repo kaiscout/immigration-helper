@@ -32,7 +32,8 @@ import { createCorpusIndex } from "../server/uscis/search.mjs";
 import { shouldCountCasePilotQuestion } from "../data/casePilotResponse.js";
 import {
   CASEPILOT_VISITOR_LANGUAGE_CASES,
-  CASEPILOT_VISITOR_LANGUAGE_CODES
+  CASEPILOT_VISITOR_LANGUAGE_CODES,
+  casePilotAnswerIncludesAnyFact
 } from "../data/casePilotVisitorLanguageCases.mjs";
 
 const records = [{
@@ -3688,6 +3689,21 @@ test("routes the fixed four-turn visitor conversation in all 30 languages", () =
       `${code} must retain visitor routing on the final citizenship correction`
     );
   }
+});
+
+test("visitor audit recognizes accented and inflected country names", () => {
+  assert.equal(casePilotAnswerIncludesAnyFact(
+    "Vous êtes uniquement citoyen nigérian et vous vivez au Portugal.",
+    ["Nigeria"]
+  ), true);
+  assert.equal(casePilotAnswerIncludesAnyFact(
+    "Você tem cidadania nigeriana e vive em Portugal.",
+    ["Nigéria"]
+  ), true);
+  assert.equal(casePilotAnswerIncludesAnyFact(
+    "Вы гражданин Нигерии и живёте в Португалии.",
+    ["Нигерия", "Португалия"]
+  ), true);
 });
 
 test("gives non-English users the same conversational contract and agency access", async () => {

@@ -3,7 +3,10 @@ import path from "node:path";
 
 import { casePilotResponseLanguageMismatch } from "../data/casePilotLanguageGate.mjs";
 import { evaluateCasePilotRuntimeSafety } from "../data/casePilotReleaseGate.mjs";
-import { CASEPILOT_VISITOR_LANGUAGE_CASES } from "../data/casePilotVisitorLanguageCases.mjs";
+import {
+  CASEPILOT_VISITOR_LANGUAGE_CASES,
+  casePilotAnswerIncludesAnyFact
+} from "../data/casePilotVisitorLanguageCases.mjs";
 
 const allCodes = [
   "en", "tr", "es", "zh", "hi", "fr", "ar", "bn", "ru", "pt",
@@ -114,21 +117,6 @@ const clientToken = process.env.EXPO_PUBLIC_AI_CLIENT_TOKEN || process.env.CASEP
   process.env.AI_PROXY_CLIENT_TOKEN;
 if (!endpoint || !clientToken) throw new Error("The production CasePilot endpoint and client token are required.");
 
-const normalized = (value) => String(value || "").normalize("NFKC").toLocaleLowerCase();
-const includesAny = (answer, tokens) => {
-  const normalizedAnswer = normalized(answer);
-  return tokens.some(token => {
-    const normalizedToken = normalized(token);
-    if (normalizedToken && normalizedAnswer.includes(normalizedToken)) return true;
-    // Country names are inflected in many supported languages. Match a stable
-    // five-letter stem from the longest meaningful word without weakening the
-    // short-token checks used for Chinese and other scripts.
-    const words = normalizedToken.match(/\p{L}+/gu) || [];
-    const longest = words.sort((a,b) => [...b].length - [...a].length)[0] || "";
-    const stem = [...longest].slice(0, 5).join("");
-    return [...longest].length >= 6 && normalizedAnswer.includes(stem);
-  });
-};
 const restrictionPath = "/suspension-of-visa-issuance-to-foreign-nationals-to-protect-the-security-of-the-united-states.html";
 
 const runCase = async (code) => {
@@ -166,9 +154,9 @@ const runCase = async (code) => {
       requestedLanguage: !casePilotResponseLanguageMismatch(code, answer),
       runtimeSafe: runtimeSafety.pass,
       substantive: [...answer].length >= 180,
-      nigeriaPreserved: includesAny(answer, fixture.nigeriaTokens),
-      portugalPreserved: includesAny(answer, fixture.portugalTokens),
-      visitorGoalPreserved: includesAny(answer, fixture.visitorTokens) || /B-?1\s*\/\s*B-?2|B-?2/iu.test(answer),
+      nigeriaPreserved: casePilotAnswerIncludesAnyFact(answer, fixture.nigeriaTokens),
+      portugalPreserved: casePilotAnswerIncludesAnyFact(answer, fixture.portugalTokens),
+      visitorGoalPreserved: casePilotAnswerIncludesAnyFact(answer, fixture.visitorTokens) || /B-?1\s*\/\s*B-?2|B-?2/iu.test(answer),
       controllingSource: sources.some(source => {
         try {
           const url = new URL(source?.url || "");
