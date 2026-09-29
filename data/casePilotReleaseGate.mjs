@@ -533,9 +533,10 @@ const termOccurrences = (text, terms, { wordBoundaries = false } = {}) => {
     // (of approval), which appears in ordinary prospective process guidance.
     const exactWord = wordBoundaries || normalizedTerm === normalize("آلياً") ||
       normalizedTerm === "bestemt" || normalizedTerm === normalize("apstiprinās") ||
-      // Hindi तय (decided/certain) must not match inside सत्यापित
-      // (verified) after Unicode mark normalization.
-      normalizedTerm === normalize("तय") ||
+      // Hindi certainty words must stay whole words: तय must not match inside
+      // सत्यापित (verified), and निश्चित must not match inside सुनिश्चित
+      // (make sure) after Unicode mark normalization.
+      normalizedTerm === normalize("तय") || normalizedTerm === normalize("निश्चित") ||
       // Portuguese singular certainty adjectives must not match ordinary
       // plural quantifiers such as certas relações or certos trabalhadores.
       normalizedTerm === "certa" || normalizedTerm === "certo";
