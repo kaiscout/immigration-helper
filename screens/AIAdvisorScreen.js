@@ -52,6 +52,11 @@ const euSupportTerms = (section, key) =>
 
 const CONFIGURED_AI_PROXY_URL = (process.env.EXPO_PUBLIC_AI_PROXY_URL || "").trim();
 const AI_PROXY_CLIENT_TOKEN = (process.env.EXPO_PUBLIC_AI_CLIENT_TOKEN || "").trim();
+const CASEPILOT_TEST_TRACE_SESSION = (
+  typeof __DEV__ !== "undefined" && __DEV__
+    ? process.env.EXPO_PUBLIC_CASEPILOT_TEST_TRACE_SESSION || ""
+    : ""
+).trim();
 const OFFICIAL_IMMIGRATION_DOMAINS = [
   "uscis.gov",
   "state.gov",
@@ -80,6 +85,18 @@ const developmentProxyUrl = () => {
 const AI_PROXY_URL = CONFIGURED_AI_PROXY_URL || developmentProxyUrl();
 const openEndedAiConfigured = Boolean(AI_PROXY_URL && AI_PROXY_CLIENT_TOKEN);
 const AI_REQUEST_TIMEOUT_MS = 125_000;
+const logCasePilotTestExchange = ({ question, answer, language, sources }) => {
+  if (!CASEPILOT_TEST_TRACE_SESSION) return;
+  const sensitive = containsSensitiveIdentifier(question) || containsSensitiveIdentifier(answer);
+  console.info("CASEPILOT_TEST_CLIENT_TRACE", JSON.stringify({
+    session: CASEPILOT_TEST_TRACE_SESSION,
+    recordedAt: new Date().toISOString(),
+    language,
+    question: sensitive ? "[omitted: sensitive identifier detected]" : question,
+    answer: sensitive ? "[omitted: sensitive identifier detected]" : answer,
+    sources: sensitive ? [] : sources.map(({ title, url }) => ({ title, url }))
+  }));
+};
 const LOADING_STAGE_KEYS = [
   "ai.loadingSources",
   "ai.loadingOfficial",
@@ -815,7 +832,10 @@ export default function AIAdvisorScreen({ navigation }) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-Immigration-Helper-Token": AI_PROXY_CLIENT_TOKEN
+          "X-Immigration-Helper-Token": AI_PROXY_CLIENT_TOKEN,
+          ...(CASEPILOT_TEST_TRACE_SESSION ? {
+            "X-CasePilot-Test-Session": CASEPILOT_TEST_TRACE_SESSION
+          } : {})
         },
         body: JSON.stringify({
           question,
@@ -834,6 +854,13 @@ export default function AIAdvisorScreen({ navigation }) {
       const sources = responseSources(data);
       const sections = responseSections(data);
       const followups = responseFollowups(data, t);
+
+      logCasePilotTestExchange({
+        question,
+        answer,
+        language: i18n.language,
+        sources
+      });
 
       if (!isPlus && shouldCountCasePilotQuestion(data)) {
         setAiUsage(await recordCasePilotQuestionSafely(recordAiQuestion, aiUsage));

@@ -533,6 +533,10 @@ const termOccurrences = (text, terms, { wordBoundaries = false } = {}) => {
     // (of approval), which appears in ordinary prospective process guidance.
     const exactWord = wordBoundaries || normalizedTerm === normalize("آلياً") ||
       normalizedTerm === "bestemt" || normalizedTerm === normalize("apstiprinās") ||
+      // Maltese approva is past tense (approved) as a complete word, but it is
+      // also a substring of japprova/tapprova (will/does approve). A generic
+      // future process explanation must not be mistaken for a completed case.
+      normalizedTerm === "approva" ||
       // Hindi certainty words must stay whole words: तय must not match inside
       // सत्यापित (verified), and निश्चित must not match inside सुनिश्चित
       // (make sure) after Unicode mark normalization.

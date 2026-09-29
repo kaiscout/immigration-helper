@@ -1,6 +1,7 @@
 import http from "node:http";
 import { timingSafeEqual } from "node:crypto";
 import { createAnswerService, SUPPORTED_AI_LANGUAGES } from "./ai/answer.mjs";
+import { createCasePilotTestTracer } from "./ai/test-trace.mjs";
 import { createCorpusIndex, loadCorpus } from "./uscis/search.mjs";
 import SERVER_VERSION from "./version.cjs";
 
@@ -16,6 +17,7 @@ const CLIENT_TOKEN = (
 ).trim();
 const REQUIRE_AI_GENERATION = process.env.REQUIRE_AI_GENERATION === "true";
 const REQUIRE_CLIENT_TOKEN = process.env.REQUIRE_CLIENT_TOKEN !== "false";
+const CASEPILOT_TEST_TRACE_SESSION = (process.env.CASEPILOT_TEST_TRACE_SESSION || "").trim();
 const MAX_BODY_BYTES = 64 * 1024;
 const RATE_WINDOW_MS = 10 * 60 * 1000;
 const RATE_LIMIT = 30;
@@ -39,10 +41,13 @@ const answerQuestion = createAnswerService({
   model: OPENAI_MODEL,
   vectorStoreId: VECTOR_STORE_ID
 });
+const testTracer = createCasePilotTestTracer({
+  expectedSession: CASEPILOT_TEST_TRACE_SESSION
+});
 
 function corsHeaders() {
   return {
-    "Access-Control-Allow-Headers": "Content-Type, X-Immigration-Helper-Token",
+    "Access-Control-Allow-Headers": "Content-Type, X-Immigration-Helper-Token, X-CasePilot-Test-Session",
     "Access-Control-Allow-Methods": "POST,OPTIONS",
     "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
     "Cache-Control": "no-store",
@@ -124,6 +129,7 @@ const server = http.createServer(async (request, response) => {
       model: OPENAI_MODEL,
       serverVersion: SERVER_VERSION,
       supportedLanguages: Object.keys(SUPPORTED_AI_LANGUAGES).length,
+      testTraceConfigured: testTracer.configured,
       vectorStoreConfigured: Boolean(VECTOR_STORE_ID)
     });
     return;
@@ -151,9 +157,11 @@ const server = http.createServer(async (request, response) => {
     return;
   }
 
+  let payload;
   try {
-    const payload = await readJson(request);
+    payload = await readJson(request);
     const result = await answerQuestion(payload);
+    testTracer.record({ headers: request.headers, payload, result });
     sendJson(response, result.status, result.body);
   } catch (error) {
     if (error.message === "REQUEST_TOO_LARGE") {
@@ -165,6 +173,11 @@ const server = http.createServer(async (request, response) => {
       return;
     }
     console.error("AI request failed:", error?.message || error);
+    testTracer.record({
+      headers: request.headers,
+      payload,
+      result: { status: 500, body: { degraded: true, degraded_reason: "server_error" } }
+    });
     sendJson(response, 500, { error: { message: "The AI service could not answer right now." } });
   }
 });

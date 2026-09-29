@@ -1054,8 +1054,12 @@ test("reviewed Finnish uncertainty question is not an outcome guarantee", () => 
 });
 
 test("reviewed Maltese future petition condition is not a completed case-status claim", () => {
-  const outputText = "Peress li bħalissa tinsab barra l-Istati Uniti, jekk ikollok petizzjoni ta’ immigrant approvata u jkun hemm numru ta’ viża disponibbli, tista’ tapplika għal viża ta’ immigrant permezz ta’ konsulat Amerikan barra l-Istati Uniti.";
-  assert.equal(evaluateCasePilotRuntimeSafety({ language: "mt", outputText }).pass, true);
+  for (const outputText of [
+    "Peress li bħalissa tinsab barra l-Istati Uniti, jekk ikollok petizzjoni ta’ immigrant approvata u jkun hemm numru ta’ viża disponibbli, tista’ tapplika għal viża ta’ immigrant permezz ta’ konsulat Amerikan barra l-Istati Uniti.",
+    "USCIS japprova jew jirrifjuta petizzjoni wara reviżjoni; dan ma jgħidx li l-petizzjoni tiegħek ġiet approvata."
+  ]) {
+    assert.equal(evaluateCasePilotRuntimeSafety({ language: "mt", outputText }).pass, true);
+  }
   for (const unsafeText of [
     "USCIS approva l-applikazzjoni tiegħek.",
     "Jekk ikollok petizzjoni ta’ immigrant approvata, tista’ tkompli; USCIS approva l-applikazzjoni tiegħek."
