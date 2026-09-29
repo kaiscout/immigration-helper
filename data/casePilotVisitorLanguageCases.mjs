@@ -185,33 +185,34 @@ const cases = {
 };
 
 const factTokens = {
-  en: ["Nigeria", "Portugal", "tourism"], tr: ["Nijerya", "Portekiz", "turizm"],
-  es: ["Nigeria", "Portugal", "turismo"], zh: ["尼日利亚", "葡萄牙", "旅游"],
-  hi: ["नाइजीरिया", "पुर्तगाल", "पर्यटन"], fr: ["Nigeria", "Portugal", "touris"],
-  ar: ["نيجير", "البرتغال", "السياح"], bn: ["নাইজেরিয়া", "পর্তুগাল", "পর্যটন"],
-  ru: ["Нигерия", "Португалия", "туризм"], pt: ["Nigéria", "Portugal", "turismo"],
-  it: ["Nigeria", "Portogallo", "turismo"], bg: ["Нигерия", "Португалия", "туризъм"],
-  hr: ["Nigerija", "Portugal", "turistič"], cs: ["Nigérie", "Portugalsko", "turist"],
-  da: ["Nigeria", "Portugal", "turis"], nl: ["Nigeria", "Portugal", "toeris"],
-  et: ["Nigeeria", "Portugal", "turism"], fi: ["Nigeria", "Portugal", "matkail"],
-  de: ["Nigeria", "Portugal", "Touris"], el: ["Νιγηρία", "Πορτογαλία", "τουρισ"],
-  hu: ["Nigéria", "Portugália", "turizmus"], ga: ["Nigéir", "Phortaingéil", "turasóireacht"],
-  lv: ["Nigērija", "Portugāle", "tūris"], lt: ["Nigerija", "Portugalija", "turizmas"],
-  mt: ["Niġerja", "Portugall", "turiżmu"], pl: ["Nigeria", "Portugalia", "turyst"],
-  ro: ["Nigeria", "Portugalia", "turism"], sk: ["Nigéria", "Portugalsko", "turist"],
-  sl: ["Nigerija", "Portugalska", "turiz"], sv: ["Nigeria", "Portugal", "turis"]
+  en: ["Nigeria", "Portugal", "tourism", "first"], tr: ["Nijerya", "Portekiz", "turizm", "ilk"],
+  es: ["Nigeria", "Portugal", "turismo", "primer"], zh: ["尼日利亚", "葡萄牙", "旅游", "第一次"],
+  hi: ["नाइजीरिया", "पुर्तगाल", "पर्यटन", "पहली"], fr: ["Nigeria", "Portugal", "touris", "premi"],
+  ar: ["نيجير", "البرتغال", "السياح", "أول"], bn: ["নাইজেরিয়া", "পর্তুগাল", "পর্যটন", "প্রথম"],
+  ru: ["Нигерия", "Португалия", "туризм", "перв"], pt: ["Nigéria", "Portugal", "turismo", "primeir"],
+  it: ["Nigeria", "Portogallo", "turismo", "prim"], bg: ["Нигерия", "Португалия", "туризъм", "първ"],
+  hr: ["Nigerija", "Portugal", "turistič", "prv"], cs: ["Nigérie", "Portugalsko", "turist", "prvn"],
+  da: ["Nigeria", "Portugal", "turis", "første"], nl: ["Nigeria", "Portugal", "toeris", "eerste"],
+  et: ["Nigeeria", "Portugal", "turism", "esimene"], fi: ["Nigeria", "Portugal", "matkail", "ensimmä"],
+  de: ["Nigeria", "Portugal", "Touris", "erst"], el: ["Νιγηρία", "Πορτογαλία", "τουρισ", "πρώτ"],
+  hu: ["Nigéria", "Portugália", "turizmus", "első"], ga: ["Nigéir", "Phortaingéil", "turasóireacht", "chéad"],
+  lv: ["Nigērija", "Portugāle", "tūris", "pirma"], lt: ["Nigerija", "Portugalija", "turizmas", "pirm"],
+  mt: ["Niġerja", "Portugall", "turiżmu", "ewwel"], pl: ["Nigeria", "Portugalia", "turyst", "pierwsz"],
+  ro: ["Nigeria", "Portugalia", "turism", "prim"], sk: ["Nigéria", "Portugalsko", "turist", "prv"],
+  sl: ["Nigerija", "Portugalska", "turiz", "prv"], sv: ["Nigeria", "Portugal", "turis", "första"]
 };
 
 export const CASEPILOT_VISITOR_LANGUAGE_CASES = Object.freeze(Object.fromEntries(
   Object.entries(cases).map(([code, statements]) => {
-    const [nigeria, portugal, visitor] = factTokens[code];
+    const [nigeria, portugal, visitor, firstApplication] = factTokens[code];
     return [code, Object.freeze({
       code,
       statements: Object.freeze([...statements]),
       context: Object.freeze(statements.slice(0, 3)),
       nigeriaTokens: Object.freeze([nigeria]),
       portugalTokens: Object.freeze([portugal]),
-      visitorTokens: Object.freeze([visitor])
+      visitorTokens: Object.freeze([visitor]),
+      firstApplicationTokens: Object.freeze([firstApplication])
     })];
   })
 ));

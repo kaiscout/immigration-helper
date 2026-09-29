@@ -30,13 +30,14 @@ if (shouldGenerateFixtures && !process.env.OPENAI_API_KEY) {
 const entrySchema = {
   type: "object",
   additionalProperties: false,
-  required: ["statements", "context", "nigeriaTokens", "portugalTokens", "visitorTokens"],
+  required: ["statements", "context", "nigeriaTokens", "portugalTokens", "visitorTokens", "firstApplicationTokens"],
   properties: {
     statements: {type:"array",minItems:4,maxItems:4,items:{type:"string"}},
     context: {type:"array",minItems:4,maxItems:4,items:{type:"string"}},
     nigeriaTokens: {type:"array",minItems:1,maxItems:4,items:{type:"string"}},
     portugalTokens: {type:"array",minItems:1,maxItems:4,items:{type:"string"}},
-    visitorTokens: {type:"array",minItems:1,maxItems:6,items:{type:"string"}}
+    visitorTokens: {type:"array",minItems:1,maxItems:6,items:{type:"string"}},
+    firstApplicationTokens: {type:"array",minItems:1,maxItems:4,items:{type:"string"}}
   }
 };
 
@@ -60,7 +61,7 @@ const response = await fetch("https://api.openai.com/v1/responses", {
         properties:Object.fromEntries(allCodes.map(code => [code,entrySchema]))
       }
     }},
-    instructions: "You create natural multilingual test fixtures. Translate meaning faithfully; never add legal guidance or answer the questions. Use each requested language's normal script and conversational grammar. Keep U.S. visa names such as B-1/B-2 untranslated only when normal. Token arrays must include short native-script words or inflected forms likely to appear in an answer for Nigeria/Nigerian, Portugal/Portuguese residence, and tourism/visitor visa.",
+    instructions: "You create natural multilingual test fixtures. Translate meaning faithfully; never add legal guidance or answer the questions. Use each requested language's normal script and conversational grammar. Keep U.S. visa names such as B-1/B-2 untranslated only when normal. Token arrays must include short native-script words or inflected forms likely to appear in an answer for Nigeria/Nigerian, Portugal/Portuguese residence, tourism/visitor visa, and a first visa application.",
     input: JSON.stringify({
       languages:allCodes,
       statements:[
@@ -161,6 +162,7 @@ const runCase = async (code) => {
       nigeriaPreserved: casePilotAnswerIncludesAnyFact(answer, fixture.nigeriaTokens),
       portugalPreserved: casePilotAnswerIncludesAnyFact(answer, fixture.portugalTokens),
       visitorGoalPreserved: casePilotAnswerIncludesAnyFact(answer, fixture.visitorTokens) || /B-?1\s*\/\s*B-?2|B-?2/iu.test(answer),
+      firstApplicationPreserved: casePilotAnswerIncludesAnyFact(answer, fixture.firstApplicationTokens),
       controllingSource: sources.some(source => {
         try {
           const url = new URL(source?.url || "");

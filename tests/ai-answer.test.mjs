@@ -2840,6 +2840,7 @@ test("a visitor answer gets one bounded safety rephrase instead of a stochastic 
       calls+=1;
       if(calls===1) return new Response(JSON.stringify(candidate),{status:200});
       const request=JSON.parse(options.body);
+      if(calls===2) assert.match(request.instructions,/For this active visitor-visa follow-up/);
       if(calls===3) assert.match(request.instructions,/previous reviewed wording was rejected by the final conservative safety check/i);
       const text=calls===2 ? unsafeText : safeText;
       return new Response(JSON.stringify({status:"completed",output:[{
@@ -3790,6 +3791,7 @@ test("a terse citizenship correction keeps the visitor route from conversation h
   assert.deepEqual(result.body.sources, []);
   assert.doesNotMatch(result.body.output_text, /civics|naturalization|N-400/i);
   assert.ok(upstreamRequests.length >= 1);
+  assert.match(upstreamRequests[0].instructions, /Visitor-visa follow-up contract/);
   assert.equal(upstreamRequests[0].tool_choice, "required");
   assert.deepEqual(
     upstreamRequests[0].tools[0].filters.allowed_domains,

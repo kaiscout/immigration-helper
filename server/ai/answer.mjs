@@ -376,6 +376,17 @@ Case-planning contract for this request:
 - For an initial broad question, aim for 150-250 words and at most three relevant branches, three brief next actions, and one focused question. Use equivalent natural length and detail in every requested language, not an English word count imposed on another writing system. Detailed follow-ups may be longer when needed to answer the actual question accurately. Do not front-load detailed category rules, numeric thresholds, form lists, or filing procedures before the person's basis is known. An intake question is a conversation starter, not a survey of every category.
 `;
 
+const VISITOR_RESPONSE_CONTRACT = `
+
+Visitor-visa follow-up contract for this request:
+- Answer the newest user statement directly while preserving their citizenship, current residence, tourism/visit goal, and first-application status when those facts appear in recent user turns.
+- Lead with any verified current nationality-based restriction that changes the ordinary visitor-visa path. Explain the practical effect on this person's facts in plain language.
+- If the user says they have only one citizenship, address whether the dual-national exception remains available. If they also say this is their first U.S. visa application, address whether the valid-visa-on-the-effective-date protection fits their facts.
+- Give one clear immediate next step. Do not leave the user with policy text but no practical direction.
+- Do not introduce visa bonds, reciprocity schedules, fees, form steps, or unrelated categories unless the current question asks about them or they are necessary to the immediate next step.
+- Do not recite routine DS-160 steps as though they solve the problem when a verified issuance suspension controls the route.
+`;
+
 function normalizeForRouting(value) {
   return String(value || "")
     .toLowerCase()
@@ -3070,9 +3081,10 @@ export function createAnswerService({
         "Optional saved checklist context (ignore unless the user asks about it or it directly changes the requested answer)";
       const openAIResponse = await fetchOpenAI({
         model,
-        instructions: planningQuestion
-          ? `${SYSTEM_PROMPT}${PLANNING_RESPONSE_CONTRACT}`
-          : SYSTEM_PROMPT,
+        instructions:
+          `${SYSTEM_PROMPT}` +
+          (planningQuestion ? PLANNING_RESPONSE_CONTRACT : "") +
+          (visitorResearchRequired ? VISITOR_RESPONSE_CONTRACT : ""),
         input:
           `Requested response language: ${language.name} (${language.code}).\n` +
           `Write the entire user-facing answer in ${language.name}, translating English source material naturally when needed.\n\n` +
@@ -3122,6 +3134,7 @@ export function createAnswerService({
           referenceResults: localResults,
           researchUrls: officialReviewUrls,
           candidateWebSources,
+          visitorFocused: visitorResearchRequired,
           sections: answerSections, timeoutMs: 118_000 - (Date.now() - requestStartedAt), fetchImpl, sourceFetchImpl
         });
         if (reviewed) {
@@ -3152,6 +3165,7 @@ export function createAnswerService({
               referenceResults: localResults,
               researchUrls: officialReviewUrls,
               candidateWebSources,
+              visitorFocused: visitorResearchRequired,
               safetyRepairFailures: runtimeSafety.failures,
               sections: answerSections, timeoutMs: 118_000 - (Date.now() - requestStartedAt), fetchImpl, sourceFetchImpl
             });
