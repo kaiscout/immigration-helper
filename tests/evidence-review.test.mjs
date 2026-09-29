@@ -235,19 +235,105 @@ test("no-evidence review can approve a genuine greeting but constrains URLs and 
   assert.deepEqual(sectionSchema(body).status.enum,["non_factual","unsupported"]);
 });
 
-test("unsupported factual approval is rejected even if the model invents a completed web search", async () => {
+test("unresolved official candidate requires an independent domain-filtered web review", async () => {
   let body;
   const result=await reviewOfficialEvidence({
     apiKey:"test",model:"test",question:"What are visa categories?",language:"en",sections,timeoutMs:30_000,
+    researchUrls:[url],
     fetchImpl:async(_target,options)=>{
       body=JSON.parse(options.body);
       return new Response(JSON.stringify(fixture()),{status:200});
     }
   });
+  assert.equal(result.sections[0].evidence.status,"supported");
+  assert.deepEqual(result.sections[0].evidence.sourceBasis,[{url,basis:"review_web"}]);
+  assert.deepEqual(body.tools,[{
+    type:"web_search",filters:{allowed_domains:["cbp.gov"]},search_context_size:"medium"
+  }]);
+  assert.equal(body.tool_choice,"required");
+  assert.deepEqual(body.include,["web_search_call.action.sources"]);
+  assert.deepEqual(sectionSchema(body).sourceUrls.items.enum,[url]);
+  const input=JSON.parse(body.input);
+  assert.deepEqual(input.independentReviewUrls,[url]);
+  assert.deepEqual(input.availablePassageSourceUrls,[url]);
+  assert.match(body.instructions,/MUST independently search the allowed official domains/);
+  assert.match(body.instructions,/perform a separate open_page action on that exact page/);
+});
+
+test("independent web review rejects a verdict whose exact page was not returned by search", async () => {
+  const unrelated="https://www.cbp.gov/travel";
+  const result=await reviewOfficialEvidence({
+    apiKey:"test",model:"test",question:"What are visa categories?",language:"en",sections,timeoutMs:30_000,
+    researchUrls:[url],
+    fetchImpl:async()=>{
+      const data=fixture();
+      data.output[0].action.sources=[{url:unrelated,title:"Travel"}];
+      return new Response(JSON.stringify(data),{status:200});
+    }
+  });
   assert.equal(result,null);
-  assertNoReviewTools(body);
-  assert.deepEqual(sectionSchema(body).sourceUrls,{type:"array",items:{type:"string"},maxItems:0});
-  assert.deepEqual(sectionSchema(body).status.enum,["non_factual","unsupported"]);
+});
+
+test("independent web review accepts an exact official page that the reviewer opened", async () => {
+  const result=await reviewOfficialEvidence({
+    apiKey:"test",model:"test",question:"What are visa categories?",language:"en",sections,timeoutMs:30_000,
+    researchUrls:[url],
+    fetchImpl:async()=>{
+      const data=fixture();
+      data.output[0].action={type:"open_page",url:`${url}?utm_source=review`};
+      return new Response(JSON.stringify(data),{status:200});
+    }
+  });
+  assert.equal(result.sections[0].evidence.status,"supported");
+  assert.deepEqual(result.sections[0].evidence.sourceBasis,[{url,basis:"review_web"}]);
+});
+
+test("independent search can corroborate an exact page returned by the generation search", async () => {
+  const result=await reviewOfficialEvidence({
+    apiKey:"test",model:"test",question:"What are visa categories?",language:"en",sections,timeoutMs:30_000,
+    researchUrls:[url],candidateWebSources:[{url,title:"Visa categories"}],
+    fetchImpl:async()=>{
+      const data=fixture();
+      data.output[0].action={type:"search",queries:["site:cbp.gov visa categories"]};
+      return new Response(JSON.stringify(data),{status:200});
+    }
+  });
+  assert.equal(result.sections[0].evidence.status,"supported");
+  assert.deepEqual(result.sections[0].evidence.sourceBasis,[{url,basis:"review_web"}]);
+});
+
+test("review drops an unverified detail while retaining independently verified guidance", () => {
+  const unverifiedUrl="https://www.uscis.gov/green-card";
+  const candidate=[
+    sections[0],
+    {text:"An unrelated fee is due today.",sources:[{url:unverifiedUrl,title:"Green Card"}]}
+  ];
+  const data=fixture({sections:[
+    {index:0,status:"supported",sourceUrls:[url],reason:"The exact page was independently opened."},
+    {index:1,status:"supported",sourceUrls:[unverifiedUrl],reason:"This page was not independently returned or opened."}
+  ]});
+  const result=applyEvidenceReview(data,candidate,{reviewedWebSources:[{url,title:"Visa categories"}]});
+  assert.equal(result.outcome,"answered");
+  assert.equal(result.sections.length,1);
+  assert.equal(result.sections[0].text,sections[0].text);
+  assert.deepEqual(result.sections[0].evidence.sourceBasis,[{url,basis:"review_web"}]);
+});
+
+test("review removes an orphaned nonfactual heading when its detail is unverified", () => {
+  const unverifiedUrl="https://www.uscis.gov/green-card";
+  const candidate=[
+    sections[0],
+    {text:"Your practical next steps are:",sources:[]},
+    {text:"Pay an unrelated fee today.",sources:[{url:unverifiedUrl,title:"Green Card"}]}
+  ];
+  const data=fixture({sections:[
+    {index:0,status:"supported",sourceUrls:[url],reason:"The exact page was independently opened."},
+    {index:1,status:"non_factual",sourceUrls:[],reason:"Organizational heading only."},
+    {index:2,status:"supported",sourceUrls:[unverifiedUrl],reason:"This page was not independently returned or opened."}
+  ]});
+  const result=applyEvidenceReview(data,candidate,{reviewedWebSources:[{url,title:"Visa categories"}]});
+  assert.equal(result.sections.length,1);
+  assert.equal(result.sections[0].text,sections[0].text);
 });
 
 test("fetched or cached evidence for a different page cannot authorize an unseen source", () => {

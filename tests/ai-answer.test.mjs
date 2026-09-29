@@ -436,6 +436,25 @@ test("local corpus fallback uses Italian framing", () => {
   assert.match(result.output_text, /passaggio USCIS è in inglese/i);
 });
 
+test("visitor research failure never falls back to a nationality-matched USCIS biography", () => {
+  const biography = [{
+    title:"A Nigerian American biography",
+    url:"https://www.uscis.gov/citizenship-resource-center/learn-about-citizenship/outstanding-americans-by-choice/example",
+    excerpt:"A person born in Nigeria later moved to the United States."
+  }];
+  const result=buildLocalFallback(
+    "No, I am only a citizen of Nigeria.",
+    "en",
+    biography,
+    false,
+    true
+  );
+  assert.equal(result.grounded_on,"official_research_unavailable");
+  assert.deepEqual(result.sources,[]);
+  assert.doesNotMatch(result.output_text,/biography|born in Nigeria|closest official USCIS guidance/i);
+  assert.match(result.output_text,/official-source research|official sources/i);
+});
+
 test("recognizes broad relocation planning and rewrites retrieval around plausible permanent routes", () => {
   assert.equal(isImmigrationPlanningQuestion(planningQuestion), true);
   assert.equal(isImmigrationPlanningQuestion("How do I change my address with USCIS?"), false);

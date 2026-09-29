@@ -75,6 +75,7 @@ Evidence rules:
 - Prefer the retrieved USCIS passages when they are genuinely relevant. Ignore passages that do not answer the user's question.
 - Use the agency that actually governs the issue: USCIS for immigration benefits, the Department of State for visas and consular processing, CBP for admission and I-94 matters, EOIR/DOJ for immigration court, and DOL for labor-certification matters.
 - For visitor-visa questions from outside the United States, explain that the Department of State and the relevant U.S. embassy or consulate are the proper starting points, then provide useful official next steps.
+- When a current nationality-based restriction materially limits the route the user asked about, lead with that fact in plain language, explain its practical effect and only verified exceptions, and then give the most useful available next step. Do not bury a supported restriction under a generic application checklist or repeated uncertainty statements.
 - Use live official web search when facts may have changed, cached passages are incomplete, or another agency governs the issue.
 - If the sources do not establish an answer, explain what could not be verified and tell the user exactly what to check on their notice or official page.
 
@@ -919,6 +920,15 @@ const LOCALIZED_PLANNING_FOLLOWUPS = Object.freeze([
   Object.freeze({ id: "official" })
 ]);
 
+const STATE_VISITOR_REVIEW_URLS = Object.freeze([
+  "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html",
+  "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/forms/ds-160-online-nonimmigrant-visa-application.html",
+  "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees/fees-visa-services.html",
+  "https://travel.state.gov/content/travel/en/News/visas-news/suspension-of-visa-issuance-to-foreign-nationals-to-protect-the-security-of-the-united-states.html",
+  "https://travel.state.gov/content/travel/en/News/visas-news/countries-subject-to-visa-bonds.html",
+  "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees/visa-issuing-posts.html"
+]);
+
 export function planningFollowUpsForQuestion(question, {
   force = false,
   language = "en",
@@ -1262,6 +1272,14 @@ function annotationBelongsToRange(annotation, range) {
 
   return start < range.end && (Number.isFinite(end) ? end > range.start : start >= range.start);
 }
+
+const officialReviewUrlsForQuestion = (question, userFacts, language = "en") => {
+  const combined = `${userFacts || ""}\n${question || ""}`;
+  const normalized = normalizeForRouting(combined);
+  const visitorQuestion = [...VISITOR_VISA_TERMS, ...VISITOR_ONLY_TERMS]
+    .some((term) => planningTermOccurrences(normalized, term).length > 0);
+  return visitorQuestion ? [...STATE_VISITOR_REVIEW_URLS] : [];
+};
 
 const SECTION_HEADING = Symbol("casePilotSectionHeading");
 
@@ -2028,7 +2046,13 @@ function usefulSentences(result, question, limit = 3) {
   return sentences.length ? sentences : [String(result.excerpt || "").replace(/\s+/g, " ").slice(0, 900)];
 }
 
-export function buildLocalFallback(question, language, results, planningOverride = false) {
+export function buildLocalFallback(
+  question,
+  language,
+  results,
+  planningOverride = false,
+  officialResearchRequired = false
+) {
   const code = normalizeLanguage(language);
   const copy = LOCAL_COPY[code] || LOCAL_COPY.en;
   const planningQuestion = planningOverride || isImmigrationPlanningQuestion(question, code);
@@ -2039,14 +2063,14 @@ export function buildLocalFallback(question, language, results, planningOverride
     sourceResults.slice(0, planningQuestion ? 6 : 1).map(({ title, url }) => ({ title, url }))
   );
 
-  if (planningQuestion) {
+  if (planningQuestion || officialResearchRequired) {
     const outputText = PLANNING_LANGUAGE_SUPPORT[code]?.fallback ||
       PLANNING_LANGUAGE_SUPPORT.en.fallback;
     return {
       output_text: outputText,
-      sources,
-      sections: [{ text: outputText, sources }],
-      grounded_on: "planning_research_unavailable",
+      sources: planningQuestion ? sources : [],
+      sections: [{ text: outputText, sources: planningQuestion ? sources : [] }],
+      grounded_on: planningQuestion ? "planning_research_unavailable" : "official_research_unavailable",
       degraded: true
     };
   }
@@ -2917,6 +2941,11 @@ export function createAnswerService({
       isImmigrationPlanningQuestion(question, language.code) ||
       isPlanningContinuation(question, suppliedUserFacts, language.code);
     const planningContext = `${suppliedUserFacts}\nCurrent user statement: ${question}`.trim();
+    const officialReviewUrls = officialReviewUrlsForQuestion(
+      question,
+      suppliedUserFacts,
+      language.code
+    );
     const localResults = retrieveLocalResults(
       corpusIndex,
       question,
@@ -2930,7 +2959,8 @@ export function createAnswerService({
       question,
       language.code,
       localResults,
-      planningQuestion
+      planningQuestion,
+      officialReviewUrls.length > 0
     );
     const metadataContext = {
       question,
@@ -3020,6 +3050,11 @@ export function createAnswerService({
       }, { planningAttempt: planningQuestion, deadline: requestStartedAt + 65_000 });
 
       const data = await openAIResponse.json();
+      const candidateWebSources = (Array.isArray(data?.output) ? data.output : [])
+        .filter(item => item?.type === "web_search_call" && item?.status === "completed" &&
+          item?.action?.type === "search" && Array.isArray(item.action.sources))
+        .flatMap(item => item.action.sources)
+        .filter(source => typeof source?.url === "string");
       let outputText = extractOutputText(data);
       let answerSections = extractAnswerSections(data);
       const incompleteResponse = isIncompleteResponse(data);
@@ -3035,6 +3070,8 @@ export function createAnswerService({
         const reviewed = await reviewOfficialEvidence({
           apiKey, model, question, userFacts: suppliedUserFacts, conversation, language: language.code, corpusIndex,
           referenceResults: localResults,
+          researchUrls: officialReviewUrls,
+          candidateWebSources,
           sections: answerSections, timeoutMs: 118_000 - (Date.now() - requestStartedAt), fetchImpl, sourceFetchImpl
         });
         if (reviewed) {
@@ -3086,7 +3123,7 @@ export function createAnswerService({
       );
       const evidenceReviewed = answerSections.some(section => section.evidence?.method === "official_source_review");
       const reviewedLiveEvidence = answerSections.some(section =>
-        section.evidence?.sourceBasis?.some(source => source.basis === "live")
+        section.evidence?.sourceBasis?.some(source => ["live", "review_web"].includes(source.basis))
       );
       const sources = evidenceReviewed
         ? sectionSources
