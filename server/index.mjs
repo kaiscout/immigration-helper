@@ -17,7 +17,13 @@ const CLIENT_TOKEN = (
 ).trim();
 const REQUIRE_AI_GENERATION = process.env.REQUIRE_AI_GENERATION === "true";
 const REQUIRE_CLIENT_TOKEN = process.env.REQUIRE_CLIENT_TOKEN !== "false";
-const CASEPILOT_TEST_TRACE_SESSION = (process.env.CASEPILOT_TEST_TRACE_SESSION || "").trim();
+// Temporary review-session default. The App Store/EAS environment does not
+// include the matching client header, so ordinary user traffic is never traced.
+// Remove this default together with the preview Plus switch before submission.
+const CASEPILOT_TEST_TRACE_SESSION = (
+  process.env.CASEPILOT_TEST_TRACE_SESSION ||
+  "casepilot-review-52f1d56f-6dbc-49d2-9d37-f8c1b77ed9e9"
+).trim();
 const MAX_BODY_BYTES = 64 * 1024;
 const RATE_WINDOW_MS = 10 * 60 * 1000;
 const RATE_LIMIT = 30;
