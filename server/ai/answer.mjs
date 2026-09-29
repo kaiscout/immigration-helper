@@ -64,7 +64,7 @@ Professional response standard for every request:
 - In a personal planning answer, briefly acknowledge the user's stated citizenship, current residence, and goal in a separate conversational paragraph. Those are user facts, not legal claims requiring outside proof; keep that acknowledgment when explaining conditional options.
 - Treat the current message as the newest and most authoritative user statement. If it corrects an earlier fact, use the correction and do not blend the old and new versions.
 - Separate what the official sources establish from what remains fact-dependent or unknown. Give conditional guidance where appropriate instead of guessing eligibility or presenting possibilities as conclusions.
-- Give useful guidance before asking for more information. When one missing fact materially changes the answer, finish with one focused, conversational question rather than an intake questionnaire.
+- Give useful guidance before asking for more information. When one missing fact materially changes the answer, finish with one focused, conversational question rather than an intake questionnaire. If you offer examples in that question, leave room for another basis or none of those circumstances; do not imply that the examples exhaust the person's options.
 - Never substitute saved checklist progress for the current question. Mention checklist data only when the user asks about it or it directly changes the requested next step.
 - This chat is informational and read-only. Never claim to file forms, change saved checklist items or dates, access a USCIS case account, or make a purchase. Explain the next step and direct the user to the relevant dedicated app screen or official workflow.
 - For a wholly unrelated topic, acknowledge your U.S. immigration focus naturally and ask what immigration question the user needs help with. Do not force an unrelated question into a visa category or invent a USCIS connection.
@@ -364,7 +364,7 @@ Case-planning contract for this request:
 - End with a section containing exactly three concrete next actions, prioritized for this person.
 - Then ask exactly one high-value follow-up question that most efficiently narrows the plausible route.
 - Keep the result sophisticated but human and concise: explain the reasoning and tradeoffs in plain language, not as a legal memo.
-- For an initial broad question, aim for 250-400 words and at most three relevant branches. Do not front-load detailed category rules, numeric thresholds, form lists, or filing procedures before the person's basis is known. An intake question is a conversation starter, not a survey of every category.
+- For an initial broad question, aim for 150-250 words and at most three relevant branches, three brief next actions, and one focused question. Use equivalent natural length and detail in every requested language, not an English word count imposed on another writing system. Detailed follow-ups may be longer when needed to answer the actual question accurately. Do not front-load detailed category rules, numeric thresholds, form lists, or filing procedures before the person's basis is known. An intake question is a conversation starter, not a survey of every category.
 `;
 
 function normalizeForRouting(value) {
@@ -3030,6 +3030,7 @@ export function createAnswerService({
       // Every generated reply gets one independent evidence review/repair,
       // including nonfactual conversation. Never serve solely on URL keywords.
       let citationFailure = true;
+      let reviewedOutcome;
       if (openAIResponse.ok && outputText && !incompleteResponse) {
         const reviewed = await reviewOfficialEvidence({
           apiKey, model, question, userFacts: suppliedUserFacts, conversation, language: language.code, corpusIndex,
@@ -3037,7 +3038,8 @@ export function createAnswerService({
           sections: answerSections, timeoutMs: 118_000 - (Date.now() - requestStartedAt), fetchImpl, sourceFetchImpl
         });
         if (reviewed) {
-          answerSections = reviewed.map(section => ({
+          reviewedOutcome = reviewed.outcome;
+          answerSections = reviewed.sections.map(section => ({
             ...section,
             text: extractOutputText({output_text: section.text})
           }));
@@ -3097,10 +3099,12 @@ export function createAnswerService({
         sections: answerSections.length
           ? answerSections
           : [{ text: outputText, sources: uniqueSources(sources) }],
-        grounded_on: evidenceReviewed
+        grounded_on: reviewedOutcome === "unavailable" ? "verification_unavailable" : evidenceReviewed
           ? (reviewedLiveEvidence ? "live_official_sources" : (sectionSources.length ? "local_uscis_corpus" : "conversation"))
           : (sectionSources.length || webSources.length ? "live_official_sources" : "local_uscis_corpus"),
-        degraded: false
+        answer_outcome: reviewedOutcome,
+        degraded: reviewedOutcome === "unavailable",
+        ...(reviewedOutcome === "unavailable" ? {degraded_reason: "verification_unavailable"} : {})
       }, metadataContext);
       writeCachedAnswer(answerCache, cacheKey, body);
       return { status: 200, body };

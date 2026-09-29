@@ -57,7 +57,9 @@ const LATIN_LANGUAGE_MARKERS = Object.freeze(Object.fromEntries(
     hu: "ön önnek az egy hogy számára kell lehet azonban vagy ha nélkül szerint ezt ettől amely",
     ga: "tú do bhur an na le chun agus ach nó má gan de réir féidir ba chóir braitheann sé fianaise bhfianaise",
     lv: "jūs jūsu tas tā šo šī par ar var vajag bet vai ja bez saskaņā kas ir",
-    lt: "jūs jūsų tai šis ši dėl su gali reikia tačiau arba jei be pagal kuris yra esu gyvenu noriu nuo pradėti",
+    // Shared conjunctions/prepositions must not count as uniquely Latvian or
+    // Italian evidence against otherwise fluent Lithuanian prose.
+    lt: "jūs jūsų tai šis ši dėl su gali reikia tačiau arba jei be pagal kuris yra esu gyvenu noriu nuo pradėti ir ar per",
     mt: "inti tiegħek dan din għal ma jista għandek iżda jew jekk mingħajr skont li huwa jien ngħix irrid rrid minn fejn nitlaq nistabbilixxi ruħi nagħmel jiddependi mill provi",
     pl: "pan pani państwa twój twoja jest są dla który która może trzeba należy ale lub jeśli bez według oraz jestem mieszkam chcę czego zacząć",
     ro: "dumneavoastră dvs acest această pentru cu poate trebuie însă sau dacă fără potrivit care este sunt",

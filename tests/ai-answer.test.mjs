@@ -28,6 +28,7 @@ import {
   SUPPORTED_AI_LANGUAGES
 } from "../server/ai/answer.mjs";
 import { createCorpusIndex } from "../server/uscis/search.mjs";
+import { shouldCountCasePilotQuestion } from "../data/casePilotResponse.js";
 
 const records = [{
   url: "https://www.uscis.gov/addresschange",
@@ -46,6 +47,20 @@ const records = [{
 }];
 
 const index = createCorpusIndex(records);
+const caseStatusIndex = createCorpusIndex([...records, {
+  url: "https://www.uscis.gov/tools/checking-your-case-status-online",
+  title: "Checking Your Case Status Online",
+  chunks: ["USCIS Case Status Online lets you check the latest action on your case using your receipt number. Enter the receipt number privately on the official USCIS website."]
+}]);
+
+// Explicit synthetic page text for integration fixtures, never an external
+// request or automatic approval of every URL the candidate happens to cite.
+function sourceFetchForFixtures(pages) {
+  return async url => new Response(pages[url] || "", {
+    status: Object.hasOwn(pages,url) ? 200 : 404,
+    headers: {"Content-Type":"text/plain"}
+  });
+}
 
 const planningQuestion =
   "I am an Italian citizen living in Portugal and I want to move to the USA. Where do I start and what do I need to do?";
@@ -370,8 +385,7 @@ function withVerifiedFixtureReview(data, options) {
   if (request.text?.format?.name !== "official_evidence_review") return data;
   const sections=extractAnswerSections(data);
   return {status:"completed",output:[
-    {type:"web_search_call",status:"completed",action:{type:"search",sources:sections.flatMap(section=>section.sources)}},
-    {type:"message",content:[{type:"output_text",text:JSON.stringify({approved:true,sections:sections.map((section,index)=>({
+    {type:"message",content:[{type:"output_text",text:JSON.stringify({approved:true,outcome:"answered",sections:sections.map((section,index)=>({
       index,text:section.text,status:section.sources.length ? "supported" : "non_factual",
       sourceUrls:section.sources.map(source=>source.url),reason:"This test fixture has separately verified support."
     }))})}]}
@@ -1206,7 +1220,9 @@ test("configures the exact Italian and Portugal scenario for researched personal
   assert.match(requestBody.instructions, /temporary nonimmigrant options from permanent/i);
   assert.match(requestBody.instructions, /exactly three concrete next actions/i);
   assert.match(requestBody.instructions, /exactly one high-value follow-up question/i);
-  assert.match(requestBody.instructions, /aim for 250-400 words and at most three relevant branches/);
+  assert.match(requestBody.instructions, /aim for 150-250 words and at most three relevant branches/);
+  assert.match(requestBody.instructions, /Detailed follow-ups may be longer/);
+  assert.match(requestBody.instructions, /leave room for another basis or none of those circumstances/);
   assert.deepEqual(requestBody.reasoning, { effort: "low" });
   assert.deepEqual(requestBody.text, { verbosity: "medium" });
   assert.equal(requestBody.max_output_tokens, 4_800);
@@ -2293,6 +2309,9 @@ test("serves a correctly cited CBP I-94 answer without degrading it", async () =
   const answer = createAnswerService({
     corpusIndex: index,
     apiKey: "test-key",
+    sourceFetchImpl: sourceFetchForFixtures({
+      "https://www.cbp.gov/travel/international-visitors/i-94": "Travelers can retrieve their official Form I-94 admission record through the CBP website."
+    }),
     fetchImpl: async (_url,options) => new Response(JSON.stringify(withVerifiedFixtureReview(completedCitedResponse(
       "CBP lets travelers retrieve their official Form I-94 admission record.",
       {
@@ -2698,12 +2717,11 @@ test("one evidence repair replaces an unsupported candidate with checked convers
   const checkedUrl="https://www.uscis.gov/tools/checking-your-case-status-online";
   const repairedText="Check your case status using USCIS Case Status Online. Enter your receipt number privately on that official website, not here.";
   let calls=0;
-  const answer=createAnswerService({corpusIndex:index,apiKey:"test-key",fetchImpl:async()=>{
+  const answer=createAnswerService({corpusIndex:caseStatusIndex,apiKey:"test-key",fetchImpl:async()=>{
     calls+=1;
     return new Response(JSON.stringify(calls===1 ? candidate : {
       status:"completed",output:[
-        {type:"web_search_call",status:"completed",action:{type:"search",sources:[{url:checkedUrl,title:"Checking Your Case Status Online"}]}},
-        {type:"message",content:[{type:"output_text",text:JSON.stringify({approved:true,sections:[{
+        {type:"message",content:[{type:"output_text",text:JSON.stringify({approved:true,outcome:"answered",sections:[{
           index:0,text:repairedText,status:"supported",sourceUrls:[checkedUrl],reason:"The checked page describes the case-status tool and using a receipt number."
         }]})}]}
       ]
@@ -2715,7 +2733,7 @@ test("one evidence repair replaces an unsupported candidate with checked convers
   assert.equal(result.body.output_text,repairedText);
   assert.equal(result.body.sections[0].text,repairedText);
   assert.equal(result.body.sources[0].url,checkedUrl);
-  assert.equal(result.body.grounded_on,"live_official_sources");
+  assert.equal(result.body.grounded_on,"local_uscis_corpus");
   assert.doesNotMatch(result.body.output_text,/online tool to check case progress/);
 });
 
@@ -2724,7 +2742,7 @@ test("an unsafe generated draft may be repaired but only the safe reviewed text 
   const candidate=completedCitedResponse("Your immigration approval is certain.",{url});
   const safeText="You can check the latest action on your case using USCIS Case Status Online.";
   let calls=0;
-  const answer=createAnswerService({corpusIndex:index,apiKey:"test-key",fetchImpl:async(_url,options)=>{
+  const answer=createAnswerService({corpusIndex:caseStatusIndex,apiKey:"test-key",fetchImpl:async(_url,options)=>{
     calls+=1;
     const request=JSON.parse(options.body);
     const data=request.text?.format
@@ -2763,12 +2781,11 @@ test("evidence repair cannot bypass runtime safety or introduce an approval guar
   });
   const checkedUrl="https://www.uscis.gov/tools/checking-your-case-status-online";
   let calls=0;
-  const answer=createAnswerService({corpusIndex:index,apiKey:"test-key",fetchImpl:async()=>{
+  const answer=createAnswerService({corpusIndex:caseStatusIndex,apiKey:"test-key",fetchImpl:async()=>{
     calls+=1;
     return new Response(JSON.stringify(calls===1 ? candidate : {
       status:"completed",output:[
-        {type:"web_search_call",status:"completed",action:{type:"open_page",url:checkedUrl}},
-        {type:"message",content:[{type:"output_text",text:JSON.stringify({approved:true,sections:[{
+        {type:"message",content:[{type:"output_text",text:JSON.stringify({approved:true,outcome:"answered",sections:[{
           index:0,text:"Your immigration approval is certain.",status:"supported",sourceUrls:[checkedUrl],reason:"Invalid reviewer approval."
         }]})}]}
       ]
@@ -2787,7 +2804,7 @@ test("identifier examples are repaired before they can poison the next conversat
   const candidate=completedCitedResponse("To check the progress of your application, open USCIS Case Status Online and enter your receipt number, for example IOE1234567890, on that official website. Do not send your number in this chat.",{url});
   const safeText="Use your receipt number privately on USCIS Case Status Online; do not send it here.";
   let calls=0;
-  const answer=createAnswerService({corpusIndex:index,apiKey:"test-key",fetchImpl:async(_url,options)=>{
+  const answer=createAnswerService({corpusIndex:caseStatusIndex,apiKey:"test-key",fetchImpl:async(_url,options)=>{
     calls+=1;
     const request=JSON.parse(options.body);
     if (!request.text?.format) return new Response(JSON.stringify(candidate),{status:200});
@@ -2806,7 +2823,7 @@ test("identifier examples are repaired before they can poison the next conversat
 test("an allegedly supported reply with an identifier example still fails final output privacy", async () => {
   const url="https://www.uscis.gov/tools/checking-your-case-status-online";
   const candidate=completedCitedResponse("To check the progress of your application, open USCIS Case Status Online and enter your receipt number, for example IOE1234567890, on that official website. Do not send your number in this chat.",{url});
-  const answer=createAnswerService({corpusIndex:index,apiKey:"test-key",fetchImpl:async(_url,options)=>
+  const answer=createAnswerService({corpusIndex:caseStatusIndex,apiKey:"test-key",fetchImpl:async(_url,options)=>
     new Response(JSON.stringify(withVerifiedFixtureReview(candidate,options)),{status:200})
   });
   const result=await answer({question:"How do I check my USCIS case status?",language:"en"});
@@ -2844,7 +2861,7 @@ test("independently reviewed conversational replies do not inherit unrelated res
   const answer=createAnswerService({corpusIndex:index,apiKey:"test-key",fetchImpl:async()=>{
     calls+=1;
     return new Response(JSON.stringify(calls===1 ? candidate : {
-      status:"completed",output:[{type:"message",content:[{type:"output_text",text:JSON.stringify({approved:true,sections:[{
+      status:"completed",output:[{type:"message",content:[{type:"output_text",text:JSON.stringify({approved:true,outcome:"clarification",sections:[{
         index:0,text,status:"non_factual",sourceUrls:[],reason:"Only a greeting and an offer to help, without legal assertions."
       }]})}]}]
     }),{status:200});
@@ -2855,6 +2872,40 @@ test("independently reviewed conversational replies do not inherit unrelated res
   assert.equal(result.body.output_text,text);
   assert.deepEqual(result.body.sources,[]);
   assert.equal(result.body.grounded_on,"conversation");
+  assert.equal(result.body.answer_outcome,"clarification");
+  assert.equal(shouldCountCasePilotQuestion(result.body),true);
+});
+
+test("verification-unavailable wording stays degraded, uncached, and does not consume a free question", async () => {
+  const text="I could not verify which consular office currently handles your situation from the available official information, so I cannot confirm the location.";
+  const candidate=completedCitedResponse(text);
+  candidate.output[0].content[0].annotations=[];
+  let calls=0;
+  const answer=createAnswerService({corpusIndex:createCorpusIndex([]),apiKey:"test-key",fetchImpl:async(_url,options)=>{
+    calls+=1;
+    const request=JSON.parse(options.body);
+    return new Response(JSON.stringify(request.text?.format ? {
+      status:"completed",output:[{type:"message",content:[{type:"output_text",text:JSON.stringify({
+        approved:true,outcome:"unavailable",sections:[{
+          index:0,text,status:"non_factual",sourceUrls:[],reason:"No current consular source text is available; the response honestly identifies the verification limit without asserting a legal rule."
+        }]
+      })}]}]
+    } : candidate),{status:200});
+  }});
+  const payload={question:"Which consular office currently handles immigrant visas for residents of Portugal?",language:"en"};
+  for (let attempt=0;attempt<2;attempt+=1) {
+    const result=await answer(payload);
+    assert.equal(result.status,200);
+    assert.equal(result.body.output_text,text);
+    assert.equal(result.body.answer_outcome,"unavailable");
+    assert.equal(result.body.degraded,true);
+    assert.equal(result.body.answer_profile.degraded,true);
+    assert.equal(result.body.degraded_reason,"verification_unavailable");
+    assert.equal(result.body.grounded_on,"verification_unavailable");
+    assert.deepEqual(result.body.sources,[]);
+    assert.equal(shouldCountCasePilotQuestion(result.body),false);
+  }
+  assert.equal(calls,4,"unavailable answers must be retried rather than cached as successes");
 });
 
 test("degrades an uncited ordinary answer instead of attaching a guessed source", async () => {
@@ -3258,7 +3309,7 @@ test("retries a transient upstream failure once", async () => {
 
   assert.equal(calls, 3);
   assert.equal(result.body.degraded, false);
-  assert.equal(result.body.grounded_on, "live_official_sources");
+  assert.equal(result.body.grounded_on, "local_uscis_corpus");
 });
 
 test("uses the previous user question only for short follow-up retrieval", () => {
@@ -3476,6 +3527,11 @@ test("supports every app language with an explicit response language", async () 
     const answer = createAnswerService({
       corpusIndex: index,
       apiKey: "test-key",
+      sourceFetchImpl: sourceFetchForFixtures({
+        "https://www.uscis.gov/i-130": "Form I-130 establishes a qualifying family relationship; it is not used to petition an employee. A family petition does not by itself grant permanent residence.",
+        "https://www.uscis.gov/i-140": "Form I-140 is an immigrant petition for an employment-based immigrant worker. Employment sponsorship is distinct from family sponsorship.",
+        "https://www.uscis.gov/working-in-the-united-states/permanent-workers/eb-5-immigrant-investor-program": "EB-5 is an immigrant investor category with investment and job-creation requirements. It is distinct from temporary investment status. Eligibility depends on the applicable requirements and individual circumstances."
+      }),
       fetchImpl: async (_url, options) => {
         requestBody ||= JSON.parse(options.body);
         const response = completedCitedResponse(
@@ -3556,6 +3612,9 @@ test("gives non-English users the same conversational contract and agency access
   const answer = createAnswerService({
     corpusIndex: index,
     apiKey: "test-key",
+    sourceFetchImpl: sourceFetchForFixtures({
+      "https://travel.state.gov/content/travel/en/us-visas/tourism-visit/visitor.html": "Visitor visa applicants should review the instructions for applying at their U.S. embassy or consulate."
+    }),
     fetchImpl: async (_url, options) => {
       requestBody ||= JSON.parse(options.body);
       return new Response(JSON.stringify(withVerifiedFixtureReview(completedCitedResponse(

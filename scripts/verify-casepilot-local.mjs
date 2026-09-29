@@ -16,6 +16,7 @@ if (!scenarios.length || (!requested.has('all') && scenarios.length !== requeste
 }
 const corpusIndex = createCorpusIndex(loadCorpus());
 const requestTrace = new AsyncLocalStorage();
+let billingBlocked = false;
 // Match production: one service and corpus index, not a full startup per turn.
 const answer = createAnswerService({
   corpusIndex,
@@ -24,11 +25,18 @@ const answer = createAnswerService({
   sourceFetchImpl: fetch,
   fetchImpl: async (...args) => {
     const {payload, captures} = requestTrace.getStore();
+    if (billingBlocked) {
+      captures.push({skipped: 'billing_blocked'});
+      throw Object.assign(new Error('Live evaluation stopped: API billing is unavailable.'), {name: 'EvaluationBillingBlocked'});
+    }
     const upstreamStarted = Date.now();
     try {
       const response = await fetch(...args);
       const body = await response.clone().json();
-      captures.push({status: response.status, body, durationMs: Date.now() - upstreamStarted});
+      // Only fixed synthetic requests; never record authorization headers.
+      const request = JSON.parse(args[1].body);
+      captures.push({status: response.status, body, request, durationMs: Date.now() - upstreamStarted});
+      if (body.error?.code === 'credit_balance_exhausted' || body.error?.type === 'insufficient_quota') billingBlocked = true;
       console.log(JSON.stringify({language: payload.language, phase: captures.length === 1 ? 'generation' : 'review', status: response.status, upstreamStatus: body.status, durationMs: Date.now() - upstreamStarted}));
       return response;
     } catch (error) {
@@ -49,11 +57,11 @@ const result = await runCasePilotAcceptance({
     const started = Date.now();
     const response = await requestTrace.run({payload, captures}, () => answer(payload));
     responses.push({payload, response, captures, durationMs: Date.now() - started});
-    fs.writeFileSync(report, JSON.stringify({inProgress: true, responses}, null, 2));
+    fs.writeFileSync(report, JSON.stringify({inProgress: true, billingBlocked, responses}, null, 2));
     console.log(JSON.stringify({language: payload.language, status: response.status, degraded: response.body.degraded, reason: response.body.degraded_reason, elapsedSeconds: (Date.now() - started) / 1000}));
     return new Response(JSON.stringify(response.body), {status: response.status, headers: {'Content-Type': 'application/json'}});
   },
 });
-fs.writeFileSync(report, JSON.stringify({result, responses}, null, 2));
+fs.writeFileSync(report, JSON.stringify({result, billingBlocked, responses}, null, 2));
 console.log(`Synthetic evaluation report: ${report}`);
 if (!result.pass) process.exitCode = 1;
