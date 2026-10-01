@@ -8,6 +8,8 @@ import { OFFICIAL_LINKS } from "../constants/officialLinks";
 import { loadAiConsent, saveAiConsent } from "../data/aiConsent";
 import { scoreExactIntent } from "../data/aiIntent";
 import { buildCasePilotRequestContext } from "../data/casePilotContext";
+import { buildCaseProfileAiContext, hasCaseProfileDetails } from "../data/caseProfileCore.mjs";
+import { loadCaseProfile } from "../data/caseProfile";
 import { normalizeCasePilotFollowups } from "../data/casePilotFollowups";
 import {
   isExplicitSavedChecklistSummary,
@@ -596,6 +598,7 @@ export default function AIAdvisorScreen({ navigation }) {
   const [consentChecklist, setConsentChecklist] = useState(false);
   const [subscription, setSubscription] = useState({ isPlus: false });
   const [aiUsage, setAiUsage] = useState({ count: 0 });
+  const [caseProfile, setCaseProfile] = useState(null);
   const [messages, setMessages] = useState([
     {
       role: "assistant",
@@ -608,23 +611,26 @@ export default function AIAdvisorScreen({ navigation }) {
 
   const loadScreenState = useCallback(async () => {
     try {
-      const [states, consent, plusState, usage] = await Promise.all([
+      const [states, consent, plusState, usage, savedProfile] = await Promise.all([
         loadAllFlowStates(),
         loadAiConsent(),
         loadSubscriptionState(),
-        loadAiUsage()
+        loadAiUsage(),
+        loadCaseProfile()
       ]);
       setFlowStates(states);
       setAiConsent(consent);
       setConsentChecklist(consent?.shareChecklist === true);
       setSubscription(plusState);
       setAiUsage(usage);
+      setCaseProfile(savedProfile);
     } catch {
       setFlowStates({});
       setAiConsent(null);
       setConsentChecklist(false);
       setSubscription({ isPlus: false });
       setAiUsage({ count: 0 });
+      setCaseProfile(null);
       showAlert(t("alerts.loadingErrorTitle"), t("alerts.loadingErrorBody"));
     }
   }, [t]);
@@ -826,6 +832,11 @@ export default function AIAdvisorScreen({ navigation }) {
         conversation: recentConversation,
         userContext
       } = buildCasePilotRequestContext(messages, userMessage);
+      const savedProfileContext = buildCaseProfileAiContext(caseProfile);
+      const combinedUserContext = [
+        savedProfileContext,
+        userContext ? `Current conversation facts (newer than the saved profile):\n${userContext}` : ""
+      ].filter(Boolean).join("\n\n");
 
       const sharedChecklistContext = isPlus && aiConsent?.shareChecklist ? contextText : "";
       const { response, data } = await fetchCasePilotResponse(AI_PROXY_URL, {
@@ -840,7 +851,7 @@ export default function AIAdvisorScreen({ navigation }) {
         body: JSON.stringify({
           question,
           conversation: recentConversation,
-          userContext,
+          userContext: combinedUserContext,
           checklistContext: sharedChecklistContext,
           language: i18n.language
         })
@@ -912,6 +923,10 @@ export default function AIAdvisorScreen({ navigation }) {
           <View style={styles.consentPoint}>
             <Ionicons name="cloud-upload-outline" size={21} color={COLORS.primary} />
             <Text style={styles.consentPointText}>{t("privacy.consentRequiredData")}</Text>
+          </View>
+          <View style={styles.consentPoint}>
+            <Ionicons name="person-circle-outline" size={21} color={COLORS.primary} />
+            <Text style={styles.consentPointText}>{t("profile.aiNote")}</Text>
           </View>
           <View style={styles.consentPoint}>
             <Ionicons name="time-outline" size={21} color={COLORS.primary} />
@@ -989,24 +1004,37 @@ export default function AIAdvisorScreen({ navigation }) {
           </View>
           <Text style={styles.title}>{t("ai.title")}</Text>
           <Text style={styles.subtitle}>{t("ai.subtitle")}</Text>
-          <TouchableOpacity
-            style={styles.plusStatusPill}
-            onPress={() => !isPlus && navigation.navigate("Paywall")}
-            activeOpacity={isPlus ? 1 : 0.8}
-            accessibilityRole="button"
-            accessibilityLabel={isPlus ? t("plus.statusActive") : t("plus.aiLimitLabel", { remaining: freeAiRemaining })}
-          >
-            <Ionicons
-              name={isPlus ? "checkmark-circle-outline" : "sparkles-outline"}
-              size={15}
-              color={COLORS.primaryTextOn}
-            />
-            <Text style={styles.plusStatusText}>
-              {isPlus
-                ? t("plus.statusActive")
-                : t("plus.aiLimitLabel", { remaining: freeAiRemaining })}
-            </Text>
-          </TouchableOpacity>
+          <View style={styles.statusPills}>
+            <TouchableOpacity
+              style={styles.plusStatusPill}
+              onPress={() => !isPlus && navigation.navigate("Paywall")}
+              activeOpacity={isPlus ? 1 : 0.8}
+              accessibilityRole="button"
+              accessibilityLabel={isPlus ? t("plus.statusActive") : t("plus.aiLimitLabel", { remaining: freeAiRemaining })}
+            >
+              <Ionicons
+                name={isPlus ? "checkmark-circle-outline" : "sparkles-outline"}
+                size={15}
+                color={COLORS.primaryTextOn}
+              />
+              <Text style={styles.plusStatusText}>
+                {isPlus
+                  ? t("plus.statusActive")
+                  : t("plus.aiLimitLabel", { remaining: freeAiRemaining })}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.plusStatusPill}
+              onPress={() => navigation.navigate("CaseProfile")}
+              accessibilityRole="button"
+              accessibilityLabel={hasCaseProfileDetails(caseProfile) ? t("profile.ready") : t("profile.add")}
+            >
+              <Ionicons name="person-circle-outline" size={15} color={COLORS.primaryTextOn} />
+              <Text style={styles.plusStatusText}>
+                {hasCaseProfileDetails(caseProfile) ? t("profile.ready") : t("profile.add")}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.guardCard}>
@@ -1326,11 +1354,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    marginTop: SPACING.md,
     paddingVertical: 8,
     paddingHorizontal: 11,
     borderRadius: RADII.pill,
     backgroundColor: "rgba(255,255,255,0.16)"
+  },
+  statusPills: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: SPACING.md
   },
   plusStatusText: {
     color: COLORS.primaryTextOn,

@@ -1,24 +1,15 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTranslation } from "react-i18next";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
 import LanguageDropdown from "../components/LanguageDropdown";
-import { showAlert } from "../data/appAlert";
 
 const ONBOARDING_KEY = "hasSeenOnboarding";
 
 export default function OnboardingScreen({ navigation }) {
   const { t } = useTranslation();
 
-  const finish = async () => {
-    try {
-      await AsyncStorage.setItem(ONBOARDING_KEY, "true");
-      navigation.replace("Home");
-    } catch {
-      showAlert(t("alerts.saveErrorTitle"), t("alerts.saveErrorBody"));
-    }
-  };
+  const finish = () => navigation.replace("CaseProfile", { fromOnboarding: true });
 
   const points = [
     { key: "organize", icon: "checkmark-done-outline", title: t("onboarding.organizeTitle"), body: t("onboarding.organizeBody") },

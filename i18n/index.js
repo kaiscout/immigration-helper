@@ -31,6 +31,7 @@ import ro from "./ro.json";
 import sk from "./sk.json";
 import sl from "./sl.json";
 import sv from "./sv.json";
+import { PROFILE_TRANSLATIONS } from "./profileTranslations";
 
 const resources = {
   en: { translation: en },
@@ -64,6 +65,10 @@ const resources = {
   sl: { translation: sl },
   sv: { translation: sv }
 };
+
+Object.entries(PROFILE_TRANSLATIONS).forEach(([code, profile]) => {
+  if (resources[code]?.translation) resources[code].translation.profile = profile;
+});
 
 const i18n = createInstance();
 

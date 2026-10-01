@@ -19,6 +19,7 @@ import PrivacyScreen from "./screens/PrivacyScreen";
 import PaywallScreen from "./screens/PaywallScreen";
 import FileVaultScreen from "./screens/FileVaultScreen";
 import PlusWorkspaceScreen from "./screens/PlusWorkspaceScreen";
+import CaseProfileScreen from "./screens/CaseProfileScreen";
 import { COLORS } from "./constants/theme";
 import { loadPreferredLanguage } from "./data/languagePreference";
 import LanguageDropdown from "./components/LanguageDropdown";
@@ -134,6 +135,11 @@ export default function App() {
           name="Paywall"
           component={PaywallScreen}
           options={{ title: t("plus.shortTitle") }}
+        />
+        <Stack.Screen
+          name="CaseProfile"
+          component={CaseProfileScreen}
+          options={{ title: t("profile.title") }}
         />
         <Stack.Screen
           name="PlusWorkspace"

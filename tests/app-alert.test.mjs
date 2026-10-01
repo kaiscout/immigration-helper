@@ -81,7 +81,7 @@ test("all app alert callers use the cross-platform helper", async () => {
   const callers = await Promise.all([
     "screens/RemindersScreen.js",
     "screens/PaywallScreen.js",
-    "screens/OnboardingScreen.js",
+    "screens/CaseProfileScreen.js",
     "screens/PrivacyScreen.js",
     "screens/FlowScreen.js",
     "screens/FileVaultScreen.js",

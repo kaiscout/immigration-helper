@@ -157,6 +157,20 @@ export default function PrivacyScreen({ navigation }) {
         ) : null}
 
         <TouchableOpacity
+          style={styles.profileButton}
+          onPress={() => navigation.navigate("CaseProfile")}
+          accessibilityRole="button"
+          accessibilityLabel={t("profile.title")}
+        >
+          <Ionicons name="person-circle-outline" size={20} color={COLORS.primary} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.settingTitle}>{t("profile.title")}</Text>
+            <Text style={styles.settingBody}>{t("profile.localNote")}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={COLORS.subtext} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
           style={styles.controlButton}
           onPress={() => consent ? withdrawConsent() : navigation.navigate("AIAdvisor")}
           accessibilityRole="button"
@@ -271,6 +285,15 @@ const styles = StyleSheet.create({
   },
   settingTitle: { color: COLORS.text, fontWeight: "900" },
   settingBody: { color: COLORS.subtext, fontSize: 12, lineHeight: 17, marginTop: 3 },
+  profileButton: {
+    minHeight: 58,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: SPACING.md,
+    paddingTop: SPACING.md,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border
+  },
   controlButton: {
     minHeight: 46,
     alignItems: "center",

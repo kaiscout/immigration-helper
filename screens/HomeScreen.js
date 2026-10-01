@@ -197,6 +197,15 @@ export default function HomeScreen({ navigation }) {
       <View style={styles.bottomLinks}>
         <TouchableOpacity
           style={styles.bottomLink}
+          onPress={() => navigation.navigate("CaseProfile")}
+          accessibilityRole="button"
+          accessibilityLabel={t("profile.title")}
+        >
+          <Ionicons name="person-circle-outline" size={16} color={COLORS.subtext} />
+          <Text style={styles.bottomLinkText}>{t("profile.title")}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.bottomLink}
           onPress={() => navigation.navigate("Privacy")}
           accessibilityRole="button"
           accessibilityLabel={t("privacy.title")}

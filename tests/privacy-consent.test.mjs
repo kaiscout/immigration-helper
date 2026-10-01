@@ -42,6 +42,14 @@ test("public privacy policy explains File Vault storage, sharing, and deletion",
   assert.match(policy, /Deleting a File Vault item deletes the app's private copy/i);
 });
 
+test("public privacy policy explains optional Case Profile processing and deletion", async () => {
+  const policy = await readProjectFile("docs/privacy-policy.html");
+
+  assert.match(policy, /preferred name, citizenship, country of residence, immigration situation, and immigration goal/i);
+  assert.match(policy, /optional Case Profile details you saved/i);
+  assert.match(policy, /edit or delete the Case Profile/i);
+});
+
 test("subscription paywall exposes privacy and terms links", async () => {
   const [paywall, links] = await Promise.all([
     readProjectFile("screens/PaywallScreen.js"),
