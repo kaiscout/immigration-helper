@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { buildCasePilotRequestContext } from "../data/casePilotContext.js";
+import { CASEPILOT_RELEASE_LANGUAGE_CASES } from "../data/casePilotReleaseGate.mjs";
 
 test("bounds request context and keeps the intake anchor plus newest user correction", () => {
   const messages = Array.from({ length: 30 }, (_, index) => ({
@@ -62,7 +63,7 @@ test("keeps a decisive fact at the end of a long user narrative", () => {
   assert.ok(result.userContext.length <= 12_000);
 });
 
-test("preserves the initial planning statement after more than twelve user turns", () => {
+test("preserves the initial planning statement and all short follow-ups when the character budget allows", () => {
   const history = [
     {
       role: "user",
@@ -81,11 +82,33 @@ test("preserves the initial planning statement after more than twelve user turns
   const result = buildCasePilotRequestContext(history, current);
 
   assert.match(result.userContext, /Italian citizen living in Portugal.*United States/);
-  assert.doesNotMatch(result.userContext, /Follow-up answer 1(?:\D|$)/);
+  assert.match(result.userContext, /Follow-up answer 1(?:\D|$)/);
   assert.match(result.userContext, /Follow-up answer 12/);
   assert.match(result.userContext, /goal is permanent residence/);
   assert.equal(
     result.userContext.split("\n").filter(Boolean).length,
-    12
+    14
   );
+});
+
+test("retains relevant mid-conversation facts across every supported language", () => {
+  for (const { code, planning, facts } of CASEPILOT_RELEASE_LANGUAGE_CASES) {
+    const decisiveFact = `${code}-decisive-fact: I have a U.S. citizen spouse.`;
+    const history = [
+      { role: "user", text: planning },
+      ...Array.from({ length: 10 }, (_, index) => ({ role: "user", text: `${code} short answer ${index + 1}` })),
+      { role: "user", text: decisiveFact },
+      ...Array.from({ length: 16 }, (_, index) => ({ role: "user", text: `${code} newer answer ${index + 1}` }))
+    ];
+
+    const result = buildCasePilotRequestContext(history, {
+      role: "user",
+      text: `${code}-latest-correction: my goal is permanent residence.`
+    });
+
+    for (const fact of facts) assert.match(result.userContext, new RegExp(fact, "iu"), `${code}: intake fact`);
+    assert.match(result.userContext, new RegExp(decisiveFact, "u"), `${code}: mid-conversation fact`);
+    assert.match(result.userContext, new RegExp(`${code}-latest-correction`, "u"), `${code}: latest correction`);
+    assert.ok(result.userContext.length <= 12_000, `${code}: bounded context`);
+  }
 });

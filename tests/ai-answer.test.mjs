@@ -988,6 +988,25 @@ test("retains the newest conversation and user-fact tails for corrections", asyn
   });
   assert.match(requestBodies[1].input, /Newest conversation detail must remain/);
   assert.doesNotMatch(requestBodies[1].input, /OLDEST CONVERSATION MUST BE DROPPED/);
+
+  await answer({
+    question: "What should I focus on next?",
+    language: "en",
+    profileContext: buildCaseProfileAiContext({
+      preferredName: "Alex",
+      citizenships: "Italian",
+      residenceCountry: "Portugal",
+      immigrationGoal: "Permanent residence"
+    }),
+    userContext:
+      `OLDEST LIVE FACT MUST BE DROPPED\n${oversizedMiddle}\n` +
+      "User statement: Correction: I now live in Spain."
+  });
+  assert.match(requestBodies[2].input, /"preferredName":"Alex"/);
+  assert.match(requestBodies[2].input, /"citizenships":"Italian"/);
+  assert.match(requestBodies[2].input, /"currentCountryOfResidence":"Portugal"/);
+  assert.match(requestBodies[2].input, /Correction: I now live in Spain/);
+  assert.doesNotMatch(requestBodies[2].input, /OLDEST LIVE FACT MUST BE DROPPED/);
 });
 
 test("uses planning-specific localized degraded copy in every supported language", () => {
@@ -3349,7 +3368,7 @@ test("continues to scan user-authored conversation text for email addresses", as
   assert.equal(called, false);
 });
 
-test("never shares cached answers when any conversation context is present", async () => {
+test("never shares cached answers when conversation or saved-profile context is present", async () => {
   let calls = 0;
   const answer = createAnswerService({
     corpusIndex: index,
@@ -3373,8 +3392,39 @@ test("never shares cached answers when any conversation context is present", asy
     conversation: "Assistant: You said you currently live in Brazil.",
     language: "en"
   });
+  await answer({
+    question: "How do I change my address with USCIS?",
+    profileContext: buildCaseProfileAiContext({ preferredName: "Alex", residenceCountry: "Italy" }),
+    language: "en"
+  });
+  await answer({
+    question: "How do I change my address with USCIS?",
+    profileContext: buildCaseProfileAiContext({ preferredName: "Sam", residenceCountry: "Brazil" }),
+    language: "en"
+  });
 
-  assert.equal(calls, 4);
+  assert.equal(calls, 8);
+});
+
+test("rejects sensitive identifiers in saved-profile context", async () => {
+  let called = false;
+  const answer = createAnswerService({
+    corpusIndex: index,
+    apiKey: "test-key",
+    fetchImpl: async () => {
+      called = true;
+      return new Response("{}");
+    }
+  });
+  const result = await answer({
+    question: "What should I do next?",
+    profileContext: "Saved Case Profile:\nPassport number: X12345678",
+    language: "en"
+  });
+
+  assert.equal(result.status, 400);
+  assert.equal(result.body.error.code, "sensitive_identifier");
+  assert.equal(called, false);
 });
 
 test("a degraded answer is not cached and a recovered grounded answer is cached", async () => {

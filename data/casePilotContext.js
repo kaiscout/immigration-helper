@@ -1,5 +1,5 @@
 const MESSAGE_MAX_LENGTH = 900;
-const USER_CONTEXT_MESSAGE_LIMIT = 12;
+const USER_CONTEXT_MESSAGE_LIMIT = 48;
 const OMITTED_MIDDLE_MARKER = " … ";
 
 const cleanMessageText = (value, maxLength = MESSAGE_MAX_LENGTH) => {
@@ -43,6 +43,14 @@ function newestLinesWithinBudget(lines, maxCharacters) {
   return selected.join("\n");
 }
 
+function anchorAndNewestLinesWithinBudget(lines, maxCharacters) {
+  if (!lines.length) return "";
+
+  const anchor = lines[0];
+  const recent = newestLinesWithinBudget(lines.slice(1), Math.max(0, maxCharacters - anchor.length - 1));
+  return recent ? `${anchor}\n${recent}` : anchor.slice(0, maxCharacters);
+}
+
 export function buildCasePilotRequestContext(messages, currentUserMessage) {
   const history = Array.isArray(messages) ? messages : [];
   const conversationLines = history
@@ -64,6 +72,6 @@ export function buildCasePilotRequestContext(messages, currentUserMessage) {
 
   return {
     conversation: newestLinesWithinBudget(conversationLines, 8_000),
-    userContext: newestLinesWithinBudget(userLines, 12_000)
+    userContext: anchorAndNewestLinesWithinBudget(userLines, 12_000)
   };
 }

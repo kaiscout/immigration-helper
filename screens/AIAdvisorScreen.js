@@ -833,10 +833,9 @@ export default function AIAdvisorScreen({ navigation }) {
         userContext
       } = buildCasePilotRequestContext(messages, userMessage);
       const savedProfileContext = buildCaseProfileAiContext(caseProfile);
-      const combinedUserContext = [
-        savedProfileContext,
-        userContext ? `Current conversation facts (newer than the saved profile):\n${userContext}` : ""
-      ].filter(Boolean).join("\n\n");
+      const currentUserContext = userContext
+        ? `Current conversation facts (newer than the saved profile):\n${userContext}`
+        : "";
 
       const sharedChecklistContext = isPlus && aiConsent?.shareChecklist ? contextText : "";
       const { response, data } = await fetchCasePilotResponse(AI_PROXY_URL, {
@@ -851,7 +850,8 @@ export default function AIAdvisorScreen({ navigation }) {
         body: JSON.stringify({
           question,
           conversation: recentConversation,
-          userContext: combinedUserContext,
+          profileContext: savedProfileContext,
+          userContext: currentUserContext,
           checklistContext: sharedChecklistContext,
           language: i18n.language
         })

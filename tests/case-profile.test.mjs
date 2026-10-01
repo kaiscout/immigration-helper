@@ -91,7 +91,8 @@ test("onboarding, navigation, privacy, and CasePilot use the optional profile sa
   assert.match(advisor, /loadCaseProfile\(\)/);
   assert.match(advisor, /buildCaseProfileAiContext\(caseProfile\)/);
   assert.match(advisor, /Current conversation facts \(newer than the saved profile\)/);
-  assert.match(advisor, /userContext: combinedUserContext/);
+  assert.match(advisor, /profileContext: savedProfileContext/);
+  assert.match(advisor, /userContext: currentUserContext/);
   assert.match(advisor, /t\("profile\.aiNote"\)/);
   assert.match(home, /navigation\.navigate\("CaseProfile"\)/);
   assert.match(privacy, /navigation\.navigate\("CaseProfile"\)/);

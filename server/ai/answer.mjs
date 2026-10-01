@@ -1471,9 +1471,10 @@ function privacyStatementSequence(value) {
     : userContextStatements(value);
 }
 
-function containsSplitSensitiveIdentifier(question, conversation, userContext) {
+function containsSplitSensitiveIdentifier(question, conversation, profileContext, userContext) {
   const sequences = [
     privacyStatementSequence(conversation),
+    privacyStatementSequence(profileContext),
     privacyStatementSequence(userContext)
   ].filter((sequence) => sequence.length);
 
@@ -3017,9 +3018,12 @@ export function createAnswerService({
       return { status: 400, body: { error: { message: "The question is too long." } } };
     }
     const conversation = String(payload.conversation || "").slice(-12_000);
+    const profileContext = String(payload.profileContext || "").slice(0, 3_000);
     const userContext = String(payload.userContext || "").slice(-12_000);
     const checklistContext = String(payload.checklistContext || "").slice(0, 12_000);
-    const suppliedUserFacts = userContext.trim();
+    const suppliedUserFacts = [profileContext.trim(), userContext.trim()]
+      .filter(Boolean)
+      .join("\n\n");
     // Every payload field is caller-controlled, including apparent role labels.
     // Scan each field independently so unrelated prose cannot bind a date or
     // number in another field. Then make one narrow cross-turn check: a known
@@ -3028,11 +3032,11 @@ export function createAnswerService({
     // public contacts found in trusted official corpus pages (plus the small
     // reviewed registry above) are exempted; a government-looking domain or an
     // "Assistant:" prefix is never a privacy boundary.
-    const privacyFields = [question, conversation, userContext, checklistContext]
+    const privacyFields = [question, conversation, profileContext, userContext, checklistContext]
       .map((value) => privacyScanText(value, publicAgencyEmails));
     if (
       privacyFields.some((value) => containsSensitiveIdentifier(value)) ||
-      containsSplitSensitiveIdentifier(question, conversation, userContext)
+      containsSplitSensitiveIdentifier(question, conversation, profileContext, userContext)
     ) {
       return {
         status: 400,
@@ -3080,6 +3084,7 @@ export function createAnswerService({
       planningContext
     };
     const cacheable =
+      !profileContext.trim() &&
       !userContext.trim() &&
       !checklistContext.trim() &&
       !conversation.trim();
