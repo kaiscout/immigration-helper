@@ -3183,7 +3183,7 @@ export function createAnswerService({
       let reviewedOutcome;
       if (openAIResponse.ok && outputText && !incompleteResponse) {
         const reviewed = await reviewOfficialEvidence({
-          apiKey, model: reviewModel || model, question, userFacts: suppliedUserFacts, conversation, language: language.code, corpusIndex,
+          apiKey, model: planningQuestion || visitorResearchRequired ? model : (reviewModel || model), question, userFacts: suppliedUserFacts, conversation, language: language.code, corpusIndex,
           referenceResults: localResults,
           researchUrls: officialReviewUrls,
           candidateWebSources,
@@ -3215,7 +3215,7 @@ export function createAnswerService({
             ].includes(code));
           if (retryableProfessionalSafetyFailure) {
             const repaired = await reviewOfficialEvidence({
-              apiKey, model: reviewModel || model, question, userFacts: suppliedUserFacts, conversation, language: language.code, corpusIndex,
+              apiKey, model: planningQuestion || visitorResearchRequired ? model : (reviewModel || model), question, userFacts: suppliedUserFacts, conversation, language: language.code, corpusIndex,
               referenceResults: localResults,
               researchUrls: officialReviewUrls,
               candidateWebSources,

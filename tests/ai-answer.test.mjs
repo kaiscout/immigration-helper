@@ -1314,7 +1314,7 @@ test("configures the exact Italian and Portugal scenario for researched personal
   assert.match(requestBody.instructions, /Detailed follow-ups may be longer/);
   assert.match(requestBody.instructions, /leave room for another basis or none of those circumstances/);
   assert.equal(requestBody.model, "gpt-5.4-mini");
-  assert.equal(reviewRequestBody.model, "gpt-5.6-luna");
+  assert.equal(reviewRequestBody.model, "gpt-5.4-mini");
   assert.deepEqual(requestBody.reasoning, { effort: "low" });
   assert.deepEqual(requestBody.text, { verbosity: "low" });
   assert.equal(requestBody.max_output_tokens, 3_200);
@@ -2641,12 +2641,16 @@ test("uses only one upstream attempt within the planning request deadline", asyn
 
 test("sends retrieved USCIS passages to the model and keeps official sources", async () => {
   let requestBody;
+  let reviewRequestBody;
   const answer = createAnswerService({
     corpusIndex: index,
     apiKey: "test-key",
     model: "gpt-5.4-mini",
+    reviewModel: "gpt-5.6-luna",
     fetchImpl: async (_url, options) => {
-      requestBody ||= JSON.parse(options.body);
+      const body = JSON.parse(options.body);
+      if (body.text?.format?.name === "official_evidence_review") reviewRequestBody = body;
+      else requestBody ||= body;
       const response = completedCitedResponse(
         "You can usually update it through your USCIS online account.",
         {
@@ -2691,6 +2695,7 @@ test("sends retrieved USCIS passages to the model and keeps official sources", a
   assert.deepEqual(requestBody.prompt_cache_options, { mode: "implicit", ttl: "30m" });
   assert.equal(requestBody.tools[0].search_context_size, "low");
   assert.equal(requestBody.store, false);
+  assert.equal(reviewRequestBody.model, "gpt-5.6-luna");
   assert.deepEqual(requestBody.tools[0].filters.allowed_domains, OFFICIAL_IMMIGRATION_DOMAINS);
   assert.equal(result.body.output_text, "You can usually update it through your USCIS online account.");
   assert.equal(result.body.sources.length, 1);
