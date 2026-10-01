@@ -2963,6 +2963,7 @@ export function createAnswerService({
   corpusIndex,
   apiKey = "",
   model = "gpt-5.6-sol",
+  reviewModel = model,
   vectorStoreId = "",
   fetchImpl = fetch,
   // Inject separately in instrumented live runs; a mocked model fetch must not
@@ -2970,6 +2971,10 @@ export function createAnswerService({
   sourceFetchImpl = fetchImpl === fetch ? fetch : null
 }) {
   const answerCache = new Map();
+  // Reuse very recent official page text across nearby questions. Five minutes
+  // is short enough for current guidance and avoids repeated network delay and
+  // bandwidth when a conversation stays on the same route.
+  const officialPageCache = new Map();
   const publicAgencyEmails = trustedPublicAgencyEmails(corpusIndex);
 
   const fetchOpenAI = async (body, { planningAttempt = false, deadline } = {}) => {
@@ -3152,9 +3157,10 @@ export function createAnswerService({
           "web_search_call.action.sources",
           ...(vectorStoreId ? ["file_search_call.results"] : [])
         ],
-        reasoning: { effort: "low" },
-        text: { verbosity: "medium" },
-        max_output_tokens: planningQuestion ? 4_800 : 1_800,
+        reasoning: { effort: planningQuestion ? "low" : "none" },
+        text: { verbosity: "low" },
+        max_output_tokens: planningQuestion ? 3_200 : 1_600,
+        prompt_cache_options: { mode: "implicit", ttl: "30m" },
         store: false
       }, { planningAttempt: planningQuestion, deadline: requestStartedAt + 65_000 });
 
@@ -3177,12 +3183,13 @@ export function createAnswerService({
       let reviewedOutcome;
       if (openAIResponse.ok && outputText && !incompleteResponse) {
         const reviewed = await reviewOfficialEvidence({
-          apiKey, model, question, userFacts: suppliedUserFacts, conversation, language: language.code, corpusIndex,
+          apiKey, model: reviewModel || model, question, userFacts: suppliedUserFacts, conversation, language: language.code, corpusIndex,
           referenceResults: localResults,
           researchUrls: officialReviewUrls,
           candidateWebSources,
           visitorFocused: visitorResearchRequired,
-          sections: answerSections, timeoutMs: 118_000 - (Date.now() - requestStartedAt), fetchImpl, sourceFetchImpl
+          sections: answerSections, timeoutMs: 118_000 - (Date.now() - requestStartedAt), fetchImpl, sourceFetchImpl,
+          officialPageCache
         });
         if (reviewed) {
           reviewedOutcome = reviewed.outcome;
@@ -3208,13 +3215,14 @@ export function createAnswerService({
             ].includes(code));
           if (retryableProfessionalSafetyFailure) {
             const repaired = await reviewOfficialEvidence({
-              apiKey, model, question, userFacts: suppliedUserFacts, conversation, language: language.code, corpusIndex,
+              apiKey, model: reviewModel || model, question, userFacts: suppliedUserFacts, conversation, language: language.code, corpusIndex,
               referenceResults: localResults,
               researchUrls: officialReviewUrls,
               candidateWebSources,
               visitorFocused: visitorResearchRequired,
               safetyRepairFailures: runtimeSafety.failures,
-              sections: answerSections, timeoutMs: 118_000 - (Date.now() - requestStartedAt), fetchImpl, sourceFetchImpl
+              sections: answerSections, timeoutMs: 118_000 - (Date.now() - requestStartedAt), fetchImpl, sourceFetchImpl,
+              officialPageCache
             });
             if (repaired) {
               reviewedOutcome = repaired.outcome;

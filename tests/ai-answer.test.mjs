@@ -1269,12 +1269,16 @@ test("uses a transparent planning fallback instead of quoting an unrelated passa
 
 test("configures the exact Italian and Portugal scenario for researched personalized planning", async () => {
   let requestBody;
+  let reviewRequestBody;
   const answer = createAnswerService({
     corpusIndex: planningIndex,
     apiKey: "test-key",
     model: "gpt-5.4-mini",
+    reviewModel: "gpt-5.6-luna",
     fetchImpl: async (_url, options) => {
-      requestBody ||= JSON.parse(options.body);
+      const body = JSON.parse(options.body);
+      if (body.text?.format?.name === "official_evidence_review") reviewRequestBody = body;
+      else requestBody ||= body;
       return new Response(JSON.stringify(withVerifiedFixtureReview(completedCitedResponse(
         "Your Italian citizenship and residence in Portugal are important facts, but the best route depends on your goal and immigration basis."
       ),options)), { status: 200, headers: { "Content-Type": "application/json" } });
@@ -1309,9 +1313,12 @@ test("configures the exact Italian and Portugal scenario for researched personal
   assert.match(requestBody.instructions, /aim for 150-250 words and at most three relevant branches/);
   assert.match(requestBody.instructions, /Detailed follow-ups may be longer/);
   assert.match(requestBody.instructions, /leave room for another basis or none of those circumstances/);
+  assert.equal(requestBody.model, "gpt-5.4-mini");
+  assert.equal(reviewRequestBody.model, "gpt-5.6-luna");
   assert.deepEqual(requestBody.reasoning, { effort: "low" });
-  assert.deepEqual(requestBody.text, { verbosity: "medium" });
-  assert.equal(requestBody.max_output_tokens, 4_800);
+  assert.deepEqual(requestBody.text, { verbosity: "low" });
+  assert.equal(requestBody.max_output_tokens, 3_200);
+  assert.deepEqual(requestBody.prompt_cache_options, { mode: "implicit", ttl: "30m" });
   assert.equal(requestBody.tools[0].search_context_size, "low");
   assert.deepEqual(requestBody.tools[0].filters.allowed_domains, OFFICIAL_IMMIGRATION_DOMAINS);
   assert.equal(requestBody.tool_choice, "auto");
@@ -1354,7 +1361,7 @@ test("retains prior personal facts and planning settings for an investor follow-
   assert.equal(requestBody.model, "gpt-5.6-sol");
   assert.deepEqual(requestBody.reasoning, { effort: "low" });
   assert.equal(requestBody.tools[0].search_context_size, "low");
-  assert.equal(requestBody.max_output_tokens, 4_800);
+  assert.equal(requestBody.max_output_tokens, 3_200);
   assert.match(requestBody.instructions, /Case-planning contract/);
   assert.match(requestBody.input, /Citizenship: Italy.*Current residence: Portugal/s);
   assert.match(requestBody.input, /no U\.S\. family or job offer, but I can invest/i);
@@ -2678,9 +2685,10 @@ test("sends retrieved USCIS passages to the model and keeps official sources", a
   assert.match(requestBody.input, /ignore unless the user asks about it/i);
   assert.match(requestBody.input, /TPS: 1\/5 complete/);
   assert.equal(requestBody.tool_choice, "auto");
-  assert.deepEqual(requestBody.reasoning, { effort: "low" });
-  assert.deepEqual(requestBody.text, { verbosity: "medium" });
-  assert.equal(requestBody.max_output_tokens, 1_800);
+  assert.deepEqual(requestBody.reasoning, { effort: "none" });
+  assert.deepEqual(requestBody.text, { verbosity: "low" });
+  assert.equal(requestBody.max_output_tokens, 1_600);
+  assert.deepEqual(requestBody.prompt_cache_options, { mode: "implicit", ttl: "30m" });
   assert.equal(requestBody.tools[0].search_context_size, "low");
   assert.equal(requestBody.store, false);
   assert.deepEqual(requestBody.tools[0].filters.allowed_domains, OFFICIAL_IMMIGRATION_DOMAINS);

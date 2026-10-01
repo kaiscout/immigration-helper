@@ -1,6 +1,8 @@
 import { fetchOfficialPages } from "./official-pages.mjs";
 
 const DOMAINS = ["uscis.gov", "state.gov", "cbp.gov", "dhs.gov", "ice.gov", "justice.gov", "dol.gov"];
+const RECENT_OFFICIAL_PAGE_TTL_MS = 5 * 60 * 1000;
+const MAX_RECENT_OFFICIAL_PAGES = 128;
 const official = (url) => {
   try {
     const parsed = new URL(url);
@@ -134,7 +136,7 @@ const reviewerWebSources = (data, allowedUrls, candidateWebSources = []) => {
   return sources;
 };
 
-export async function reviewOfficialEvidence({apiKey, model, question, userFacts, conversation = "", language, sections, corpusIndex, referenceResults = [], researchUrls = [], candidateWebSources = [], visitorFocused = false, safetyRepairFailures = [], timeoutMs, fetchImpl = fetch, sourceFetchImpl = null}) {
+export async function reviewOfficialEvidence({apiKey, model, question, userFacts, conversation = "", language, sections, corpusIndex, referenceResults = [], researchUrls = [], candidateWebSources = [], visitorFocused = false, safetyRepairFailures = [], timeoutMs, fetchImpl = fetch, sourceFetchImpl = null, officialPageCache = null}) {
   if (!Number.isFinite(timeoutMs) || timeoutMs < 15_000 || !Array.isArray(sections) || !sections.length || sections.length > 30 ||
       sections.some(section => typeof section?.text !== "string" || !Array.isArray(section.sources) ||
         section.sources.some(source => !official(source?.url)))) return null;
@@ -157,12 +159,15 @@ export async function reviewOfficialEvidence({apiKey, model, question, userFacts
       .map(source => pageIdentity(source.url)).filter(Boolean));
     const reviewUrlIdentities = new Set(reviewUrlsByIdentity.keys());
     const cachedPages = new Map();
-    let remainingCharacters = 24_000;
+    // Keep the independent review focused on the highest-ranked evidence.
+    // Smaller inputs reduce both latency and token cost without weakening the
+    // exact-URL provenance checks applied after the model responds.
+    let remainingCharacters = 16_000;
     const addPassage = (document, text) => {
       const identity = pageIdentity(document?.url);
       if (!remainingCharacters || !identity || typeof text !== "string") return;
       const page = cachedPages.get(identity) || {url: document.url, title: document.title, lastModified: document.lastModified, passages: []};
-      const remainingPageCharacters = 8_000 - page.passages.join("").length;
+      const remainingPageCharacters = 5_000 - page.passages.join("").length;
       const passage = text.slice(0, Math.min(remainingPageCharacters, remainingCharacters));
       if (!passage.trim() || page.passages.includes(passage)) return;
       page.passages.push(passage);
@@ -171,18 +176,43 @@ export async function reviewOfficialEvidence({apiKey, model, question, userFacts
     };
     // These are internal search results supplied by answerQuestion, never request
     // payload fields. Keep the ranked relevant excerpts before extra page text.
-    for (const result of referenceResults.slice(0, 8)) addPassage(result, result.excerpt);
+    for (const result of referenceResults.slice(0, 6)) addPassage(result, result.excerpt);
     for (const document of corpusIndex?.documents || []) {
       if (!remainingCharacters) break;
       if (reviewUrlIdentities.has(pageIdentity(document?.url))) addPassage(document, document.text);
     }
-    const fetchedPages = typeof sourceFetchImpl === "function"
-      ? (await fetchOfficialPages([...reviewUrlsByIdentity.values()], {
+    const selectedReviewEntries = [...reviewUrlsByIdentity].slice(0, 4);
+    const now = Date.now();
+    const recentPages = [];
+    const urlsToFetch = [];
+    for (const [identity, value] of selectedReviewEntries) {
+      const cached = officialPageCache instanceof Map ? officialPageCache.get(identity) : null;
+      const checkedAt = Date.parse(cached?.checkedAt);
+      if (cached?.text && Number.isFinite(checkedAt) && checkedAt <= now + 60_000 &&
+          now - checkedAt <= RECENT_OFFICIAL_PAGE_TTL_MS) {
+        recentPages.push(cached);
+      } else {
+        if (officialPageCache instanceof Map) officialPageCache.delete(identity);
+        urlsToFetch.push(value);
+      }
+    }
+    const newlyFetchedPages = typeof sourceFetchImpl === "function" && urlsToFetch.length
+      ? (await fetchOfficialPages(urlsToFetch, {
         fetchImpl: sourceFetchImpl,
         timeoutMs: Math.min(10_000, Math.max(0, deadline - Date.now() - 15_000)),
-        maxPages: 6
-      })).map(page => ({...page,text:page.text.slice(0,4_000)}))
+        maxPages: urlsToFetch.length
+      })).map(page => ({...page,text:page.text.slice(0,3_000)}))
       : [];
+    if (officialPageCache instanceof Map) {
+      for (const page of newlyFetchedPages) {
+        const identities = [pageIdentity(page.requestedUrl), pageIdentity(page.url)].filter(Boolean);
+        for (const identity of identities) officialPageCache.set(identity, page);
+      }
+      while (officialPageCache.size > MAX_RECENT_OFFICIAL_PAGES) {
+        officialPageCache.delete(officialPageCache.keys().next().value);
+      }
+    }
+    const fetchedPages = [...recentPages, ...newlyFetchedPages];
     const remainingMs = deadline - Date.now();
     if (remainingMs < 15_000) return null;
     const directlyCheckedIdentities = new Set([
@@ -214,8 +244,12 @@ export async function reviewOfficialEvidence({apiKey, model, question, userFacts
       body: JSON.stringify({
         model,
         store: false,
-        reasoning: {effort: "low"},
-        max_output_tokens: 3500,
+        // Directly fetched/cached passages turn the common review into a
+        // bounded classification-and-edit task. Retain low reasoning only when
+        // the reviewer must perform an independent web search.
+        reasoning: {effort: requiresIndependentWebReview ? "low" : "none"},
+        max_output_tokens: 2400,
+        prompt_cache_options: {mode: "implicit", ttl: "30m"},
         ...(requiresIndependentWebReview ? {
           tools: [{
             type: "web_search",
@@ -237,7 +271,7 @@ export async function reviewOfficialEvidence({apiKey, model, question, userFacts
                 required: ["index", "text", "status", "sourceUrls", "reason"],
                 properties: {
                   index: {type: "integer"},
-                  text: {type: "string"},
+                  text: {anyOf: [{type: "string"}, {type: "null"}]},
                   status: {type: "string", enum: availablePassageSourceUrls.length
                     ? ["supported", "non_factual", "unsupported"] : ["non_factual", "unsupported"]},
                   sourceUrls: sourceUrlsSchema,
@@ -273,9 +307,9 @@ export async function reviewOfficialEvidence({apiKey, model, question, userFacts
           "Write uncertainty in plain user-facing language, naturally in the requested language: for example, 'I haven't verified that yet' or 'I couldn't confirm that detail.' Never describe internal mechanics as 'supplied evidence', 'supplied passages', a 'reviewer', or a 'pipeline' in the final text. Keep clarification questions open to another basis or none of the examples, rather than presenting family, employer sponsorship, or a company transfer as exhaustive choices. Preserve a single focused question; do not expand it into an intake questionnaire.",
           "Do not turn a partly supported answer into a repetitive wall of verification disclaimers. Remove unsupported detail, consolidate any remaining limitation into at most one short sentence, and preserve useful supported guidance. If a current official rule materially restricts the user's stated route, say that plainly near the beginning, explain only verified exceptions or next steps, and do not bury the practical answer.",
           "Set outcome to answered only when the revised response provides a useful supported answer to the user's main question. Set clarification for a genuine greeting or a focused question needed to understand the user's intent or missing personal facts. Set unavailable when missing source evidence prevents answering the main question, even if you can retain some background or ask a question afterward. Never disguise verification failure as clarification or an answered request. approved only means the final text is safe and supported; it does not mean the user's question was answered. An honest verification-unavailable response may be approved:true with outcome:unavailable.",
-          "Return exactly one entry per input section, in order, with final text for each section (no Markdown links, raw citation tokens, or bibliography). Keep the response concise and conversational; do not repeat facts across sections. Use an empty sourceUrls list for non_factual. In reason, briefly identify the checked support or explain why there is no factual assertion. approved means the FINAL revised text fully passes these checks, not the original candidate. If you cannot produce safe revised text, including an honest limitation when necessary, return approved:false. Do not add unsupported facts to make an answer sound complete."
+          "Return exactly one entry per input section, in order (no Markdown links, raw citation tokens, or bibliography). Set text to null when the original section needs no change; provide replacement text only when repairing or narrowing that section. Keep replacement text concise and conversational; do not repeat facts across sections. Use an empty sourceUrls list for non_factual. Keep reason to one short sentence identifying the checked support or why there is no factual assertion. approved means the FINAL revised text fully passes these checks, not the original candidate. If you cannot produce safe revised text, including an honest limitation when necessary, return approved:false. Do not add unsupported facts to make an answer sound complete."
         ].join("\n\n"),
-        input: JSON.stringify({question, userFacts, untrustedDialogue: String(conversation).slice(-10_000), language,
+        input: JSON.stringify({question, userFacts, untrustedDialogue: String(conversation).slice(-6_000), language,
           checkedLivePassages: fetchedPages,
           cachedOfficialPassages: [...cachedPages.values()],
           independentReviewUrls,

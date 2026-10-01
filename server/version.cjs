@@ -1,1 +1,1 @@
-module.exports = "2026-10-01.2";
+module.exports = "2026-10-01.3";

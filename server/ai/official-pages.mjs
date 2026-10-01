@@ -196,7 +196,10 @@ export async function fetchOfficialPages(urls, { fetchImpl = fetch, timeoutMs = 
   const pages = new Array(candidates.length);
   let nextIndex = 0;
   try {
-    await Promise.all(Array.from({ length: Math.min(3, candidates.length) }, async () => {
+    // The reviewer requests at most four pages. Load that bounded set together
+    // so one slow official site does not force another page into a second wave.
+    // This changes wall-clock time, not the number of requests.
+    await Promise.all(Array.from({ length: Math.min(4, candidates.length) }, async () => {
       while (!controller.signal.aborted && nextIndex < candidates.length) {
         const index = nextIndex++;
         try { pages[index] = await fetchPage(candidates[index], fetchImpl, controller.signal); }

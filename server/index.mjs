@@ -8,6 +8,7 @@ import SERVER_VERSION from "./version.cjs";
 const PORT = Number.parseInt(process.env.PORT || "8787", 10);
 const OPENAI_API_KEY = (process.env.OPENAI_API_KEY || "").trim();
 const OPENAI_MODEL = (process.env.OPENAI_MODEL || "gpt-5.6-sol").trim();
+const OPENAI_REVIEW_MODEL = (process.env.OPENAI_REVIEW_MODEL || OPENAI_MODEL).trim();
 const VECTOR_STORE_ID = (process.env.USCIS_VECTOR_STORE_ID || "").trim();
 const ALLOWED_ORIGIN = (process.env.ALLOWED_ORIGIN || "*").trim();
 const CLIENT_TOKEN = (
@@ -45,6 +46,7 @@ const answerQuestion = createAnswerService({
   corpusIndex,
   apiKey: OPENAI_API_KEY,
   model: OPENAI_MODEL,
+  reviewModel: OPENAI_REVIEW_MODEL,
   vectorStoreId: VECTOR_STORE_ID
 });
 const testTracer = createCasePilotTestTracer({
@@ -133,6 +135,7 @@ const server = http.createServer(async (request, response) => {
       aiGenerationConfigured: Boolean(OPENAI_API_KEY),
       clientTokenRequired: REQUIRE_CLIENT_TOKEN,
       model: OPENAI_MODEL,
+      reviewModel: OPENAI_REVIEW_MODEL,
       serverVersion: SERVER_VERSION,
       supportedLanguages: Object.keys(SUPPORTED_AI_LANGUAGES).length,
       testTraceConfigured: testTracer.configured,

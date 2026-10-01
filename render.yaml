@@ -13,6 +13,8 @@ services:
         sync: false
       - key: OPENAI_MODEL
         value: gpt-5.6-sol
+      - key: OPENAI_REVIEW_MODEL
+        value: gpt-5.6-luna
       - key: REQUIRE_AI_GENERATION
         value: "true"
       - key: AI_PROXY_CLIENT_TOKEN

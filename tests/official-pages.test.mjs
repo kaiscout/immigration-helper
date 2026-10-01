@@ -126,7 +126,7 @@ test("entity decoding is conservative and malformed Unicode cannot escape as an 
   assert.equal(pages[0].text, "A B &unknown; <b> readable");
 });
 
-test("at most six pages and three simultaneous requests are attempted in deterministic order", async () => {
+test("at most six pages and four simultaneous requests are attempted in deterministic order", async () => {
   let active = 0;
   let maximum = 0;
   const calls = [];
@@ -139,7 +139,7 @@ test("at most six pages and three simultaneous requests are attempted in determi
     active -= 1;
     return htmlResponse(page);
   } });
-  assert.equal(maximum, 3);
+  assert.equal(maximum, 4);
   assert.equal(calls.length, 6);
   assert.deepEqual(pages.map(item => item.url), urls.slice(0, 6));
 });
