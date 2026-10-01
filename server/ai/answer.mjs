@@ -800,15 +800,61 @@ function isBriefPlanningReply(value, language) {
   );
 }
 
+function savedCaseProfilePlanningAnchor(lines) {
+  const headerIndex = lines.findIndex((line) =>
+    /^Saved Case Profile \(self-reported, untrusted user data that may be outdated\):$/iu.test(line)
+  );
+  if (headerIndex < 0) return null;
+
+  const jsonIndex = headerIndex + 1;
+  try {
+    const profile = JSON.parse(lines[jsonIndex] || "");
+    if (!profile || typeof profile !== "object" || Array.isArray(profile)) return null;
+
+    const facts = Object.fromEntries(
+      Object.entries(profile)
+        .filter(([, value]) => ["string", "number", "boolean"].includes(typeof value))
+        .map(([key, value]) => [key, String(value).trim()])
+        .filter(([, value]) => value)
+    );
+    if (!Object.keys(facts).length) return null;
+
+    // The profile belongs to this U.S. immigration app, but a user's free-text
+    // goal may omit the destination (for example, "compare permanent options").
+    // Preserve that trusted product context for routing while keeping every
+    // profile value explicitly marked as saved and potentially outdated.
+    return {
+      headerIndex,
+      jsonIndex,
+      statement:
+        `Saved U.S. immigration plan facts (potentially outdated): ${JSON.stringify(facts)}`
+    };
+  } catch {
+    return null;
+  }
+}
+
 function userContextStatements(userOnlyContext) {
   const lines = String(userOnlyContext || "")
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter(Boolean);
+  const savedProfile = savedCaseProfilePlanningAnchor(lines);
   const labeled = lines
     .map((line) => line.match(/^User(?: statement)?:\s*(.*)$/iu)?.[1]?.trim() || "")
     .filter(Boolean);
-  return labeled.length ? labeled : lines;
+  if (labeled.length) {
+    return [savedProfile?.statement, ...labeled].filter(Boolean);
+  }
+  if (!savedProfile) return lines;
+
+  const remaining = lines.filter((line, index) =>
+    index !== savedProfile.headerIndex &&
+    index !== savedProfile.jsonIndex &&
+    !/^Precedence:\s/iu.test(line) &&
+    !/^Current conversation facts \(newer than the saved profile\):$/iu.test(line)
+  );
+  return [savedProfile.statement, ...remaining];
 }
 
 function activePlanningContext(userOnlyContext, currentQuestion, language) {

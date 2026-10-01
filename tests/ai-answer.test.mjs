@@ -30,6 +30,7 @@ import {
 } from "../server/ai/answer.mjs";
 import { createCorpusIndex } from "../server/uscis/search.mjs";
 import { shouldCountCasePilotQuestion } from "../data/casePilotResponse.js";
+import { buildCaseProfileAiContext } from "../data/caseProfileCore.mjs";
 import {
   CASEPILOT_VISITOR_LANGUAGE_CASES,
   CASEPILOT_VISITOR_LANGUAGE_CODES,
@@ -1124,6 +1125,66 @@ test("keeps route details and personal-fact corrections in planning mode without
   assert.equal(isPlanningContinuation("I now live in Spain.", priorFacts), true);
   assert.equal(isPlanningContinuation("How do I reschedule biometrics?", priorFacts), false);
   assert.equal(isPlanningContinuation("What is the postage cost?", priorFacts, "en"), false);
+});
+
+test("keeps corrected route comparisons in planning mode when a saved profile supplies the U.S. goal", () => {
+  const savedProfile = buildCaseProfileAiContext({
+    preferredName: "Alex",
+    citizenships: "Italian",
+    residenceCountry: "Portugal",
+    currentSituation: "Living outside the United States",
+    immigrationGoal: "Explore permanent immigration options"
+  });
+  const question =
+    "Correction: I am Portuguese, not Italian, and I now live in Spain. " +
+    "I have no qualifying U.S. family or job offer, but I can invest in an operating business. " +
+    "Compare the most plausible temporary and permanent routes and tell me what to verify first.";
+  const context = [
+    savedProfile,
+    "Current conversation facts (newer than the saved profile):",
+    `User statement: ${question}`
+  ].join("\n");
+
+  assert.equal(isImmigrationPlanningQuestion(question, "en"), false);
+  assert.equal(isPlanningContinuation(question, context, "en"), true);
+});
+
+test("uses the safe planning fallback for a corrected saved-profile route comparison", async () => {
+  const savedProfile = buildCaseProfileAiContext({
+    preferredName: "Alex",
+    citizenships: "Italian",
+    residenceCountry: "Portugal",
+    currentSituation: "Living outside the United States",
+    immigrationGoal: "Explore permanent immigration options"
+  });
+  const question =
+    "Correction: I am Portuguese, not Italian, and I now live in Spain. " +
+    "I have no qualifying U.S. family or job offer, but I can invest in an operating business. " +
+    "Compare the most plausible temporary and permanent routes and tell me what to verify first.";
+  const answer = createAnswerService({
+    corpusIndex: planningIndex,
+    apiKey: "test-key",
+    fetchImpl: async () => new Response(JSON.stringify({
+      status: "incomplete",
+      incomplete_details: { reason: "max_output_tokens" },
+      output_text: "This incomplete route comparison must not be shown."
+    }), { status: 200, headers: { "Content-Type": "application/json" } })
+  });
+
+  const result = await answer({
+    question,
+    language: "en",
+    userContext: [
+      savedProfile,
+      "Current conversation facts (newer than the saved profile):",
+      `User statement: ${question}`
+    ].join("\n")
+  });
+
+  assert.equal(result.body.degraded, true);
+  assert.equal(result.body.grounded_on, "planning_research_unavailable");
+  assert.match(result.body.output_text, /live official-source research/i);
+  assert.doesNotMatch(result.body.output_text, /incomplete route comparison|closest official USCIS guidance/i);
 });
 
 test("planning continuity closes when the most recent user topic is address maintenance", () => {
