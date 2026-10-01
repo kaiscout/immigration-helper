@@ -2689,6 +2689,7 @@ test("sends retrieved USCIS passages to the model and keeps official sources", a
   assert.match(requestBody.input, /ignore unless the user asks about it/i);
   assert.match(requestBody.input, /TPS: 1\/5 complete/);
   assert.equal(requestBody.tool_choice, "auto");
+  assert.equal(requestBody.model, "gpt-5.6-luna");
   assert.deepEqual(requestBody.reasoning, { effort: "none" });
   assert.deepEqual(requestBody.text, { verbosity: "low" });
   assert.equal(requestBody.max_output_tokens, 1_600);

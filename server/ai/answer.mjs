@@ -3102,6 +3102,9 @@ export function createAnswerService({
     }
 
     const visitorResearchRequired = officialReviewUrls.length > 0;
+    const generationModel = planningQuestion || visitorResearchRequired
+      ? model
+      : (reviewModel || model);
     const tools = [{
       type: "web_search",
       filters: { allowed_domains: visitorResearchRequired
@@ -3132,7 +3135,7 @@ export function createAnswerService({
       const checklistLabel =
         "Optional saved checklist context (ignore unless the user asks about it or it directly changes the requested answer)";
       const openAIResponse = await fetchOpenAI({
-        model,
+        model: generationModel,
         instructions:
           `${SYSTEM_PROMPT}` +
           (planningQuestion ? PLANNING_RESPONSE_CONTRACT : "") +
@@ -3183,7 +3186,7 @@ export function createAnswerService({
       let reviewedOutcome;
       if (openAIResponse.ok && outputText && !incompleteResponse) {
         const reviewed = await reviewOfficialEvidence({
-          apiKey, model: planningQuestion || visitorResearchRequired ? model : (reviewModel || model), question, userFacts: suppliedUserFacts, conversation, language: language.code, corpusIndex,
+          apiKey, model: generationModel, question, userFacts: suppliedUserFacts, conversation, language: language.code, corpusIndex,
           referenceResults: localResults,
           researchUrls: officialReviewUrls,
           candidateWebSources,
@@ -3215,7 +3218,7 @@ export function createAnswerService({
             ].includes(code));
           if (retryableProfessionalSafetyFailure) {
             const repaired = await reviewOfficialEvidence({
-              apiKey, model: planningQuestion || visitorResearchRequired ? model : (reviewModel || model), question, userFacts: suppliedUserFacts, conversation, language: language.code, corpusIndex,
+              apiKey, model: generationModel, question, userFacts: suppliedUserFacts, conversation, language: language.code, corpusIndex,
               referenceResults: localResults,
               researchUrls: officialReviewUrls,
               candidateWebSources,
