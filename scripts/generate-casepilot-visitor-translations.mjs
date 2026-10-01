@@ -182,6 +182,14 @@ const runCase = async (code) => {
 };
 
 const results = [];
+const reportCreatedAt = new Date().toISOString();
+const reportPath = path.resolve(".expo",`casepilot-visitor-30-language-${Date.now()}.json`);
+fs.mkdirSync(path.dirname(reportPath),{recursive:true});
+const writeReport = () => fs.writeFileSync(reportPath,JSON.stringify({
+  createdAt:reportCreatedAt,endpoint:new URL(endpoint).origin,fixturePath:path.resolve(fixturePath),fixtures,results
+},null,2));
+writeReport();
+console.log(JSON.stringify({liveReportPath:reportPath}));
 let nextIndex = 0;
 const interCaseDelayMs = Math.max(0, Math.min(
   120_000,
@@ -192,6 +200,7 @@ const worker = async () => {
     const code = codes[nextIndex++];
     const result = await runCase(code);
     results.push(result);
+    writeReport();
     console.log(JSON.stringify({
       code,
       status:result.status,
@@ -212,12 +221,7 @@ const concurrency = Math.max(1, Math.min(
 ));
 await Promise.all(Array.from({length:concurrency}, () => worker()));
 results.sort((a,b) => codes.indexOf(a.code) - codes.indexOf(b.code));
-
-const reportPath = path.resolve(".expo",`casepilot-visitor-30-language-${Date.now()}.json`);
-fs.mkdirSync(path.dirname(reportPath),{recursive:true});
-fs.writeFileSync(reportPath,JSON.stringify({
-  createdAt:new Date().toISOString(),endpoint:new URL(endpoint).origin,fixturePath:path.resolve(fixturePath),fixtures,results
-},null,2));
+writeReport();
 const passed = results.filter(result => result.pass).length;
 console.log(JSON.stringify({summary:{passed,total:results.length,failed:results.length-passed},reportPath},null,2));
 if (passed !== results.length) process.exitCode = 1;
