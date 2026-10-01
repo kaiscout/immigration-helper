@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
 import {
+  CASEPILOT_ROUTE_ANALYSIS_TERMS_BY_LANGUAGE,
   CASEPILOT_GROUNDED_LANGUAGE_ANSWERS,
   CASEPILOT_RELEASE_LANGUAGE_CASES
 } from "../data/casePilotReleaseGate.mjs";
@@ -462,6 +463,23 @@ test("visitor research failure never falls back to a nationality-matched USCIS b
   assert.match(result.output_text,/official-source research|official sources/i);
 });
 
+test("ordinary degraded fallback never presents an unrelated official passage", () => {
+  const result = buildLocalFallback(
+    "ما مسارات الهجرة التي ينبغي أن أبحثها؟",
+    "ar",
+    [{
+      title: "بيان صحفي",
+      url: "https://www.uscis.gov/humanitarian/temporary-protected-status/yemen/byan-shfy",
+      excerpt: "فترة إعادة التسجيل مفتوحة الآن لحالة الحماية المؤقتة لليمن."
+    }]
+  );
+
+  assert.equal(result.grounded_on, "no_matching_uscis_source");
+  assert.equal(result.degraded, true);
+  assert.deepEqual(result.sources, []);
+  assert.doesNotMatch(result.output_text, /اليمن|الحماية المؤقتة/);
+});
+
 test("recognizes broad relocation planning and rewrites retrieval around plausible permanent routes", () => {
   assert.equal(isImmigrationPlanningQuestion(planningQuestion), true);
   assert.equal(isImmigrationPlanningQuestion("How do I change my address with USCIS?"), false);
@@ -758,6 +776,44 @@ test("uses client-translated fixed planning follow-ups outside English", () => {
       assert.deepEqual(followups, translatedFollowups, code);
     }
   }
+});
+
+test("localized route and option follow-ups continue an active plan in all 30 languages", () => {
+  for (const scenario of CASEPILOT_RELEASE_LANGUAGE_CASES) {
+    const context = `User statement: ${scenario.planning}`;
+    const terms = CASEPILOT_ROUTE_ANALYSIS_TERMS_BY_LANGUAGE[scenario.code] || [];
+    assert.ok(terms.length > 0, `${scenario.code}: route vocabulary`);
+
+    for (const term of terms) {
+      assert.equal(
+        isPlanningContinuation(`${term}?`, context, scenario.code),
+        true,
+        `${scenario.code}: ${term}`
+      );
+      assert.equal(
+        isPlanningContinuation(`${term}?`, "", scenario.code),
+        false,
+        `${scenario.code}: ${term} requires active context`
+      );
+    }
+  }
+});
+
+test("the live Arabic correction-and-routes wording stays in planning mode", () => {
+  const profile = buildCaseProfileAiContext({
+    citizenships: "Italian",
+    residenceCountry: "Portugal",
+    immigrationGoal: "Move permanently to the United States"
+  });
+  const correction =
+    "User statement: تصحيح: أنا برتغالي ولست إيطالياً، وأعيش الآن في إسبانيا. " +
+    "ليس لدي قريب أمريكي مؤهل ولا عرض عمل، لكن يمكنني الاستثمار في شركة قائمة.";
+  const question =
+    "بناءً على تصحيحي، ما مسارات الهجرة التي ينبغي أن أبحثها أولاً، " +
+    "وما الذي يجب أن أتحقق منه بعد ذلك؟";
+
+  assert.equal(isImmigrationPlanningQuestion(question, "ar"), false);
+  assert.equal(isPlanningContinuation(question, `${profile}\n${correction}`, "ar"), true);
 });
 
 test("keeps every client-translated generic chip in planning mode", () => {

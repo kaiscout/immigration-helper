@@ -7,7 +7,10 @@ import {
   KNOWN_PUBLIC_AGENCY_EMAILS,
   redactAllowedEmailAddressesForPrivacyScan
 } from "../../data/sensitiveIdentifiers.js";
-import { evaluateCasePilotRuntimeSafety } from "../../data/casePilotReleaseGate.mjs";
+import {
+  CASEPILOT_ROUTE_ANALYSIS_TERMS_BY_LANGUAGE,
+  evaluateCasePilotRuntimeSafety
+} from "../../data/casePilotReleaseGate.mjs";
 import euLanguageSupport from "../../data/euLanguageSupport.json" with { type: "json" };
 import euLocalCopy from "./eu-local-copy.json" with { type: "json" };
 
@@ -899,7 +902,10 @@ export function isPlanningContinuation(question, userOnlyContext, language = "en
   const normalized = ` ${normalizeForRouting(question)} `;
   if (!normalized.trim()) return false;
   const continuationTerms = planningContinuationVocabulary(language);
-  const hasPlanningDetail = continuationTerms.some((term) =>
+  const routeQuestionTerms = CASEPILOT_ROUTE_ANALYSIS_TERMS_BY_LANGUAGE[
+    String(language || "en").toLowerCase().split(/[-_]/)[0]
+  ] || [];
+  const hasPlanningDetail = [...continuationTerms, ...routeQuestionTerms].some((term) =>
     planningTermOccurrences(normalized, term).length > 0
   );
   const hasOperationalTopic = ORDINARY_OPERATIONAL_TERMS.some((term) =>
@@ -2151,6 +2157,17 @@ function usefulSentences(result, question, limit = 3) {
   return sentences.length ? sentences : [String(result.excerpt || "").replace(/\s+/g, " ").slice(0, 900)];
 }
 
+function localFallbackSourceMatchesQuestion(result, question, language) {
+  const questionTopics = ordinaryCitationTopics(question, language);
+  const sourceTopics = sourceCitationTopics(result);
+  if ([...questionTopics].some((topic) => sourceTopics.has(topic))) return true;
+
+  // For topics outside the fixed multilingual lexicon, require a distinctive
+  // term shared with the official URL path. A generic word such as
+  // "immigration" must never make an unrelated cached page look responsive.
+  return sourcePathSharesDistinctiveCitationTerm(result, question);
+}
+
 export function buildLocalFallback(
   question,
   language,
@@ -2163,7 +2180,7 @@ export function buildLocalFallback(
   const planningQuestion = planningOverride || isImmigrationPlanningQuestion(question, code);
   const sourceResults = planningQuestion
     ? results.filter((result) => !UNRELATED_PLANNING_PATH.test(String(result.url || "")))
-    : results;
+    : results.filter((result) => localFallbackSourceMatchesQuestion(result, question, code));
   const sources = uniqueSources(
     sourceResults.slice(0, planningQuestion ? 6 : 1).map(({ title, url }) => ({ title, url }))
   );
@@ -2180,7 +2197,7 @@ export function buildLocalFallback(
     };
   }
 
-  if (!results.length) {
+  if (!sourceResults.length) {
     return {
       output_text: copy.missing,
       sources,
@@ -2190,7 +2207,7 @@ export function buildLocalFallback(
     };
   }
 
-  const primary = results[0];
+  const primary = sourceResults[0];
   const passage = usefulSentences(primary, question).join(" ");
   const sourceLabel = copy.sourceLanguage ? `${copy.sourceLanguage}\n` : "";
   const outputText = `${copy.intro}\n\n${sourceLabel}${passage}\n\n${copy.verify}`;

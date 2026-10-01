@@ -1218,37 +1218,37 @@ const isLowDiversityNonAnswer = (answer) => {
     (tokens.length >= 20 && uniqueTokens.size / tokens.length < 0.12);
 };
 
-const ROUTE_ANALYSIS_TERMS_BY_LANGUAGE = Object.freeze({
-  en: Object.freeze(["route", "visa", "green card", "petition", "eligibility", "category", "sponsor"]),
-  tr: Object.freeze(["rota", "seçenek", "vize", "yeşil kart", "dilekçe", "uygunluk", "kategori", "sponsor"]),
-  es: Object.freeze(["ruta", "opción migratoria", "visa", "visado", "tarjeta verde", "petición", "elegibilidad", "categoría", "patrocinador"]),
+export const CASEPILOT_ROUTE_ANALYSIS_TERMS_BY_LANGUAGE = Object.freeze({
+  en: Object.freeze(["route", "routes", "visa", "green card", "petition", "eligibility", "category", "sponsor"]),
+  tr: Object.freeze(["rota", "rotalar", "seçenek", "vize", "yeşil kart", "dilekçe", "uygunluk", "kategori", "sponsor"]),
+  es: Object.freeze(["ruta", "rutas", "opción migratoria", "visa", "visado", "tarjeta verde", "petición", "elegibilidad", "categoría", "patrocinador"]),
   zh: Object.freeze(["途径", "选项", "签证", "绿卡", "申请", "资格", "类别", "担保人"]),
   hi: Object.freeze(["मार्ग", "विकल्प", "वीज़ा", "वीजा", "ग्रीन कार्ड", "याचिका", "पात्रता", "श्रेणी", "प्रायोजक"]),
-  fr: Object.freeze(["voie", "option d’immigration", "visa", "carte verte", "admissibilité", "catégorie", "parrain"]),
-  ar: Object.freeze(["مسار", "خيار", "تأشيرة", "البطاقة الخضراء", "التماس", "أهلية", "فئة", "كفيل"]),
+  fr: Object.freeze(["voie", "voies", "option d’immigration", "visa", "carte verte", "admissibilité", "catégorie", "parrain"]),
+  ar: Object.freeze(["مسار", "مسارات", "خيار", "خيارات", "تأشيرة", "البطاقة الخضراء", "التماس", "أهلية", "فئة", "كفيل"]),
   bn: Object.freeze(["পথ", "বিকল্প", "ভিসা", "গ্রিন কার্ড", "আবেদন", "যোগ্যতা", "বিভাগ", "স্পনসর"]),
-  ru: Object.freeze(["путь", "вариант", "виза", "грин-карт", "петици", "право", "категори", "спонсор"]),
-  pt: Object.freeze(["via de imigração", "opção", "visto", "green card", "petição", "elegibilidade", "categoria", "patrocinador"]),
-  it: Object.freeze(["percorso", "opzione", "visto", "carta verde", "petizione", "idoneità", "categoria", "sponsor"]),
-  bg: Object.freeze(["път", "вариант", "виза", "зелена карта", "петиция", "допустимост", "категория", "спонсор"]),
-  hr: Object.freeze(["put", "opcija", "viza", "zelena karta", "peticija", "uvjeti", "kategorija", "sponzor"]),
-  cs: Object.freeze(["cesta", "možnost", "vízum", "zelená karta", "petice", "způsobilost", "kategorie", "sponzor"]),
-  da: Object.freeze(["vej", "mulighed", "visum", "green card", "andragende", "berettigelse", "kategori", "sponsor"]),
-  nl: Object.freeze(["route", "optie", "visum", "green card", "verzoekschrift", "geschiktheid", "categorie", "sponsor"]),
-  et: Object.freeze(["tee", "võimalus", "viisa", "roheline kaart", "avaldus", "sobivus", "kategooria", "sponsor"]),
-  fi: Object.freeze(["reitti", "vaihtoehto", "viisumi", "green card", "vetoomus", "kelpoisuus", "luokka", "sponsori"]),
-  de: Object.freeze(["weg", "einwanderungsoption", "visum", "green card", "antrag", "berechtigung", "kategorie", "sponsor"]),
-  el: Object.freeze(["διαδρομή", "οδό", "μετανάστευσης", "επιλογή", "βίζα", "πράσινη κάρτα", "αίτηση", "επιλεξιμότητα", "κατηγορία", "κατηγορίες", "χορηγός"]),
-  hu: Object.freeze(["útvonal", "lehetőség", "vízum", "zöldkártya", "petíció", "jogosultság", "kategória", "szponzor"]),
-  ga: Object.freeze(["bealach", "rogha", "víosa", "cárta glas", "achainí", "incháilitheacht", "catagóir", "urraitheoir"]),
-  lv: Object.freeze(["ceļš", "iespēja", "vīza", "zaļā karte", "petīcija", "atbilstība", "kategorija", "sponsors"]),
-  lt: Object.freeze(["kelias", "galimybė", "viza", "žalioji korta", "peticija", "tinkamumas", "kategorija", "rėmėjas"]),
-  mt: Object.freeze(["rotta", "għażla", "viża", "karta ħadra", "petizzjoni", "eliġibbiltà", "kategorija", "sponsor"]),
+  ru: Object.freeze(["путь", "пути", "вариант", "виза", "грин-карт", "петици", "право", "категори", "спонсор"]),
+  pt: Object.freeze(["via de imigração", "vias de imigração", "opção", "visto", "green card", "petição", "elegibilidade", "categoria", "patrocinador"]),
+  it: Object.freeze(["percorso", "percorsi", "opzione", "visto", "carta verde", "petizione", "idoneità", "categoria", "sponsor"]),
+  bg: Object.freeze(["път", "пътища", "вариант", "виза", "зелена карта", "петиция", "допустимост", "категория", "спонсор"]),
+  hr: Object.freeze(["put", "putovi", "opcija", "viza", "zelena karta", "peticija", "uvjeti", "kategorija", "sponzor"]),
+  cs: Object.freeze(["cesta", "cesty", "možnost", "vízum", "zelená karta", "petice", "způsobilost", "kategorie", "sponzor"]),
+  da: Object.freeze(["vej", "veje", "mulighed", "visum", "green card", "andragende", "berettigelse", "kategori", "sponsor"]),
+  nl: Object.freeze(["route", "routes", "optie", "visum", "green card", "verzoekschrift", "geschiktheid", "categorie", "sponsor"]),
+  et: Object.freeze(["tee", "teed", "võimalus", "viisa", "roheline kaart", "avaldus", "sobivus", "kategooria", "sponsor"]),
+  fi: Object.freeze(["reitti", "reitit", "vaihtoehto", "viisumi", "green card", "vetoomus", "kelpoisuus", "luokka", "sponsori"]),
+  de: Object.freeze(["weg", "wege", "einwanderungsoption", "visum", "green card", "antrag", "berechtigung", "kategorie", "sponsor"]),
+  el: Object.freeze(["διαδρομή", "διαδρομές", "οδό", "μετανάστευσης", "επιλογή", "βίζα", "πράσινη κάρτα", "αίτηση", "επιλεξιμότητα", "κατηγορία", "κατηγορίες", "χορηγός"]),
+  hu: Object.freeze(["útvonal", "útvonalak", "lehetőség", "vízum", "zöldkártya", "petíció", "jogosultság", "kategória", "szponzor"]),
+  ga: Object.freeze(["bealach", "bealaí", "rogha", "víosa", "cárta glas", "achainí", "incháilitheacht", "catagóir", "urraitheoir"]),
+  lv: Object.freeze(["ceļš", "ceļi", "iespēja", "vīza", "zaļā karte", "petīcija", "atbilstība", "kategorija", "sponsors"]),
+  lt: Object.freeze(["kelias", "keliai", "galimybė", "viza", "žalioji korta", "peticija", "tinkamumas", "kategorija", "rėmėjas"]),
+  mt: Object.freeze(["rotta", "rotot", "għażla", "viża", "karta ħadra", "petizzjoni", "eliġibbiltà", "kategorija", "sponsor"]),
   pl: Object.freeze(["droga", "drogi", "imigracyjnej", "opcja", "wiza", "zielona karta", "petycja", "kwalifikacja", "kategoria", "kategorie", "sponsor"]),
-  ro: Object.freeze(["cale", "opțiune", "viză", "carte verde", "petiție", "eligibilitate", "categorie", "sponsor"]),
-  sk: Object.freeze(["cesta", "cestu", "imigračné", "možnosť", "vízum", "zelená karta", "petícia", "oprávnenosť", "kategória", "kategórie", "sponzor"]),
-  sl: Object.freeze(["pot", "možnost", "vizum", "zelena karta", "peticija", "upravičenost", "kategorija", "sponzor"]),
-  sv: Object.freeze(["väg", "alternativ", "visum", "green card", "framställning", "behörighet", "kategori", "sponsor"])
+  ro: Object.freeze(["cale", "căi", "opțiune", "viză", "carte verde", "petiție", "eligibilitate", "categorie", "sponsor"]),
+  sk: Object.freeze(["cesta", "cestu", "cesty", "imigračné", "možnosť", "vízum", "zelená karta", "petícia", "oprávnenosť", "kategória", "kategórie", "sponzor"]),
+  sl: Object.freeze(["pot", "poti", "možnost", "vizum", "zelena karta", "peticija", "upravičenost", "kategorija", "sponzor"]),
+  sv: Object.freeze(["väg", "vägar", "alternativ", "visum", "green card", "framställning", "behörighet", "kategori", "sponsor"])
 });
 
 const IMMIGRATION_PROCESS_TOKEN =
@@ -1257,8 +1257,8 @@ const IMMIGRATION_PROCESS_TOKEN =
 const hasRouteAnalysisSignal = (language, answer) => {
   const code = String(language || "en").toLowerCase().split(/[-_]/)[0];
   const terms = [
-    ...(ROUTE_ANALYSIS_TERMS_BY_LANGUAGE[code] || []),
-    ...ROUTE_ANALYSIS_TERMS_BY_LANGUAGE.en
+    ...(CASEPILOT_ROUTE_ANALYSIS_TERMS_BY_LANGUAGE[code] || []),
+    ...CASEPILOT_ROUTE_ANALYSIS_TERMS_BY_LANGUAGE.en
   ];
   const normalizedAnswer = normalize(answer);
   return IMMIGRATION_PROCESS_TOKEN.test(normalizedAnswer) ||
