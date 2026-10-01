@@ -3724,6 +3724,7 @@ test("routes the fixed four-turn visitor conversation in all 30 languages", () =
 
   for (const [code, scenario] of Object.entries(CASEPILOT_VISITOR_LANGUAGE_CASES)) {
     assert.equal(scenario.statements.length, 4, code);
+    assert.ok(scenario.nextStepTokens.length >= 2, `${code} needs localized next-step audit terms`);
     const reviewUrls = officialReviewUrlsForQuestion(
       scenario.statements.at(-1),
       "",
@@ -3792,6 +3793,8 @@ test("a terse citizenship correction keeps the visitor route from conversation h
   assert.doesNotMatch(result.body.output_text, /civics|naturalization|N-400/i);
   assert.ok(upstreamRequests.length >= 1);
   assert.match(upstreamRequests[0].instructions, /Visitor-visa follow-up contract/);
+  assert.match(upstreamRequests[0].instructions, /incomplete without telling the user what to do now/);
+  assert.match(upstreamRequests[0].instructions, /Do not repeat the same conclusion/);
   assert.equal(upstreamRequests[0].tool_choice, "required");
   assert.deepEqual(
     upstreamRequests[0].tools[0].filters.allowed_domains,

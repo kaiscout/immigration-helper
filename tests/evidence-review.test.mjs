@@ -153,6 +153,22 @@ test("review request uses structured output, bounded matching corpus text, and n
   assert.match(body.instructions,/Candidate citations and URLs researched by an earlier model are NOT checked evidence/);
 });
 
+test("visitor evidence review requires an explicit localized next step without a repeated conclusion", async () => {
+  let body;
+  const result=await reviewOfficialEvidence({
+    apiKey:"test",model:"test",question:"No, I only have Nigerian citizenship.",userFacts:"Residence: Portugal",language:"en",
+    sections,visitorFocused:true,timeoutMs:30_000,
+    corpusIndex:{documents:[{url,text:sections[0].text}]},
+    fetchImpl:async(_target,options)=>{
+      body=JSON.parse(options.body);
+      return new Response(JSON.stringify(fixture()),{status:200});
+    }
+  });
+  assert.equal(result.outcome,"answered");
+  assert.match(body.instructions,/answer without that action is incomplete/);
+  assert.match(body.instructions,/Do not repeat the conclusion in a closing summary/);
+});
+
 test("review gets bounded independently fetched passages while API mocks stay separate", async () => {
   let apiCalls=0;
   let sourceCalls=0;

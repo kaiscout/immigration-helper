@@ -382,7 +382,8 @@ Visitor-visa follow-up contract for this request:
 - Answer the newest user statement directly while preserving their citizenship, current residence, tourism/visit goal, and first-application status when those facts appear in recent user turns.
 - Lead with any verified current nationality-based restriction that changes the ordinary visitor-visa path. Explain the practical effect on this person's facts in plain language.
 - If the user says they have only one citizenship, address whether the dual-national exception remains available. If they also say this is their first U.S. visa application, address whether the valid-visa-on-the-effective-date protection fits their facts.
-- Give one clear immediate next step. Do not leave the user with policy text but no practical direction.
+- End with one explicit, clear immediate next step using natural next-step language in the requested language. The answer is incomplete without telling the user what to do now.
+- Do not repeat the same conclusion in a closing summary. Prefer a concise conversational progression: direct answer, short explanation, next step.
 - Do not introduce visa bonds, reciprocity schedules, fees, form steps, or unrelated categories unless the current question asks about them or they are necessary to the immediate next step.
 - Do not recite routine DS-160 steps as though they solve the problem when a verified issuance suspension controls the route.
 `;

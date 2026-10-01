@@ -30,14 +30,15 @@ if (shouldGenerateFixtures && !process.env.OPENAI_API_KEY) {
 const entrySchema = {
   type: "object",
   additionalProperties: false,
-  required: ["statements", "context", "nigeriaTokens", "portugalTokens", "visitorTokens", "firstApplicationTokens"],
+  required: ["statements", "context", "nigeriaTokens", "portugalTokens", "visitorTokens", "firstApplicationTokens", "nextStepTokens"],
   properties: {
     statements: {type:"array",minItems:4,maxItems:4,items:{type:"string"}},
     context: {type:"array",minItems:4,maxItems:4,items:{type:"string"}},
     nigeriaTokens: {type:"array",minItems:1,maxItems:4,items:{type:"string"}},
     portugalTokens: {type:"array",minItems:1,maxItems:4,items:{type:"string"}},
     visitorTokens: {type:"array",minItems:1,maxItems:6,items:{type:"string"}},
-    firstApplicationTokens: {type:"array",minItems:1,maxItems:4,items:{type:"string"}}
+    firstApplicationTokens: {type:"array",minItems:1,maxItems:4,items:{type:"string"}},
+    nextStepTokens: {type:"array",minItems:2,maxItems:6,items:{type:"string"}}
   }
 };
 
@@ -61,7 +62,7 @@ const response = await fetch("https://api.openai.com/v1/responses", {
         properties:Object.fromEntries(allCodes.map(code => [code,entrySchema]))
       }
     }},
-    instructions: "You create natural multilingual test fixtures. Translate meaning faithfully; never add legal guidance or answer the questions. Use each requested language's normal script and conversational grammar. Keep U.S. visa names such as B-1/B-2 untranslated only when normal. Token arrays must include short native-script words or inflected forms likely to appear in an answer for Nigeria/Nigerian, Portugal/Portuguese residence, tourism/visitor visa, and a first visa application.",
+    instructions: "You create natural multilingual test fixtures. Translate meaning faithfully; never add legal guidance or answer the questions. Use each requested language's normal script and conversational grammar. Keep U.S. visa names such as B-1/B-2 untranslated only when normal. Fact token arrays must include short native-script words or inflected forms likely to appear in an answer for Nigeria/Nigerian, Portugal/Portuguese residence, tourism/visitor visa, and a first visa application. nextStepTokens must contain natural localized phrases such as 'next step', 'check the official guidance', or 'monitor the official updates' that prove the answer gave the user an action to take now.",
     input: JSON.stringify({
       languages:allCodes,
       statements:[
@@ -163,6 +164,7 @@ const runCase = async (code) => {
       portugalPreserved: casePilotAnswerIncludesAnyFact(answer, fixture.portugalTokens),
       visitorGoalPreserved: casePilotAnswerIncludesAnyFact(answer, fixture.visitorTokens) || /B-?1\s*\/\s*B-?2|B-?2/iu.test(answer),
       firstApplicationPreserved: casePilotAnswerIncludesAnyFact(answer, fixture.firstApplicationTokens),
+      actionableNextStep: casePilotAnswerIncludesAnyFact(answer, fixture.nextStepTokens),
       controllingSource: sources.some(source => {
         try {
           const url = new URL(source?.url || "");
@@ -181,12 +183,27 @@ const runCase = async (code) => {
 
 const results = [];
 let nextIndex = 0;
+const interCaseDelayMs = Math.max(0, Math.min(
+  120_000,
+  Number.parseInt(process.env.CASEPILOT_VISITOR_DELAY_MS || "0", 10) || 0
+));
 const worker = async () => {
   while (nextIndex < codes.length) {
     const code = codes[nextIndex++];
     const result = await runCase(code);
     results.push(result);
-    console.log(JSON.stringify({code,pass:result.pass,failures:result.failures,durationMs:result.durationMs}));
+    console.log(JSON.stringify({
+      code,
+      status:result.status,
+      upstreamStatus:result.body?.upstream_status,
+      degradedReason:result.body?.degraded_reason,
+      pass:result.pass,
+      failures:result.failures,
+      durationMs:result.durationMs
+    }));
+    if (interCaseDelayMs && nextIndex < codes.length) {
+      await new Promise(resolve => setTimeout(resolve, interCaseDelayMs));
+    }
   }
 };
 const concurrency = Math.max(1, Math.min(

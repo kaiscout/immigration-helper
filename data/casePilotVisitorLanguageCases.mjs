@@ -202,6 +202,39 @@ const factTokens = {
   sl: ["Nigerija", "Portugalska", "turiz", "prv"], sv: ["Nigeria", "Portugal", "turis", "första"]
 };
 
+const nextStepTokens = {
+  en: ["next step", "check the official", "monitor the official"],
+  tr: ["sonraki adım", "kontrol edin", "takip edin"],
+  es: ["siguiente paso", "revise", "vigile"],
+  zh: ["下一步", "请先", "查看官方", "关注官方"],
+  hi: ["अगला कदम", "जाँचें", "देखें"],
+  fr: ["prochaine étape", "vérifiez", "surveillez"],
+  ar: ["الخطوة التالية", "تحقق", "راجع", "تابع"],
+  bn: ["পরবর্তী পদক্ষেপ", "যাচাই করুন", "দেখুন"],
+  ru: ["следующий шаг", "проверьте", "следите"],
+  pt: ["próximo passo", "verifique", "acompanhe"],
+  it: ["prossimo passo", "verifichi", "controlli"],
+  bg: ["следващата стъпка", "проверете", "следете"],
+  hr: ["sljedeći korak", "provjerite", "pratite"],
+  cs: ["další krok", "zkontrolujte", "sledujte"],
+  da: ["næste skridt", "kontrollér", "følg"],
+  nl: ["volgende stap", "controleer", "volg"],
+  et: ["järgmine samm", "kontrollige", "jälgige"],
+  fi: ["seuraava askel", "tarkista", "seuraa"],
+  de: ["nächster schritt", "prüfen sie", "beobachten sie"],
+  el: ["επόμενο βήμα", "ελέγξτε", "παρακολουθείτε"],
+  hu: ["következő lépés", "ellenőrizze", "figyelje"],
+  ga: ["chéad chéim eile", "seiceáil", "coinnigh súil"],
+  lv: ["nākamais solis", "pārbaudiet", "sekojiet"],
+  lt: ["kitas žingsnis", "patikrinkite", "stebėkite"],
+  mt: ["pass li jmiss", "iċċekkja", "segwi"],
+  pl: ["następny krok", "sprawdź", "śledź"],
+  ro: ["următorul pas", "verificați", "urmăriți"],
+  sk: ["ďalší krok", "skontrolujte", "sledujte"],
+  sl: ["naslednji korak", "preverite", "spremljajte"],
+  sv: ["nästa steg", "kontrollera", "följ"]
+};
+
 export const CASEPILOT_VISITOR_LANGUAGE_CASES = Object.freeze(Object.fromEntries(
   Object.entries(cases).map(([code, statements]) => {
     const [nigeria, portugal, visitor, firstApplication] = factTokens[code];
@@ -212,7 +245,8 @@ export const CASEPILOT_VISITOR_LANGUAGE_CASES = Object.freeze(Object.fromEntries
       nigeriaTokens: Object.freeze([nigeria]),
       portugalTokens: Object.freeze([portugal]),
       visitorTokens: Object.freeze([visitor]),
-      firstApplicationTokens: Object.freeze([firstApplication])
+      firstApplicationTokens: Object.freeze([firstApplication]),
+      nextStepTokens: Object.freeze([...nextStepTokens[code]])
     })];
   })
 ));
