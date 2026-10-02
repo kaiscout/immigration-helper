@@ -18,6 +18,11 @@ OPENAI_REVIEW_MODEL=gpt-5.6-luna
 AI_PROXY_CLIENT_TOKEN=your_generated_app_access_token
 REQUIRE_AI_GENERATION=true
 REQUIRE_CLIENT_TOKEN=true
+REQUIRE_AI_ACCESS_CONTROL=false
+# Production: set both values and change REQUIRE_AI_ACCESS_CONTROL to true.
+REDIS_URL=
+REVENUECAT_API_KEY=
+PLUS_ENTITLEMENT_ID=immigration_helper_plus
 PORT=8787
 ```
 
@@ -86,8 +91,10 @@ npm start
 
 - Deploy `server/index.mjs` behind HTTPS.
 - Restrict `ALLOWED_ORIGIN` where the hosting platform supports a stable web origin.
-- Keep the built-in rate limit enabled and add hosting-layer abuse monitoring
-  if traffic grows.
+- Keep the persistent per-installation/IP limits and global daily budget enabled,
+  and add hosting-layer abuse monitoring if traffic grows.
+- Production must provide persistent `REDIS_URL` storage and a server-only
+  `REVENUECAT_API_KEY`; startup intentionally fails closed without either one.
 - Keep `OPENAI_API_KEY` only in server-side secrets.
 - Schedule the resumable crawler periodically and review sitemap changes.
 - USCIS content is general information, not legal advice. The assistant is instructed to avoid eligibility decisions and guarantees.

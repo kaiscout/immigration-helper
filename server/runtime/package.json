@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "franc": "6.2.0"
+    "franc": "6.2.0",
+    "ioredis": "6.0.0"
   }
 }

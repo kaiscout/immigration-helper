@@ -11,7 +11,8 @@
 - [x] App declares iOS non-exempt encryption status as false.
 - [x] App includes in-app privacy and safety screen.
 - [x] App includes legal disclaimer and government non-affiliation language.
-- [x] App includes Immigration Helper Plus paywall, restore purchases, and free AI usage gate.
+- [x] App includes Immigration Helper Plus paywall and restore purchases.
+- [ ] Verify the new server-authoritative free AI quota and Plus entitlement gate against the production backend.
 - [x] Plus paywall links directly to the privacy policy and Apple standard Terms of Use.
 
 ## Before Apple Submission
@@ -50,7 +51,7 @@
 ## Production AI
 
 - [x] Deploy AI backend with the OpenAI key stored server-side.
-- [ ] Deploy the hardened CasePilot backend and verify server version `2026-09-08.1` in production.
+- [ ] Deploy the hardened CasePilot backend and verify the current `server/version.cjs` value in production.
 - [ ] Run `npm run eval:casepilot` against the deployed endpoint and pass all 30 languages.
 - [x] Add first-use AI disclosure and explicit consent.
 - [x] Keep optional checklist sharing off by default.

@@ -1,12 +1,12 @@
 # Immigration Helper Privacy Policy
 
-Effective date: August 24, 2026
+Effective date: October 2, 2026
 
 Immigration Helper is an independent checklist, reminder, and official-resource app. It is not affiliated with USCIS, DHS, or any government agency. It provides general information only and does not provide legal advice.
 
 ## Information Stored On Your Device
 
-The app can save checklist progress, dates, language preference, onboarding status, AI consent choices, reminder-related choices, and File Vault metadata locally on your device. This information is used to show your progress and preferences and help you organize reminders and documents.
+The app can save checklist progress, dates, language preference, onboarding status, AI consent choices, reminder-related choices, an optional Case Profile, and File Vault metadata locally on your device. The optional Case Profile may include the preferred name, citizenship, country of residence, immigration situation, and immigration goal that you choose to enter. This information is used to show your progress and preferences and help you organize reminders, documents, and CasePilot questions.
 
 The app does not operate a user account system. Locally stored checklist data is not sent to the online AI unless you separately enable the optional checklist-sharing setting.
 
@@ -26,9 +26,11 @@ Immigration Helper may offer an optional auto-renewable subscription called Immi
 
 Purchase information is used for app functionality, entitlement and fraud checks, restore-purchase functionality, and RevenueCat subscription analytics such as customer history and charts. It is not used for advertising or cross-app tracking.
 
+The app sends the anonymous RevenueCat app user identifier to Immigration Helper's backend so the backend can verify Plus access with RevenueCat and enforce the monthly free-question allowance. This identifier is not a name, email address, or advertising identifier.
+
 ## Online CasePilot And Consent
 
-Before online AI is enabled, the app presents a disclosure and asks for your permission. If you agree and submit a question, the app sends your question and recent AI conversation through Immigration Helper's backend hosted by Render to OpenAI to generate a response.
+Before online AI is enabled, the app presents a disclosure and asks for your permission. If you agree and submit a question, the app sends your question, recent AI conversation, and any optional Case Profile you saved through Immigration Helper's backend hosted by Render to OpenAI to generate a response.
 
 Sharing saved checklist dates and completed steps with the online AI is optional, starts turned off, and can be changed at any time in Privacy & Safety. You can also withdraw online AI permission. Withdrawing permission stops future online AI transmissions and does not delete your local checklists.
 
@@ -42,10 +44,12 @@ When you choose to use online AI, the following information is processed for app
 
 - Your submitted question.
 - Recent messages in the current AI conversation so the assistant can understand follow-up questions.
+- Any optional Case Profile details you saved so CasePilot can personalize its response. A newer message overrides conflicting profile details.
 - Saved checklist dates and completed steps only if you enable optional checklist sharing.
+- An anonymous RevenueCat app user identifier and a random request identifier used to verify subscription access, enforce the free-question allowance, and prevent duplicate requests.
 - Technical request information that hosting and AI service providers normally process, such as IP address, timestamps, and security or diagnostic metadata.
 
-The app does not attach a user account, advertising identifier, or profile to AI requests.
+The app does not attach a user account or advertising identifier to AI requests. If you choose to save a Case Profile, those self-reported profile details are included only when you request a CasePilot answer.
 
 ## External Links
 
@@ -65,9 +69,9 @@ If you contact the developer for support by email or another external method, yo
 
 ## Data Retention, Controls, And Deletion
 
-Checklist, consent, reminder, and File Vault data stored locally remains in the app until you change or delete it, clear app data, or delete the app. Deleting a File Vault item deletes the app's private copy. Deleting the app may delete all locally stored File Vault files, so keep separate copies of important documents. AI chat is not saved as an account history by Immigration Helper and is cleared when the in-memory app session ends.
+Checklist, Case Profile, consent, reminder, and File Vault data stored locally remains in the app until you change or delete it, clear app data, or delete the app. You can edit or delete the Case Profile from its screen at any time. Deleting a File Vault item deletes the app's private copy. Deleting the app may delete all locally stored File Vault files, so keep separate copies of important documents. AI chat is not saved as an account history by Immigration Helper and is cleared when the in-memory app session ends.
 
-The Immigration Helper backend is designed to process AI request content without intentionally storing the question or answer in an application database. Render and OpenAI may process technical logs and content under their own security and retention practices, including OpenAI's retention described above.
+The Immigration Helper backend is designed to process AI request content without intentionally storing the question or answer in an application database. It temporarily stores pseudonymous hashes, quota and rate-limit counters, request-deduplication records, and short-lived subscription-verification results to control access and protect the service. Render and OpenAI may process technical logs and content under their own security and retention practices, including OpenAI's retention described above.
 
 You can turn off checklist sharing or withdraw AI permission in the app's Privacy & Safety screen. You may contact admin@immigrationhelper.org with a privacy question or deletion request relating to support communications or data controlled by the developer. Data already processed by a service provider may remain for the provider's applicable retention period.
 

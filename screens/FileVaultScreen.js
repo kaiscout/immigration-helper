@@ -25,7 +25,7 @@ import {
   shareVaultFile,
   updateVaultFile
 } from "../data/fileVaultService";
-import { loadSubscriptionState, useSubscriptionPreviewRefresh } from "../data/subscriptionService";
+import { loadSubscriptionState } from "../data/subscriptionService";
 import { showAlert } from "../data/appAlert";
 
 const STATUS_STYLES = {
@@ -291,8 +291,6 @@ export default function FileVaultScreen({ navigation }) {
     const unsubscribe = navigation?.addListener?.("focus", refresh);
     return unsubscribe;
   }, [navigation, refresh]);
-  useSubscriptionPreviewRefresh(navigation, refresh);
-
   if (loading || !accessGranted) {
     return (
       <View style={styles.loadingScreen}>

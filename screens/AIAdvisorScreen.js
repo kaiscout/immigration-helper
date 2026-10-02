@@ -18,9 +18,9 @@ import {
 } from "../data/casePilotIntent";
 import {
   casePilotResponseText as responseOutputText,
+  createCasePilotRequestId,
   fetchCasePilotResponse,
-  recordCasePilotQuestionSafely,
-  shouldCountCasePilotQuestion
+  saveCasePilotUsageSafely
 } from "../data/casePilotResponse";
 import {
   containsSensitiveIdentifier,
@@ -41,10 +41,10 @@ import { openExternalLink } from "../data/externalLinks";
 import { showAlert } from "../data/appAlert";
 import {
   FREE_AI_QUESTION_LIMIT,
+  getCasePilotAccessIdentity,
   loadAiUsage,
   loadSubscriptionState,
-  useSubscriptionPreviewRefresh,
-  recordAiQuestion
+  saveServerAiUsage
 } from "../data/subscriptionService";
 import euLanguageSupport from "../data/euLanguageSupport.json";
 
@@ -438,11 +438,15 @@ function buildAssistantContext(flowStates, lang, t) {
 function aiErrorMessage(status, data, t) {
   const code = data?.error?.code || data?.error?.type || "";
 
+  if (["access_identity_required", "access_identity_unrecognized", "request_id_required"].includes(code)) {
+    return t("ai.requestFailed");
+  }
+
   if (status === 401 || code === "invalid_api_key") {
     return t("ai.configInvalid");
   }
 
-  if (status === 429 || code === "insufficient_quota") {
+  if (status === 429 || code === "insufficient_quota" || code === "daily_service_budget_reached") {
     return t("ai.quotaIssue");
   }
 
@@ -607,7 +611,12 @@ export default function AIAdvisorScreen({ navigation }) {
   ]);
 
   const isPlus = subscription?.isPlus === true;
-  const freeAiRemaining = Math.max(0, FREE_AI_QUESTION_LIMIT - Number(aiUsage?.count || 0));
+  const freeAiRemaining = Math.max(
+    0,
+    Number.isFinite(Number(aiUsage?.remaining))
+      ? Number(aiUsage.remaining)
+      : FREE_AI_QUESTION_LIMIT - Number(aiUsage?.count || 0)
+  );
 
   const loadScreenState = useCallback(async () => {
     try {
@@ -642,8 +651,6 @@ export default function AIAdvisorScreen({ navigation }) {
     const unsubscribe = navigation.addListener?.("focus", loadScreenState);
     return unsubscribe;
   }, [navigation, loadScreenState]);
-  useSubscriptionPreviewRefresh(navigation, loadScreenState);
-
   useEffect(() => {
     scrollRef.current?.scrollToEnd?.({ animated: true });
   }, [messages, loading]);
@@ -822,12 +829,6 @@ export default function AIAdvisorScreen({ navigation }) {
         return;
       }
 
-      if (!isPlus && freeAiRemaining <= 0) {
-        appendAssistant(t("plus.aiLimitReached", { limit: FREE_AI_QUESTION_LIMIT }));
-        navigation.navigate("Paywall", { feature: "aiLimit" });
-        return;
-      }
-
       const {
         conversation: recentConversation,
         userContext
@@ -838,11 +839,15 @@ export default function AIAdvisorScreen({ navigation }) {
         : "";
 
       const sharedChecklistContext = isPlus && aiConsent?.shareChecklist ? contextText : "";
+      const appUserId = await getCasePilotAccessIdentity();
       const { response, data } = await fetchCasePilotResponse(AI_PROXY_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "X-Immigration-Helper-Token": AI_PROXY_CLIENT_TOKEN,
+          "X-CasePilot-App-User-Id": appUserId,
+          "X-CasePilot-Request-Id": createCasePilotRequestId(),
+          ...(isPlus ? { "X-CasePilot-Refresh-Entitlement": "true" } : {}),
           ...(CASEPILOT_TEST_TRACE_SESSION ? {
             "X-CasePilot-Test-Session": CASEPILOT_TEST_TRACE_SESSION
           } : {})
@@ -856,6 +861,16 @@ export default function AIAdvisorScreen({ navigation }) {
           language: i18n.language
         })
       }, { timeoutMs: AI_REQUEST_TIMEOUT_MS });
+
+      if (response.status === 402 && data?.error?.code === "free_limit_reached") {
+        setSubscription((current) => ({ ...current, isPlus: false }));
+        if (data?.access) {
+          setAiUsage(await saveCasePilotUsageSafely(saveServerAiUsage, data.access, aiUsage));
+        }
+        appendAssistant(t("plus.aiLimitReached", { limit: FREE_AI_QUESTION_LIMIT }));
+        navigation.navigate("Paywall", { feature: "aiLimit" });
+        return;
+      }
 
       if (!response.ok) {
         throw new Error(aiErrorMessage(response.status, data, t));
@@ -873,8 +888,11 @@ export default function AIAdvisorScreen({ navigation }) {
         sources
       });
 
-      if (!isPlus && shouldCountCasePilotQuestion(data)) {
-        setAiUsage(await recordCasePilotQuestionSafely(recordAiQuestion, aiUsage));
+      if (data?.access?.isPlus === true) {
+        setSubscription((current) => ({ ...current, isPlus: true }));
+      } else if (data?.access?.usage) {
+        setSubscription((current) => ({ ...current, isPlus: false }));
+        setAiUsage(await saveCasePilotUsageSafely(saveServerAiUsage, data.access, aiUsage));
       }
 
       await appendAssistantProgressively(answer, sources, sections, followups);

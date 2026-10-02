@@ -52,6 +52,9 @@ Keep these identifiers exactly the same across App Store Connect, RevenueCat, EA
    - Monthly package: attach `immigration_helper_plus_monthly`
    - Annual package: attach `immigration_helper_plus_yearly`
 8. Copy the public iOS SDK key.
+9. Create a separate secret API key for the backend with permission to read
+   customer/subscriber entitlement state. Store it only in Render as
+   `REVENUECAT_API_KEY`; never use an `EXPO_PUBLIC_` prefix for this key.
 
 ## EAS Environment Variables
 
@@ -64,10 +67,25 @@ EXPO_PUBLIC_PLUS_ENTITLEMENT_ID=immigration_helper_plus
 EXPO_PUBLIC_PLUS_MONTHLY_PRODUCT_ID=immigration_helper_plus_monthly
 EXPO_PUBLIC_PLUS_YEARLY_PRODUCT_ID=immigration_helper_plus_yearly
 EXPO_PUBLIC_FREE_AI_QUESTION_LIMIT=10
-EXPO_PUBLIC_ENABLE_PLUS_PREVIEW_UNLOCK=false
 ```
 
 The RevenueCat SDK keys are public app configuration values, not private secrets. The private OpenAI key stays server-side only.
+
+## Render Access-Control Variables
+
+Before deploying the hardened backend, create a persistent Render Key Value
+instance and set these server-side values:
+
+```text
+REQUIRE_AI_ACCESS_CONTROL=true
+REDIS_URL=<Render internal Key Value URL>
+REVENUECAT_API_KEY=<secret RevenueCat backend API key>
+PLUS_ENTITLEMENT_ID=immigration_helper_plus
+FREE_AI_QUESTION_LIMIT=10
+```
+
+The server will refuse to start in production if the persistent quota store or
+RevenueCat verification secret is missing.
 
 ## Build And Test
 

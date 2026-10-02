@@ -4,8 +4,9 @@ import test from "node:test";
 
 import {
   casePilotResponseText,
+  createCasePilotRequestId,
   fetchCasePilotResponse,
-  recordCasePilotQuestionSafely,
+  saveCasePilotUsageSafely,
   shouldCountCasePilotQuestion
 } from "../data/casePilotResponse.js";
 
@@ -96,12 +97,14 @@ test("malformed response JSON rejects instead of becoming a successful answer", 
   }), SyntaxError);
 });
 
-test("usage storage failure retains a conservative in-memory count without failing the answer", async () => {
-  const storedUsage = { month: "2026-09", count: 2 };
-  assert.equal(await recordCasePilotQuestionSafely(async () => storedUsage, { count: 1 }), storedUsage);
-  assert.deepEqual(await recordCasePilotQuestionSafely(async () => {
+test("authoritative server usage survives a local storage failure without failing the answer", async () => {
+  const storedUsage = { month: "2026-10", count: 2, limit: 10, remaining: 8 };
+  const access = { usage: { period: "2026-10", used: 2, limit: 10, remaining: 8 } };
+  assert.equal(await saveCasePilotUsageSafely(async () => storedUsage, access, {}), storedUsage);
+  assert.deepEqual(await saveCasePilotUsageSafely(async () => {
     throw new Error("Storage unavailable");
-  }, { month: "2026-09", count: 2 }), { month: "2026-09", count: 3 });
+  }, access, {}), storedUsage);
+  assert.match(createCasePilotRequestId(), /^[A-Za-z0-9_-]{12,}$/);
 });
 
 test("chat holds its sending lock through the complete progressive answer", () => {
@@ -111,7 +114,10 @@ test("chat holds its sending lock through the complete progressive answer", () =
   assert.ok(sendMessage.indexOf("sendingRef.current = true") < sendMessage.indexOf("setMessages("));
   assert.ok(sendMessage.indexOf("await appendAssistantProgressively(") < sendMessage.indexOf("setLoading(false)"));
   assert.match(sendMessage, /finally\s*\{\s*sendingRef\.current = false;\s*setLoading\(false\)/);
-  assert.match(sendMessage, /recordCasePilotQuestionSafely\(recordAiQuestion, aiUsage\)/);
+  assert.match(sendMessage, /"X-CasePilot-App-User-Id": appUserId/);
+  assert.match(sendMessage, /"X-CasePilot-Request-Id": createCasePilotRequestId\(\)/);
+  assert.match(sendMessage, /saveCasePilotUsageSafely\(saveServerAiUsage, data\.access, aiUsage\)/);
+  assert.doesNotMatch(sendMessage, /freeAiRemaining <= 0/);
 });
 
 test("service failures show localized unavailability without a keyword-selected canned answer", () => {

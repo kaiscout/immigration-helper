@@ -21,9 +21,25 @@ services:
         sync: false
       - key: REQUIRE_CLIENT_TOKEN
         value: "true"
+      - key: REQUIRE_AI_ACCESS_CONTROL
+        value: "true"
+      - key: REDIS_URL
+        sync: false
+      - key: REVENUECAT_API_KEY
+        sync: false
+      - key: PLUS_ENTITLEMENT_ID
+        value: immigration_helper_plus
+      - key: FREE_AI_QUESTION_LIMIT
+        value: "10"
+      - key: CASEPILOT_SUBJECT_WINDOW_LIMIT
+        value: "30"
+      - key: CASEPILOT_IP_WINDOW_LIMIT
+        value: "90"
+      - key: CASEPILOT_GLOBAL_DAILY_LIMIT
+        value: "500"
+      - key: CASEPILOT_RATE_WINDOW_SECONDS
+        value: "600"
       - key: USCIS_VECTOR_STORE_ID
         sync: false
       - key: ALLOWED_ORIGIN
-        value: "*"
-      - key: CASEPILOT_TEST_TRACE_SESSION
-        value: casepilot-review-52f1d56f-6dbc-49d2-9d37-f8c1b77ed9e9
+        value: https://kaiscout.github.io

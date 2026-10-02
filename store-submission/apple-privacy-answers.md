@@ -17,7 +17,9 @@ What this includes:
 
 - Questions submitted to CasePilot.
 - Recent messages from the current AI conversation.
+- Optional Case Profile details saved by the user, including preferred name, citizenship, country of residence, immigration situation, and immigration goal.
 - Saved checklist dates and completed steps only when the user enables optional checklist sharing.
+- An anonymous RevenueCat app user identifier and a random request identifier used for entitlement checks, monthly quota enforcement, and duplicate-request prevention.
 
 Purpose:
 
@@ -26,7 +28,7 @@ Purpose:
 
 Linked to user:
 
-- No. The app has no account system and does not attach a profile, advertising identifier, or user identity to AI requests. RevenueCat uses an anonymous app user ID because this app does not provide a custom user ID tied to an identity.
+- No. The app has no account system and does not attach an advertising identifier or known account identity to AI requests. An optional self-reported Case Profile and RevenueCat's anonymous app user ID may accompany a request for personalization and access control, but they are not tied to an Immigration Helper account.
 
 Tracking:
 
@@ -51,6 +53,7 @@ Checklist sharing:
 Other technical data:
 
 - Render and OpenAI may process IP address, timestamps, and security or diagnostic metadata as service providers.
+- The backend temporarily stores pseudonymous hashes, quota and rate-limit counters, request-deduplication records, and short-lived entitlement-verification results; it does not intentionally store question or answer text in an application database.
 - RevenueCat may process purchase history, product and transaction identifiers, subscription and entitlement status, timestamps, an anonymous app-user identifier, and device/app information to operate Immigration Helper Plus, prevent fraud, restore purchases, and provide subscription analytics.
 - Re-check these answers against RevenueCat's current Apple App Privacy guidance whenever the SDK configuration or data integrations change.
 

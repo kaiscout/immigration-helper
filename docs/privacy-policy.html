@@ -19,7 +19,7 @@
   <main>
     <article>
       <h1>Immigration Helper Privacy Policy</h1>
-      <p class="meta">Effective date: October 1, 2026</p>
+      <p class="meta">Effective date: October 2, 2026</p>
       <p>Immigration Helper is an independent checklist, reminder, and official-resource app. It is not affiliated with USCIS, DHS, or any government agency. It provides general information only and does not provide legal advice.</p>
 
       <h2>Information Stored On Your Device</h2>
@@ -36,6 +36,7 @@
       <h2>Optional Subscriptions</h2>
       <p>Immigration Helper may offer an optional auto-renewable subscription called Immigration Helper Plus. Purchases, subscription status, free trials, renewals, cancellations, and restore-purchase requests are handled by the app stores and RevenueCat. RevenueCat may process purchase history, product and transaction identifiers, subscription status, timestamps, an anonymous RevenueCat app user identifier, and device or app information needed to operate subscriptions.</p>
       <p>Purchase information is used for app functionality, entitlement and fraud checks, restore-purchase functionality, and RevenueCat subscription analytics such as customer history and charts. It is not used for advertising or cross-app tracking.</p>
+      <p>The app sends the anonymous RevenueCat app user identifier to Immigration Helper's backend so the backend can verify Plus access with RevenueCat and enforce the monthly free-question allowance. This identifier is not a name, email address, or advertising identifier.</p>
 
       <h2>Online CasePilot And Consent</h2>
       <p>Before online AI is enabled, the app presents a disclosure and asks for your permission. If you agree and submit a question, the app sends your question, recent AI conversation, and any optional Case Profile you saved through Immigration Helper's backend hosted by Render to OpenAI to generate a response.</p>
@@ -50,6 +51,7 @@
         <li>Recent messages in the current AI conversation so the assistant can understand follow-up questions.</li>
         <li>Any optional Case Profile details you saved so CasePilot can personalize its response. A newer message overrides conflicting profile details.</li>
         <li>Saved checklist dates and completed steps only if you enable optional checklist sharing.</li>
+        <li>An anonymous RevenueCat app user identifier and a random request identifier used to verify subscription access, enforce the free-question allowance, and prevent duplicate requests.</li>
         <li>Technical request information that hosting and AI service providers normally process, such as IP address, timestamps, and security or diagnostic metadata.</li>
       </ul>
       <p>The app does not attach a user account or advertising identifier to AI requests. If you choose to save a Case Profile, those self-reported profile details are included only when you request a CasePilot answer.</p>
@@ -66,7 +68,7 @@
 
       <h2>Data Retention, Controls, And Deletion</h2>
       <p>Checklist, Case Profile, consent, reminder, and File Vault data stored locally remains in the app until you change or delete it, clear app data, or delete the app. You can edit or delete the Case Profile from its screen at any time. Deleting a File Vault item deletes the app's private copy. Deleting the app may delete all locally stored File Vault files, so keep separate copies of important documents. AI chat is not saved as an account history by Immigration Helper and is cleared when the in-memory app session ends.</p>
-      <p>The Immigration Helper backend is designed to process AI request content without intentionally storing the question or answer in an application database. Render and OpenAI may process technical logs and content under their own security and retention practices, including OpenAI's retention described above.</p>
+      <p>The Immigration Helper backend is designed to process AI request content without intentionally storing the question or answer in an application database. It temporarily stores pseudonymous hashes, quota and rate-limit counters, request-deduplication records, and short-lived subscription-verification results to control access and protect the service. Render and OpenAI may process technical logs and content under their own security and retention practices, including OpenAI's retention described above.</p>
       <p>You can turn off checklist sharing or withdraw AI permission in the app's Privacy &amp; Safety screen. You may contact admin@immigrationhelper.org with a privacy question or deletion request relating to support communications or data controlled by the developer. Data already processed by a service provider may remain for the provider's applicable retention period.</p>
 
       <h2>Security</h2>

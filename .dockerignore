@@ -7,3 +7,4 @@
 !data/sensitiveIdentifiers.js
 !data/casePilotLanguageGate.mjs
 !data/casePilotReleaseGate.mjs
+!data/casePilotResponseCore.mjs

@@ -1,36 +1,41 @@
 import http from "node:http";
 import { timingSafeEqual } from "node:crypto";
+import Redis from "ioredis";
+import { shouldCountCasePilotQuestion } from "../data/casePilotResponseCore.mjs";
+import {
+  casePilotPayloadForAccess,
+  createCasePilotAccessService,
+  createMemoryAccessStore,
+  createRedisAccessStore,
+  createRevenueCatEntitlementVerifier
+} from "./ai/access-control.mjs";
 import { createAnswerService, SUPPORTED_AI_LANGUAGES } from "./ai/answer.mjs";
 import { createCasePilotTestTracer } from "./ai/test-trace.mjs";
+import { createCorsPolicy, trustedClientAddress } from "./http/security.mjs";
 import { createCorpusIndex, loadCorpus } from "./uscis/search.mjs";
 import SERVER_VERSION from "./version.cjs";
 
 const PORT = Number.parseInt(process.env.PORT || "8787", 10);
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
+const IS_RENDER = process.env.RENDER === "true";
 const OPENAI_API_KEY = (process.env.OPENAI_API_KEY || "").trim();
 const OPENAI_MODEL = (process.env.OPENAI_MODEL || "gpt-5.6-sol").trim();
 const OPENAI_REVIEW_MODEL = (process.env.OPENAI_REVIEW_MODEL || "gpt-5.6-luna").trim();
 const VECTOR_STORE_ID = (process.env.USCIS_VECTOR_STORE_ID || "").trim();
-const ALLOWED_ORIGIN = (process.env.ALLOWED_ORIGIN || "*").trim();
+const ALLOWED_ORIGIN = (process.env.ALLOWED_ORIGIN || (IS_PRODUCTION ? "" : "*")).trim();
 const CLIENT_TOKEN = (
   process.env.AI_PROXY_CLIENT_TOKEN ||
-  (process.env.NODE_ENV !== "production" ? process.env.EXPO_PUBLIC_AI_CLIENT_TOKEN : "") ||
+  (!IS_PRODUCTION ? process.env.EXPO_PUBLIC_AI_CLIENT_TOKEN : "") ||
   ""
 ).trim();
 const REQUIRE_AI_GENERATION = process.env.REQUIRE_AI_GENERATION === "true";
 const REQUIRE_CLIENT_TOKEN = process.env.REQUIRE_CLIENT_TOKEN !== "false";
-// Temporary review-session default. The App Store/EAS environment does not
-// include the matching client header, so ordinary user traffic is never traced.
-// Remove this default together with the preview Plus switch before submission.
-const CASEPILOT_TEST_TRACE_SESSION = (
-  process.env.CASEPILOT_TEST_TRACE_SESSION ||
-  "casepilot-review-52f1d56f-6dbc-49d2-9d37-f8c1b77ed9e9"
-).trim();
+const REQUIRE_AI_ACCESS_CONTROL = process.env.REQUIRE_AI_ACCESS_CONTROL === "true" || IS_PRODUCTION;
+const REDIS_URL = (process.env.REDIS_URL || "").trim();
+const REVENUECAT_API_KEY = (process.env.REVENUECAT_API_KEY || "").trim();
+const PLUS_ENTITLEMENT_ID = (process.env.PLUS_ENTITLEMENT_ID || "immigration_helper_plus").trim();
+const CASEPILOT_TEST_TRACE_SESSION = (process.env.CASEPILOT_TEST_TRACE_SESSION || "").trim();
 const MAX_BODY_BYTES = 64 * 1024;
-const RATE_WINDOW_MS = 10 * 60 * 1000;
-const RATE_LIMIT = 30;
-const MAX_RATE_LIMIT_CLIENTS = 10_000;
-const requestLog = new Map();
-let rateLimitChecks = 0;
 
 if (REQUIRE_AI_GENERATION && !OPENAI_API_KEY) {
   throw new Error("OPENAI_API_KEY is required when REQUIRE_AI_GENERATION=true.");
@@ -40,6 +45,39 @@ if (REQUIRE_CLIENT_TOKEN && !CLIENT_TOKEN) {
     "AI_PROXY_CLIENT_TOKEN is required in production. Local development may use EXPO_PUBLIC_AI_CLIENT_TOKEN."
   );
 }
+if (REQUIRE_AI_ACCESS_CONTROL && (!REDIS_URL || !REVENUECAT_API_KEY)) {
+  throw new Error(
+    "REDIS_URL and REVENUECAT_API_KEY are required when REQUIRE_AI_ACCESS_CONTROL=true."
+  );
+}
+
+const corsPolicy = createCorsPolicy(ALLOWED_ORIGIN, { production: IS_PRODUCTION });
+let accessStore;
+if (REDIS_URL) {
+  const redis = new Redis(REDIS_URL, {
+    enableOfflineQueue: false,
+    lazyConnect: true,
+    maxRetriesPerRequest: 1
+  });
+  await redis.connect();
+  accessStore = createRedisAccessStore(redis);
+} else {
+  accessStore = createMemoryAccessStore();
+}
+
+const verifyEntitlement = createRevenueCatEntitlementVerifier({
+  apiKey: REVENUECAT_API_KEY,
+  entitlementId: PLUS_ENTITLEMENT_ID
+}) || (async () => false);
+const accessService = createCasePilotAccessService({
+  store: accessStore,
+  verifyEntitlement,
+  freeLimit: process.env.FREE_AI_QUESTION_LIMIT,
+  subjectWindowLimit: process.env.CASEPILOT_SUBJECT_WINDOW_LIMIT,
+  ipWindowLimit: process.env.CASEPILOT_IP_WINDOW_LIMIT,
+  globalDailyLimit: process.env.CASEPILOT_GLOBAL_DAILY_LIMIT,
+  windowSeconds: process.env.CASEPILOT_RATE_WINDOW_SECONDS
+});
 
 const corpusIndex = createCorpusIndex(loadCorpus());
 const answerQuestion = createAnswerService({
@@ -53,11 +91,18 @@ const testTracer = createCasePilotTestTracer({
   expectedSession: CASEPILOT_TEST_TRACE_SESSION
 });
 
-function corsHeaders() {
+function responseHeaders(request) {
   return {
-    "Access-Control-Allow-Headers": "Content-Type, X-Immigration-Helper-Token, X-CasePilot-Test-Session",
+    ...corsPolicy.headers(request?.headers?.origin),
+    "Access-Control-Allow-Headers": [
+      "Content-Type",
+      "X-Immigration-Helper-Token",
+      "X-CasePilot-App-User-Id",
+      "X-CasePilot-Request-Id",
+      "X-CasePilot-Refresh-Entitlement",
+      "X-CasePilot-Test-Session"
+    ].join(", "),
     "Access-Control-Allow-Methods": "POST,OPTIONS",
-    "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
     "Cache-Control": "no-store",
     "Content-Type": "application/json; charset=utf-8",
     "Referrer-Policy": "no-referrer",
@@ -74,39 +119,9 @@ function authorized(request) {
     timingSafeEqual(suppliedBuffer, expectedBuffer);
 }
 
-function sendJson(response, status, body) {
-  response.writeHead(status, corsHeaders());
+function sendJson(request, response, status, body) {
+  response.writeHead(status, responseHeaders(request));
   response.end(JSON.stringify(body));
-}
-
-function clientAddress(request) {
-  const forwarded = request.headers["x-forwarded-for"];
-  return String(Array.isArray(forwarded) ? forwarded[0] : forwarded || request.socket.remoteAddress || "unknown")
-    .split(",")[0]
-    .trim();
-}
-
-function withinRateLimit(request) {
-  const now = Date.now();
-  rateLimitChecks += 1;
-  if (rateLimitChecks % 100 === 0) {
-    for (const [key, timestamps] of requestLog) {
-      const recent = timestamps.filter((time) => now - time < RATE_WINDOW_MS);
-      if (recent.length) requestLog.set(key, recent);
-      else requestLog.delete(key);
-    }
-  }
-
-  while (requestLog.size >= MAX_RATE_LIMIT_CLIENTS) {
-    requestLog.delete(requestLog.keys().next().value);
-  }
-
-  const address = clientAddress(request);
-  const recent = (requestLog.get(address) || []).filter((time) => now - time < RATE_WINDOW_MS);
-  if (recent.length >= RATE_LIMIT) return false;
-  recent.push(now);
-  requestLog.set(address, recent);
-  return true;
 }
 
 async function readJson(request) {
@@ -121,15 +136,23 @@ async function readJson(request) {
 }
 
 const server = http.createServer(async (request, response) => {
+  if (!corsPolicy.allows(request.headers.origin)) {
+    sendJson(request, response, 403, {
+      error: { code: "origin_not_allowed", message: "Origin not allowed." }
+    });
+    return;
+  }
+
   if (request.method === "OPTIONS") {
-    response.writeHead(204, corsHeaders());
+    response.writeHead(204, responseHeaders(request));
     response.end();
     return;
   }
 
   if (request.method === "GET" && request.url === "/health") {
-    sendJson(response, 200, {
+    sendJson(request, response, 200, {
       ok: true,
+      accessControlConfigured: Boolean(REDIS_URL && REVENUECAT_API_KEY),
       corpusPages: corpusIndex.pageCount,
       corpusChunks: corpusIndex.documents.length,
       aiGenerationConfigured: Boolean(OPENAI_API_KEY),
@@ -145,40 +168,57 @@ const server = http.createServer(async (request, response) => {
   }
 
   if (request.method !== "POST" || request.url !== "/api/ai") {
-    sendJson(response, 404, { error: { message: "Not found." } });
+    sendJson(request, response, 404, { error: { message: "Not found." } });
     return;
   }
 
   if (!authorized(request)) {
-    sendJson(response, 401, { error: { message: "Unauthorized." } });
+    sendJson(request, response, 401, { error: { message: "Unauthorized." } });
     return;
   }
 
   if (!String(request.headers["content-type"] || "").toLowerCase().startsWith("application/json")) {
-    sendJson(response, 415, { error: { message: "Content-Type must be application/json." } });
-    return;
-  }
-
-  if (!withinRateLimit(request)) {
-    sendJson(response, 429, {
-      error: { message: "Too many requests. Please wait a few minutes and try again." }
-    });
+    sendJson(request, response, 415, { error: { message: "Content-Type must be application/json." } });
     return;
   }
 
   let payload;
+  let authorization;
   try {
     payload = await readJson(request);
-    const result = await answerQuestion(payload);
-    testTracer.record({ headers: request.headers, payload, result });
-    sendJson(response, result.status, result.body);
+    authorization = await accessService.authorize({
+      appUserId: request.headers["x-casepilot-app-user-id"],
+      requestId: request.headers["x-casepilot-request-id"],
+      refreshEntitlement: request.headers["x-casepilot-refresh-entitlement"] === "true",
+      clientAddress: trustedClientAddress(request, { trustForwardedFor: IS_RENDER })
+    });
+    if (!authorization.allowed) {
+      sendJson(request, response, authorization.status, authorization.body);
+      return;
+    }
+
+    const authorizedPayload = casePilotPayloadForAccess(payload, authorization);
+    const result = await answerQuestion(authorizedPayload);
+    const countQuestion = shouldCountCasePilotQuestion(result.body);
+    await accessService.finalize(authorization.reservation, {
+      countQuestion,
+      countGlobal: result.status >= 200 && result.status < 300
+    });
+    testTracer.record({ headers: request.headers, payload: authorizedPayload, result });
+    sendJson(request, response, result.status, {
+      ...result.body,
+      ...(countQuestion ? { access: authorization.access } : {})
+    });
   } catch (error) {
+    if (authorization?.allowed) {
+      await accessService.finalize(authorization.reservation, { countQuestion: false }).catch(() => {});
+    }
     if (error.message === "REQUEST_TOO_LARGE") {
-      sendJson(response, 413, { error: { message: "Request body is too large." } });
+      sendJson(request, response, 413, { error: { message: "Request body is too large." } });
       return;
     }
     if (error instanceof SyntaxError) {
-      sendJson(response, 400, { error: { message: "Invalid JSON request." } });
+      sendJson(request, response, 400, { error: { message: "Invalid JSON request." } });
       return;
     }
     console.error("AI request failed:", error?.message || error);
@@ -187,7 +227,7 @@ const server = http.createServer(async (request, response) => {
       payload,
       result: { status: 500, body: { degraded: true, degraded_reason: "server_error" } }
     });
-    sendJson(response, 500, { error: { message: "The AI service could not answer right now." } });
+    sendJson(request, response, 500, { error: { message: "The AI service could not answer right now." } });
   }
 });
 
@@ -199,9 +239,15 @@ server.listen(PORT, "0.0.0.0", () => {
   );
 });
 
+let shuttingDown = false;
 function shutdown(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
   console.log(`${signal} received. Closing USCIS AI proxy.`);
-  server.close(() => process.exit(0));
+  server.close(async () => {
+    await accessService.close().catch(() => {});
+    process.exit(0);
+  });
   setTimeout(() => process.exit(1), 10_000).unref();
 }
 

@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const AI_CONSENT_KEY = "aiDataConsentV1";
-export const AI_CONSENT_VERSION = 1;
+export const AI_CONSENT_VERSION = 2;
 
 export async function loadAiConsent() {
   try {

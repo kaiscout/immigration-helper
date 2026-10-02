@@ -24,7 +24,6 @@ import { COLORS } from "./constants/theme";
 import { loadPreferredLanguage } from "./data/languagePreference";
 import LanguageDropdown from "./components/LanguageDropdown";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import SubscriptionPreviewButton from "./components/SubscriptionPreviewButton";
 
 const Stack = createNativeStackNavigator();
 
@@ -153,7 +152,6 @@ export default function App() {
         />
       </Stack.Navigator>
     </NavigationContainer>
-    {__DEV__ && <SubscriptionPreviewButton />}
     </View>
     </SafeAreaProvider>
   );

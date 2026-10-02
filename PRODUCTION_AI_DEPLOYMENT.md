@@ -11,8 +11,12 @@ must exist only in Render and must never use an `EXPO_PUBLIC_` prefix.
 4. Generate an app access token with `openssl rand -hex 32`, then set the same
    value as `AI_PROXY_CLIENT_TOKEN` in Render and
    `EXPO_PUBLIC_AI_CLIENT_TOKEN` in EAS.
-5. Leave `USCIS_VECTOR_STORE_ID` blank unless a vector store is configured.
-6. Deploy and verify:
+5. Create a persistent Render Key Value instance. Set its internal connection
+   URL as the secret `REDIS_URL` value on `immigration-helper-ai`.
+6. Create a secret RevenueCat API key that can read customer/subscriber state,
+   and set it only in Render as `REVENUECAT_API_KEY`.
+7. Leave `USCIS_VECTOR_STORE_ID` blank unless a vector store is configured.
+8. Deploy and verify that `/health` reports `accessControlConfigured: true`:
 
    ```text
    https://immigration-helper-ai.onrender.com/health
@@ -39,7 +43,10 @@ npx eas-cli@latest env:create production \
 `EXPO_PUBLIC_AI_PROXY_URL` is intentionally public. It identifies the app's
 backend endpoint and contains no secret. The client token is embedded in the
 app and only deters casual endpoint abuse. `OPENAI_API_KEY` stays in Render and
-is the only credential that authorizes OpenAI billing.
+is the only credential that authorizes OpenAI billing. The server independently
+checks RevenueCat entitlement state and keeps free-tier quota, rate-limit, daily
+budget, and duplicate-request counters in persistent Key Value storage before
+starting a billable AI request.
 
 Builds made with the production EAS profile use the production environment:
 

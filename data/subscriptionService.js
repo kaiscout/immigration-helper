@@ -1,6 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
-import { useEffect, useSyncExternalStore } from "react";
 import {
   checkMonthlyTrialEligibility,
   findConfiguredPlusPackage,
@@ -23,47 +22,10 @@ export const FREE_AI_QUESTION_LIMIT = Number.parseInt(
   process.env.EXPO_PUBLIC_FREE_AI_QUESTION_LIMIT || "10",
   10
 );
-export const PLUS_PREVIEW_UNLOCKED = Boolean(
-  typeof __DEV__ !== "undefined" &&
-  __DEV__ &&
-  String(process.env.EXPO_PUBLIC_ENABLE_PLUS_PREVIEW_UNLOCK || "").trim().toLowerCase() === "true"
-);
 
 const PLUS_STATUS_KEY = "immigrationHelperPlusStatusV1";
 const AI_USAGE_KEY = "immigrationHelperAiUsageV1";
-export const SUBSCRIPTION_PREVIEW_ENABLED = typeof __DEV__ !== "undefined" && __DEV__;
-let previewMode = PLUS_PREVIEW_UNLOCKED ? "plus" : null;
-const previewListeners = new Set();
-const subscribePreview = (listener) => {
-  previewListeners.add(listener);
-  return () => previewListeners.delete(listener);
-};
-const previewSnapshot = () => SUBSCRIPTION_PREVIEW_ENABLED ? previewMode : null;
-export const useSubscriptionPreviewMode = () =>
-  useSyncExternalStore(subscribePreview, previewSnapshot, () => null);
-
-export function setSubscriptionPreviewMode(mode) {
-  if (!SUBSCRIPTION_PREVIEW_ENABLED || !["free", "plus"].includes(mode)) return;
-  previewMode = mode;
-  previewListeners.forEach((listener) => listener());
-}
-
-// Refresh only the visible screen; hidden paid screens must not redirect the
-// currently visible route. Switching modes preserves chat and form state.
-export function useSubscriptionPreviewRefresh(navigation, refresh) {
-  useEffect(() => {
-    let cleanup;
-    const unsubscribe = subscribePreview(() => {
-      if (navigation?.isFocused && !navigation.isFocused()) return;
-      if (typeof cleanup === "function") cleanup();
-      cleanup = refresh();
-    });
-    return () => {
-      unsubscribe();
-      if (typeof cleanup === "function") cleanup();
-    };
-  }, [navigation, refresh]);
-}
+const ACCESS_IDENTITY_KEY = "immigrationHelperCasePilotIdentityV1";
 
 const revenueCatKey = () => {
   const key = Platform.OS === "ios"
@@ -85,15 +47,6 @@ const defaultSubscriptionState = {
   managementUrl: null
 };
 
-const withPreviewUnlock = (state) => SUBSCRIPTION_PREVIEW_ENABLED && previewMode !== null
-  ? {
-      ...state,
-      isPlus: previewMode === "plus",
-      isPreview: true,
-      storeAvailable: false
-    }
-  : state;
-
 async function loadCachedSubscriptionState() {
   try {
     const raw = await AsyncStorage.getItem(PLUS_STATUS_KEY);
@@ -104,9 +57,9 @@ async function loadCachedSubscriptionState() {
       isPlus: hasUnexpiredCachedEntitlement(stored),
       isPreview: false
     };
-    return withPreviewUnlock(sanitized);
+    return sanitized;
   } catch {
-    return withPreviewUnlock(defaultSubscriptionState);
+    return defaultSubscriptionState;
   }
 }
 
@@ -114,12 +67,12 @@ async function saveSubscriptionState(next) {
   const state = {
     ...defaultSubscriptionState,
     ...next,
-    isPlus: next?.isPreview === true ? false : next?.isPlus === true,
+    isPlus: next?.isPlus === true,
     isPreview: false,
     checkedAt: new Date().toISOString()
   };
   await AsyncStorage.setItem(PLUS_STATUS_KEY, JSON.stringify(state));
-  return withPreviewUnlock(state);
+  return state;
 }
 
 let purchasesModulePromise = null;
@@ -160,9 +113,6 @@ export async function loadSubscriptionState() {
 }
 
 export async function refreshSubscriptionState() {
-  if (SUBSCRIPTION_PREVIEW_ENABLED && previewMode !== null) {
-    return withPreviewUnlock(defaultSubscriptionState);
-  }
   const Purchases = await configurePurchases();
   if (!Purchases?.getCustomerInfo) {
     return saveSubscriptionState({
@@ -176,6 +126,38 @@ export async function refreshSubscriptionState() {
   return saveSubscriptionState(
     subscriptionStateFromCustomerInfo(customerInfo, PLUS_ENTITLEMENT_ID)
   );
+}
+
+const randomAccessIdentity = () => {
+  const bytes = new Uint8Array(18);
+  if (globalThis.crypto?.getRandomValues) {
+    globalThis.crypto.getRandomValues(bytes);
+  } else {
+    for (let index = 0; index < bytes.length; index += 1) {
+      bytes[index] = Math.floor(Math.random() * 256);
+    }
+  }
+  return `fallback_${Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("")}`;
+};
+
+async function getFallbackAccessIdentity() {
+  const stored = String(await AsyncStorage.getItem(ACCESS_IDENTITY_KEY) || "").trim();
+  if (stored) return stored;
+  const created = randomAccessIdentity();
+  await AsyncStorage.setItem(ACCESS_IDENTITY_KEY, created);
+  return created;
+}
+
+export async function getCasePilotAccessIdentity() {
+  const Purchases = await configurePurchases();
+  if (Purchases?.getAppUserID) {
+    const appUserId = String(await Purchases.getAppUserID() || "").trim();
+    if (appUserId) return appUserId;
+  }
+
+  const developmentBuild = typeof __DEV__ !== "undefined" && __DEV__;
+  if (Platform.OS === "web" || developmentBuild) return getFallbackAccessIdentity();
+  throw new Error("access_identity_unavailable");
 }
 
 export async function getPlusOfferings() {
@@ -250,23 +232,41 @@ export async function loadAiUsage() {
     const parsed = raw ? JSON.parse(raw) : {};
     const month = usageMonth();
     return parsed.month === month
-      ? { month, count: Number(parsed.count || 0) }
-      : { month, count: 0 };
+      ? {
+          month,
+          count: Number(parsed.count || 0),
+          limit: Number(parsed.limit || FREE_AI_QUESTION_LIMIT),
+          remaining: Number.isFinite(Number(parsed.remaining))
+            ? Math.max(0, Number(parsed.remaining))
+            : Math.max(0, FREE_AI_QUESTION_LIMIT - Number(parsed.count || 0))
+        }
+      : { month, count: 0, limit: FREE_AI_QUESTION_LIMIT, remaining: FREE_AI_QUESTION_LIMIT };
   } catch {
-    return { month: usageMonth(), count: 0 };
+    return {
+      month: usageMonth(),
+      count: 0,
+      limit: FREE_AI_QUESTION_LIMIT,
+      remaining: FREE_AI_QUESTION_LIMIT
+    };
   }
 }
 
 export async function getRemainingFreeAiQuestions() {
   const usage = await loadAiUsage();
-  return Math.max(0, FREE_AI_QUESTION_LIMIT - usage.count);
+  return Math.max(0, Number(usage.remaining));
 }
 
-export async function recordAiQuestion() {
-  const current = await loadAiUsage();
+export async function saveServerAiUsage(access) {
+  const usage = access?.usage;
+  if (!usage || typeof usage !== "object") return loadAiUsage();
+  const month = String(usage.period || "");
+  const limit = Math.max(1, Number(usage.limit || FREE_AI_QUESTION_LIMIT));
+  const count = Math.max(0, Math.min(limit, Number(usage.used || 0)));
   const next = {
-    month: current.month,
-    count: current.count + 1
+    month,
+    count,
+    limit,
+    remaining: Math.max(0, Math.min(limit, Number(usage.remaining ?? (limit - count))))
   };
   await AsyncStorage.setItem(AI_USAGE_KEY, JSON.stringify(next));
   return next;

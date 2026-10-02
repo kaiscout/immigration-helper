@@ -8,7 +8,7 @@ import { OFFICIAL_LINKS } from "../constants/officialLinks";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
 import { openExternalLink } from "../data/externalLinks";
 import { showAlert } from "../data/appAlert";
-import { loadSubscriptionState, useSubscriptionPreviewRefresh } from "../data/subscriptionService";
+import { loadSubscriptionState } from "../data/subscriptionService";
 
 export default function PrivacyScreen({ navigation }) {
   const { t } = useTranslation();
@@ -36,8 +36,6 @@ export default function PrivacyScreen({ navigation }) {
     const unsubscribe = navigation.addListener?.("focus", loadConsent);
     return unsubscribe;
   }, [navigation, loadConsent]);
-  useSubscriptionPreviewRefresh(navigation, loadConsent);
-
   const changeChecklistSharing = async (value) => {
     if (value && !subscription?.isPlus) {
       navigation.navigate("Paywall", { feature: "checklistAi" });

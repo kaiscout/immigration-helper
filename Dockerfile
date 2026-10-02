@@ -14,6 +14,7 @@ COPY data/euLanguageSupport.json ./data/euLanguageSupport.json
 COPY data/sensitiveIdentifiers.js ./data/sensitiveIdentifiers.js
 COPY data/casePilotLanguageGate.mjs ./data/casePilotLanguageGate.mjs
 COPY data/casePilotReleaseGate.mjs ./data/casePilotReleaseGate.mjs
+COPY data/casePilotResponseCore.mjs ./data/casePilotResponseCore.mjs
 
 EXPOSE 10000
 

@@ -1,36 +1,4 @@
-export function shouldCountCasePilotQuestion(data) {
-  return Boolean(
-    casePilotResponseText(data) &&
-    data?.degraded !== true &&
-    data?.answer_profile?.degraded !== true
-  );
-}
-
-export function casePilotResponseText(data, fallback = "") {
-  const text = typeof data?.output_text === "string" && data.output_text.trim()
-    ? data.output_text.trim()
-    : (Array.isArray(data?.output) ? data.output : [])
-      .flatMap((item) => Array.isArray(item?.content) ? item.content : [])
-      .filter((content) => content?.type === "output_text" && typeof content.text === "string")
-      .map((content) => content.text.trim())
-      .filter(Boolean)
-      .join("\n\n");
-
-  const cleaned = (text || fallback)
-    .replace(/(?:cite|filecite)[^]+/g, "")
-    .replace(/\s*\(\s*\[\s*\]\(\s*\)\s*\)/g, "")
-    .replace(/\[\s*\]\(\s*(?:https?:\/\/[^)]*)?\s*\)/g, "")
-    .replace(/\[([^\]]+)\]\(https?:\/\/[^)]+\)/g, "$1")
-    .replace(/\s*\((?:[a-z0-9-]+\.)*(?:uscis|state|cbp|dhs|ice|justice|dol)\.gov\)/gi, "")
-    .replace(/\*\*([^*]+)\*\*/g, "$1")
-    .replace(/^#{1,6}\s+/gm, "")
-    .replace(/[ \t]{2,}/g, " ")
-    .replace(/[ \t]+([,.;:!?])/g, "$1")
-    .replace(/[ \t]+\n/g, "\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-  return cleaned || fallback;
-}
+export { casePilotResponseText, shouldCountCasePilotQuestion } from "./casePilotResponseCore.mjs";
 
 // Keep the deadline active until the response body has arrived and been read.
 // fetch() alone resolves as soon as headers arrive, which is not an answer yet.
@@ -50,16 +18,23 @@ export async function fetchCasePilotResponse(url, options, {
   }
 }
 
-export async function recordCasePilotQuestionSafely(recordQuestion, currentUsage) {
+export function createCasePilotRequestId() {
+  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+  return [Date.now().toString(36), Math.random().toString(36).slice(2), Math.random().toString(36).slice(2)]
+    .join("_");
+}
+
+export async function saveCasePilotUsageSafely(saveUsage, access, currentUsage) {
   try {
-    return await recordQuestion();
+    return await saveUsage(access);
   } catch {
-    // Storage trouble must not discard an answer that was already generated.
-    // Keep the allowance conservative in memory without logging conversation data.
-    const count = Number(currentUsage?.count);
+    const usage = access?.usage;
+    if (!usage) return currentUsage;
     return {
-      ...currentUsage,
-      count: (Number.isFinite(count) ? Math.max(0, count) : 0) + 1
+      month: String(usage.period || currentUsage?.month || ""),
+      count: Math.max(0, Number(usage.used || 0)),
+      limit: Math.max(1, Number(usage.limit || currentUsage?.limit || 10)),
+      remaining: Math.max(0, Number(usage.remaining || 0))
     };
   }
 }

@@ -81,19 +81,34 @@ test("subscription plans advertise the monthly trial and yearly best value accur
   assert.doesNotMatch(service, /offerings\.packages\[0\]/);
 });
 
-test("Plus preview access is restricted to development builds", async () => {
-  const subscriptionService = await readProjectFile("data/subscriptionService.js");
+test("release source has no preview entitlement override and retains expiry validation", async () => {
+  const [subscriptionService, app] = await Promise.all([
+    readProjectFile("data/subscriptionService.js"),
+    readProjectFile("App.js")
+  ]);
 
-  assert.match(subscriptionService, /typeof __DEV__ !== "undefined"/);
-  assert.match(subscriptionService, /__DEV__ &&/);
-  assert.match(subscriptionService, /EXPO_PUBLIC_ENABLE_PLUS_PREVIEW_UNLOCK/);
+  assert.doesNotMatch(subscriptionService, /PLUS_PREVIEW|PreviewMode|setSubscriptionPreview/);
+  assert.doesNotMatch(app, /SubscriptionPreviewButton/);
   assert.match(subscriptionService, /hasUnexpiredCachedEntitlement\(stored\)/);
   assert.match(subscriptionService, /import \{[\s\S]*hasUnexpiredCachedEntitlement/);
   const subscriptionCore = await readProjectFile("data/subscriptionCore.mjs");
   assert.match(subscriptionCore, /state\?\.isPreview !== true/);
   assert.match(subscriptionCore, /expirationTime > now/);
-  assert.match(subscriptionService, /isPlus: next\?\.isPreview === true \? false/);
-  assert.match(subscriptionService, /isPreview: false,[\s\S]*?checkedAt:/);
+  assert.match(subscriptionService, /getAppUserID/);
+  assert.match(subscriptionService, /saveServerAiUsage/);
+});
+
+test("public and submission privacy policies disclose the same Case Profile and quota processing", async () => {
+  const policies = await Promise.all([
+    readProjectFile("docs/privacy-policy.html"),
+    readProjectFile("store-submission/privacy-policy.html"),
+    readProjectFile("store-submission/privacy-policy.md")
+  ]);
+  for (const policy of policies) {
+    assert.match(policy, /preferred name, citizenship, country of residence, immigration situation, and immigration goal/i);
+    assert.match(policy, /anonymous RevenueCat app user identifier/i);
+    assert.match(policy, /quota and rate-limit counters/i);
+  }
 });
 
 test("Plus members can open the restored workspace and File Vault routes", async () => {
