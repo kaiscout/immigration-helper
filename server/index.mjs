@@ -1,12 +1,11 @@
 import http from "node:http";
 import { timingSafeEqual } from "node:crypto";
-import Redis from "ioredis";
 import { shouldCountCasePilotQuestion } from "../data/casePilotResponseCore.mjs";
 import {
   casePilotPayloadForAccess,
   createCasePilotAccessService,
+  createFileAccessStore,
   createMemoryAccessStore,
-  createRedisAccessStore,
   createRevenueCatEntitlementVerifier
 } from "./ai/access-control.mjs";
 import { createAnswerService, SUPPORTED_AI_LANGUAGES } from "./ai/answer.mjs";
@@ -31,7 +30,7 @@ const CLIENT_TOKEN = (
 const REQUIRE_AI_GENERATION = process.env.REQUIRE_AI_GENERATION === "true";
 const REQUIRE_CLIENT_TOKEN = process.env.REQUIRE_CLIENT_TOKEN !== "false";
 const REQUIRE_AI_ACCESS_CONTROL = process.env.REQUIRE_AI_ACCESS_CONTROL === "true" || IS_PRODUCTION;
-const REDIS_URL = (process.env.REDIS_URL || "").trim();
+const ACCESS_STORE_PATH = (process.env.CASEPILOT_ACCESS_STORE_PATH || "").trim();
 const REVENUECAT_API_KEY = (process.env.REVENUECAT_API_KEY || "").trim();
 const PLUS_ENTITLEMENT_ID = (process.env.PLUS_ENTITLEMENT_ID || "immigration_helper_plus").trim();
 const CASEPILOT_TEST_TRACE_SESSION = (process.env.CASEPILOT_TEST_TRACE_SESSION || "").trim();
@@ -45,25 +44,16 @@ if (REQUIRE_CLIENT_TOKEN && !CLIENT_TOKEN) {
     "AI_PROXY_CLIENT_TOKEN is required in production. Local development may use EXPO_PUBLIC_AI_CLIENT_TOKEN."
   );
 }
-if (REQUIRE_AI_ACCESS_CONTROL && (!REDIS_URL || !REVENUECAT_API_KEY)) {
+if (REQUIRE_AI_ACCESS_CONTROL && (!ACCESS_STORE_PATH || !REVENUECAT_API_KEY)) {
   throw new Error(
-    "REDIS_URL and REVENUECAT_API_KEY are required when REQUIRE_AI_ACCESS_CONTROL=true."
+    "CASEPILOT_ACCESS_STORE_PATH and REVENUECAT_API_KEY are required when REQUIRE_AI_ACCESS_CONTROL=true."
   );
 }
 
 const corsPolicy = createCorsPolicy(ALLOWED_ORIGIN, { production: IS_PRODUCTION });
-let accessStore;
-if (REDIS_URL) {
-  const redis = new Redis(REDIS_URL, {
-    enableOfflineQueue: false,
-    lazyConnect: true,
-    maxRetriesPerRequest: 1
-  });
-  await redis.connect();
-  accessStore = createRedisAccessStore(redis);
-} else {
-  accessStore = createMemoryAccessStore();
-}
+const accessStore = ACCESS_STORE_PATH
+  ? await createFileAccessStore({ filePath: ACCESS_STORE_PATH })
+  : createMemoryAccessStore();
 
 const verifyEntitlement = createRevenueCatEntitlementVerifier({
   apiKey: REVENUECAT_API_KEY,
@@ -152,7 +142,7 @@ const server = http.createServer(async (request, response) => {
   if (request.method === "GET" && request.url === "/health") {
     sendJson(request, response, 200, {
       ok: true,
-      accessControlConfigured: Boolean(REDIS_URL && REVENUECAT_API_KEY),
+      accessControlConfigured: Boolean(ACCESS_STORE_PATH && REVENUECAT_API_KEY),
       corpusPages: corpusIndex.pageCount,
       corpusChunks: corpusIndex.documents.length,
       aiGenerationConfigured: Boolean(OPENAI_API_KEY),

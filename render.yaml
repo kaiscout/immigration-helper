@@ -23,8 +23,8 @@ services:
         value: "true"
       - key: REQUIRE_AI_ACCESS_CONTROL
         value: "true"
-      - key: REDIS_URL
-        sync: false
+      - key: CASEPILOT_ACCESS_STORE_PATH
+        value: /var/data/casepilot-access.json
       - key: REVENUECAT_API_KEY
         sync: false
       - key: PLUS_ENTITLEMENT_ID
@@ -43,3 +43,7 @@ services:
         sync: false
       - key: ALLOWED_ORIGIN
         value: https://kaiscout.github.io
+    disk:
+      name: casepilot-access-data
+      mountPath: /var/data
+      sizeGB: 1

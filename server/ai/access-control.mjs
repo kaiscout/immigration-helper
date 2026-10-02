@@ -1,4 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
+import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
+import path from "node:path";
 
 const DEFAULT_FREE_LIMIT = 10;
 const DEFAULT_SUBJECT_WINDOW_LIMIT = 30;
@@ -98,85 +100,171 @@ export function createMemoryAccessStore({ now = () => Date.now() } = {}) {
   };
 }
 
-const CONSUME_SCRIPT = `
-local current = tonumber(redis.call("GET", KEYS[1]) or "0")
-local limit = tonumber(ARGV[1])
-if current >= limit then
-  return {0, current}
-end
-current = redis.call("INCR", KEYS[1])
-if current == 1 then
-  redis.call("EXPIRE", KEYS[1], tonumber(ARGV[2]))
-end
-return {1, current}
-`;
+const FILE_STORE_VERSION = 1;
 
-const RELEASE_SCRIPT = `
-local current = tonumber(redis.call("GET", KEYS[1]) or "0")
-if current <= 1 then
-  redis.call("DEL", KEYS[1])
-  return 0
-end
-return redis.call("DECR", KEYS[1])
-`;
+const finiteExpiration = (entry) => Number.isFinite(entry?.expiresAt) && entry.expiresAt > 0;
 
-const RELEASE_MANY_ONCE_SCRIPT = `
-local claimed = redis.call("SET", KEYS[1], "1", "NX", "EX", tonumber(ARGV[1]))
-if not claimed then
-  return 0
-end
-for index = 2, #KEYS do
-  local current = tonumber(redis.call("GET", KEYS[index]) or "0")
-  if current <= 1 then
-    redis.call("DEL", KEYS[index])
-  else
-    redis.call("DECR", KEYS[index])
-  end
-end
-return 1
-`;
+const mapFromEntries = (entries, label, validValue) => {
+  if (!Array.isArray(entries)) throw new Error(`Invalid ${label} in CasePilot access store.`);
+  return new Map(entries.map((entry) => {
+    if (
+      !Array.isArray(entry) ||
+      entry.length !== 2 ||
+      typeof entry[0] !== "string" ||
+      !validValue(entry[1])
+    ) {
+      throw new Error(`Invalid ${label} entry in CasePilot access store.`);
+    }
+    return entry;
+  }));
+};
 
-export function createRedisAccessStore(redis) {
-  if (!redis?.eval || !redis?.get || !redis?.set) {
-    throw new Error("A Redis-compatible client is required for CasePilot access control.");
+export async function createFileAccessStore({ filePath, now = () => Date.now() } = {}) {
+  const configuredPath = String(filePath || "");
+  if (!configuredPath || !path.isAbsolute(configuredPath)) {
+    throw new Error("An absolute file path is required for the CasePilot access store.");
   }
+  const resolvedPath = path.resolve(configuredPath);
+
+  await mkdir(path.dirname(resolvedPath), { recursive: true });
+
+  let counters = new Map();
+  let values = new Map();
+  let finalizedReservations = new Map();
+  try {
+    const parsed = JSON.parse(await readFile(resolvedPath, "utf8"));
+    if (parsed?.version !== FILE_STORE_VERSION) {
+      throw new Error("Unsupported CasePilot access store version.");
+    }
+    counters = mapFromEntries(
+      parsed.counters,
+      "counter",
+      (entry) => finiteExpiration(entry) && Number.isSafeInteger(entry.count) && entry.count > 0
+    );
+    values = mapFromEntries(
+      parsed.values,
+      "value",
+      (entry) => finiteExpiration(entry) && Object.hasOwn(entry, "value")
+    );
+    finalizedReservations = mapFromEntries(
+      parsed.finalizedReservations,
+      "reservation",
+      finiteExpiration
+    );
+  } catch (error) {
+    if (error?.code !== "ENOENT") {
+      throw new Error("CasePilot access store could not be loaded safely.", { cause: error });
+    }
+  }
+
+  let queue = Promise.resolve();
+  let fatalError = null;
+  let closed = false;
+
+  const clearExpired = (entry) => entry && entry.expiresAt <= now();
+  const pruneExpired = () => {
+    let changed = false;
+    for (const collection of [counters, values, finalizedReservations]) {
+      for (const [key, entry] of collection) {
+        if (clearExpired(entry)) {
+          collection.delete(key);
+          changed = true;
+        }
+      }
+    }
+    return changed;
+  };
+  const persist = async () => {
+    const temporaryPath = `${resolvedPath}.${process.pid}.${randomUUID()}.tmp`;
+    const payload = JSON.stringify({
+      version: FILE_STORE_VERSION,
+      counters: [...counters],
+      values: [...values],
+      finalizedReservations: [...finalizedReservations]
+    });
+    try {
+      await writeFile(temporaryPath, payload, { encoding: "utf8", mode: 0o600 });
+      await rename(temporaryPath, resolvedPath);
+    } catch (error) {
+      await rm(temporaryPath, { force: true }).catch(() => {});
+      throw error;
+    }
+  };
+  const serialized = (operation) => {
+    const task = queue.then(async () => {
+      if (closed) throw new Error("CasePilot access store is closed.");
+      if (fatalError) throw fatalError;
+      try {
+        return await operation();
+      } catch (error) {
+        fatalError = new Error("CasePilot access store is unavailable.", { cause: error });
+        throw fatalError;
+      }
+    });
+    queue = task.catch(() => {});
+    return task;
+  };
 
   return {
     async consume(key, limit, ttlSeconds) {
-      const result = await redis.eval(CONSUME_SCRIPT, 1, key, limit, ttlSeconds);
-      const allowed = Number(result?.[0]) === 1;
-      const count = Number(result?.[1] || 0);
-      return { allowed, count, remaining: Math.max(0, limit - count) };
+      return serialized(async () => {
+        pruneExpired();
+        const current = counters.get(key);
+        const count = Number(current?.count || 0);
+        if (count >= limit) return { allowed: false, count, remaining: 0 };
+        const next = count + 1;
+        counters.set(key, { count: next, expiresAt: now() + ttlSeconds * 1_000 });
+        await persist();
+        return { allowed: true, count: next, remaining: Math.max(0, limit - next) };
+      });
     },
     async release(key) {
-      await redis.eval(RELEASE_SCRIPT, 1, key);
+      return serialized(async () => {
+        const pruned = pruneExpired();
+        const current = counters.get(key);
+        if (!current) {
+          if (pruned) await persist();
+          return;
+        }
+        current.count = Math.max(0, Number(current.count || 0) - 1);
+        if (current.count === 0) counters.delete(key);
+        await persist();
+      });
     },
     async releaseManyOnce(reservationId, keys, ttlSeconds) {
-      const markerKey = `casepilot:reservation:finalized:${sha256(reservationId)}`;
-      const result = await redis.eval(
-        RELEASE_MANY_ONCE_SCRIPT,
-        keys.length + 1,
-        markerKey,
-        ...keys,
-        ttlSeconds
-      );
-      return Number(result) === 1;
+      return serialized(async () => {
+        pruneExpired();
+        if (finalizedReservations.has(reservationId)) return false;
+        finalizedReservations.set(reservationId, { expiresAt: now() + ttlSeconds * 1_000 });
+        for (const key of keys) {
+          const current = counters.get(key);
+          if (!current) continue;
+          current.count = Math.max(0, Number(current.count || 0) - 1);
+          if (current.count === 0) counters.delete(key);
+        }
+        await persist();
+        return true;
+      });
     },
     async getJson(key) {
-      const value = await redis.get(key);
-      if (!value) return null;
-      try {
-        return JSON.parse(value);
-      } catch {
+      return serialized(async () => {
+        const current = values.get(key);
+        if (!current || !clearExpired(current)) return current?.value ?? null;
+        values.delete(key);
+        await persist();
         return null;
-      }
+      });
     },
     async setJson(key, value, ttlSeconds) {
-      await redis.set(key, JSON.stringify(value), "EX", ttlSeconds);
+      return serialized(async () => {
+        pruneExpired();
+        values.set(key, { value, expiresAt: now() + ttlSeconds * 1_000 });
+        await persist();
+      });
     },
     async close() {
-      if (redis.status === "ready" || redis.status === "connect") await redis.quit();
-      else redis.disconnect?.();
+      await queue;
+      closed = true;
     }
   };
 }

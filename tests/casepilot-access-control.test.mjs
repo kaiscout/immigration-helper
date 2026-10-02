@@ -1,9 +1,13 @@
 import assert from "node:assert/strict";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import test from "node:test";
 
 import {
   casePilotPayloadForAccess,
   createCasePilotAccessService,
+  createFileAccessStore,
   createMemoryAccessStore,
   createRevenueCatEntitlementVerifier,
   normalizeCasePilotAppUserId,
@@ -13,6 +17,15 @@ import { createCorsPolicy, trustedClientAddress } from "../server/http/security.
 
 const identity = "$RCAnonymousID:1234567890abcdef";
 const requestId = (number) => `request_${String(number).padStart(12, "0")}`;
+
+const withTemporaryStore = async (run) => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "casepilot-access-"));
+  try {
+    return await run(path.join(directory, "access.json"));
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+};
 
 const serviceFor = ({ isPlus = false, verifyEntitlement, ...options } = {}) => {
   const timestamp = new Date("2026-10-02T12:00:00.000Z");
@@ -32,6 +45,60 @@ test("access control rejects missing or malformed installation and request ident
   const missingRequest = await service.authorize({ appUserId: identity });
   assert.equal(missingRequest.status, 400);
   assert.equal(missingRequest.body.error.code, "request_id_required");
+});
+
+test("the disk access store persists quotas and cached values across restarts", async () => {
+  await withTemporaryStore(async (filePath) => {
+    const first = await createFileAccessStore({ filePath });
+    assert.deepEqual(await first.consume("quota", 2, 600), { allowed: true, count: 1, remaining: 1 });
+    await first.setJson("entitlement", { recognized: true, isPlus: true }, 600);
+    await first.close();
+
+    const second = await createFileAccessStore({ filePath });
+    assert.deepEqual(await second.consume("quota", 2, 600), { allowed: true, count: 2, remaining: 0 });
+    assert.deepEqual(await second.getJson("entitlement"), { recognized: true, isPlus: true });
+    await second.close();
+  });
+});
+
+test("the disk access store serializes concurrent limits and idempotent refunds", async () => {
+  await withTemporaryStore(async (filePath) => {
+    const store = await createFileAccessStore({ filePath });
+    const attempts = await Promise.all(Array.from({ length: 12 }, () => store.consume("quota", 10, 600)));
+    assert.equal(attempts.filter((attempt) => attempt.allowed).length, 10);
+    assert.equal(await store.releaseManyOnce("reservation", ["quota"], 600), true);
+    assert.equal(await store.releaseManyOnce("reservation", ["quota"], 600), false);
+    assert.deepEqual(await store.consume("quota", 10, 600), { allowed: true, count: 10, remaining: 0 });
+    await store.close();
+  });
+});
+
+test("the disk access store expires old state and fails closed on corrupt files", async () => {
+  await withTemporaryStore(async (filePath) => {
+    let timestamp = Date.parse("2026-10-02T12:00:00.000Z");
+    const store = await createFileAccessStore({ filePath, now: () => timestamp });
+    await store.consume("quota", 1, 60);
+    await store.setJson("entitlement", { isPlus: true }, 60);
+    timestamp += 61_000;
+    assert.deepEqual(await store.consume("quota", 1, 60), { allowed: true, count: 1, remaining: 0 });
+    assert.equal(await store.getJson("entitlement"), null);
+    await store.close();
+  });
+
+  await withTemporaryStore(async (filePath) => {
+    await writeFile(filePath, "not-json", "utf8");
+    await assert.rejects(() => createFileAccessStore({ filePath }), /could not be loaded safely/);
+  });
+
+  await withTemporaryStore(async (filePath) => {
+    await writeFile(filePath, JSON.stringify({
+      version: 1,
+      counters: [["quota", { count: "invalid", expiresAt: Date.now() + 60_000 }]],
+      values: [],
+      finalizedReservations: []
+    }), "utf8");
+    await assert.rejects(() => createFileAccessStore({ filePath }), /could not be loaded safely/);
+  });
 });
 
 test("the server strips Plus-only checklist context from free requests", () => {
