@@ -2960,6 +2960,7 @@ const SAFE_RUNTIME_FAILURE_CODES = new Set([
   "response_language_mismatch",
   "question_echo_non_answer",
   "low_diversity_non_answer",
+  "planning_missing_next_actions",
   "sensitive_identifier_in_output"
 ]);
 
@@ -3224,21 +3225,23 @@ export function createAnswerService({
           }));
           outputText = answerSections.map(section => section.text).join("\n\n");
           runtimeSafety = evaluateCasePilotRuntimeSafety({
-            language: language.code, outputText, question
+            language: language.code, outputText, question,
+            requirePlanningActions: planningQuestion
           });
           if (containsSensitiveIdentifier(privacyScanText(outputText, publicAgencyEmails))) {
             runtimeSafety = {pass: false, failures: [...runtimeSafety.failures, "sensitive_identifier_in_output"]};
           }
           citationFailure = false;
 
-          const retryableProfessionalSafetyFailure =
-            visitorResearchRequired &&
+          const retryableReviewedSafetyFailure =
+            (visitorResearchRequired || planningQuestion) &&
             runtimeSafety.failures.length > 0 &&
             runtimeSafety.failures.every(code => [
               "lawyer_impersonation_or_guarantee",
-              "localized_lawyer_impersonation_or_guarantee"
+              "localized_lawyer_impersonation_or_guarantee",
+              "planning_missing_next_actions"
             ].includes(code));
-          if (retryableProfessionalSafetyFailure) {
+          if (retryableReviewedSafetyFailure) {
             const repaired = await reviewOfficialEvidence({
               apiKey, model: generationModel, question, userFacts: suppliedUserFacts, conversation, language: language.code, corpusIndex,
               referenceResults: localResults,
@@ -3257,7 +3260,8 @@ export function createAnswerService({
               }));
               outputText = answerSections.map(section => section.text).join("\n\n");
               runtimeSafety = evaluateCasePilotRuntimeSafety({
-                language: language.code, outputText, question
+                language: language.code, outputText, question,
+                requirePlanningActions: planningQuestion
               });
               if (containsSensitiveIdentifier(privacyScanText(outputText, publicAgencyEmails))) {
                 runtimeSafety = {pass: false, failures: [...runtimeSafety.failures, "sensitive_identifier_in_output"]};

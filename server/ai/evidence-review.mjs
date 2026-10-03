@@ -141,6 +141,17 @@ export async function reviewOfficialEvidence({apiKey, model, question, userFacts
       sections.some(section => typeof section?.text !== "string" || !Array.isArray(section.sources) ||
         section.sources.some(source => !official(source?.url)))) return null;
   try {
+    const safetyRepairInstruction = [
+      safetyRepairFailures.some(code => [
+        "lawyer_impersonation_or_guarantee",
+        "localized_lawyer_impersonation_or_guarantee"
+      ].includes(code))
+        ? "Rewrite minimally so the answer cannot read as lawyer impersonation, a promise, or a categorical prediction of this user's personal approval or eligibility. A verified class-wide government restriction may still be stated plainly and precisely. Do not weaken, omit, or reverse that verified rule."
+        : "",
+      safetyRepairFailures.includes("planning_missing_next_actions")
+        ? "The planning answer has an empty or orphaned next-actions heading. Repair that section so it contains exactly three concise, concrete actions supported by the checked evidence or limited to safe organizational steps, followed by the single focused question. Never leave a heading without its promised actions."
+        : ""
+    ].filter(Boolean).join(" ");
     const deadline = Date.now() + timeoutMs;
     const reviewUrlsByIdentity = new Map();
     const candidateUrls = sections.flatMap(section => section.sources).map(source => source.url);
@@ -300,8 +311,8 @@ export async function reviewOfficialEvidence({apiKey, model, question, userFacts
           "non_factual is ONLY for greetings, empathy, headings, faithful restatements of user facts, genuine clarification questions, honest statements of this answer's verification limits, or organizational/privacy next actions with NO assertion of legal rules or eligibility. An app safety instruction such as 'Do not send your receipt number here' is non_factual; a rule about which identifier an official process requires is factual. A legal assertion phrased as a question or next action is still factual. Do not treat a whole paragraph as non_factual when any part asserts a legal or procedural claim.",
           "Never ask for, repeat, or invent example sensitive identifier values (receipt numbers, A-Numbers, passport numbers, SSNs, payment details, or private email addresses). Replace examples with words such as 'your receipt number' or describe the format in words. Users must enter identifiers privately on the official site, not in this chat.",
           "Do not describe yourself as the user's lawyer or legal representative, and do not use promises, assurances, or guarantee wording about an outcome—even to deny a guarantee. State uncertainty or restrictions directly in ordinary language instead.",
-          safetyRepairFailures.length
-            ? `The previous reviewed wording was rejected by the final conservative safety check (${safetyRepairFailures.join(", ")}). Rewrite it minimally so it cannot read as lawyer impersonation, a promise, or a categorical prediction of this user's personal approval or eligibility. A verified class-wide government restriction may still be stated plainly and precisely. Do not weaken, omit, or reverse that verified rule.`
+          safetyRepairInstruction
+            ? `The previous reviewed wording was rejected by the final conservative safety check (${safetyRepairFailures.join(", ")}). ${safetyRepairInstruction}`
             : "",
           "This chat is informational and read-only. Never claim that it filed forms, changed saved checklists or dates, accessed USCIS case accounts, or made purchases; direct users to the appropriate dedicated app screen or official workflow. For wholly unrelated topics, acknowledge the U.S. immigration focus naturally without inventing a connection. Honest app-scope and privacy statements are non_factual, not legal claims requiring citations.",
           "Write uncertainty in plain user-facing language, naturally in the requested language: for example, 'I haven't verified that yet' or 'I couldn't confirm that detail.' Never describe internal mechanics as 'supplied evidence', 'supplied passages', a 'reviewer', or a 'pipeline' in the final text. Keep clarification questions open to another basis or none of the examples, rather than presenting family, employer sponsorship, or a company transfer as exhaustive choices. Preserve a single focused question; do not expand it into an intake questionnaire.",

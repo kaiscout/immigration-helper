@@ -1288,6 +1288,22 @@ const isPureQuestionSection = (section) => {
   return !LEADING_FACT_ASSERTION.test(normalize(text));
 };
 
+const hasOrphanPlanningActionHeading = (answer) => {
+  const paragraphs = String(answer || "")
+    .split(/\n[ \t]*\n/u)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+
+  return paragraphs.some((paragraph, index) => {
+    const next = paragraphs[index + 1] || "";
+    const headingLike =
+      paragraph.length <= 120 &&
+      !paragraph.includes("\n") &&
+      !/[.!?;。！？؛؟]\s*$/u.test(paragraph);
+    return headingLike && /[?？؟]\s*$/u.test(next);
+  });
+};
+
 const requiresCitation = (section) => {
   const text = String(section?.text || "").trim();
   return Boolean(text) && !isStructurallyHeading(section) && !isPureQuestionSection(section) &&
@@ -1297,7 +1313,8 @@ const requiresCitation = (section) => {
 export function evaluateCasePilotRuntimeSafety({
   language,
   outputText,
-  question = ""
+  question = "",
+  requirePlanningActions = false
 } = {}) {
   const answer = String(outputText || "").trim();
   const normalizedAnswer = normalize(answer);
@@ -1341,6 +1358,9 @@ export function evaluateCasePilotRuntimeSafety({
   }
   if (isLowDiversityNonAnswer(answer)) {
     failures.push("low_diversity_non_answer");
+  }
+  if (requirePlanningActions && hasOrphanPlanningActionHeading(answer)) {
+    failures.push("planning_missing_next_actions");
   }
 
   return Object.freeze({

@@ -42,7 +42,7 @@ services:
       - key: USCIS_VECTOR_STORE_ID
         sync: false
       - key: ALLOWED_ORIGIN
-        value: https://kaiscout.github.io
+        value: https://kaiscout.github.io,http://localhost:8082
     disk:
       name: casepilot-access-data
       mountPath: /var/data

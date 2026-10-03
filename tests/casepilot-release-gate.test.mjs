@@ -1157,6 +1157,34 @@ test("runtime and release gates reject a repeated-question non-answer", () => {
   assert.ok(evaluated.failures.includes("question_echo_non_answer"));
 });
 
+test("planning runtime gate rejects an orphaned next-actions heading", () => {
+  const incomplete = [
+    "As an Italian citizen living in Portugal, first identify whether your U.S. goal is temporary or permanent.",
+    "Your next three actions",
+    "Which basis best fits you—employment, family, study, business, or something else?"
+  ].join("\n\n");
+  const rejected = evaluateCasePilotRuntimeSafety({
+    language: "en",
+    outputText: incomplete,
+    question: "I live in Portugal and want to move to the United States. Where should I start?",
+    requirePlanningActions: true
+  });
+  assert.ok(rejected.failures.includes("planning_missing_next_actions"));
+
+  const complete = [
+    "As an Italian citizen living in Portugal, first identify whether your U.S. goal is temporary or permanent.",
+    "Your next three actions",
+    "1. Decide whether the move should be temporary or permanent.\n2. Identify a possible family, work, study, business, or achievement basis.\n3. Gather the basic facts needed to compare the plausible routes.",
+    "Which basis best fits you—employment, family, study, business, or something else?"
+  ].join("\n\n");
+  assert.equal(evaluateCasePilotRuntimeSafety({
+    language: "en",
+    outputText: complete,
+    question: "I live in Portugal and want to move to the United States. Where should I start?",
+    requirePlanningActions: true
+  }).pass, true);
+});
+
 test("echo safety covers short questions and repeated low-diversity filler", () => {
   const englishScenario = CASEPILOT_RELEASE_LANGUAGE_CASES.find(({ code }) => code === "en");
   const englishEcho = `${englishScenario.planning} ${Array(10).fill("visa").join(" ")}.`;
