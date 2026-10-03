@@ -326,6 +326,14 @@ const planningRecords = [{
   title: "Green Card for Employment-Based Immigrants",
   chunks: ["Employment-based immigrant categories have different petition and eligibility requirements."]
 }, {
+  url: "https://www.uscis.gov/working-in-the-united-states/permanent-workers/employment-based-immigration-first-preference-eb-1",
+  title: "Employment-Based Immigration: First Preference EB-1",
+  chunks: ["A person seeking EB-1 extraordinary-ability classification may self-petition, but must satisfy the applicable evidence criteria and show sustained national or international acclaim."]
+}, {
+  url: "https://www.uscis.gov/working-in-the-united-states/permanent-workers/employment-based-immigration-second-preference-eb-2",
+  title: "Employment-Based Immigration: Second Preference EB-2",
+  chunks: ["A national interest waiver request requires EB-2 classification and a separate showing under the three national-interest-waiver factors. A person requesting the waiver may self-petition."]
+}, {
   url: "https://www.uscis.gov/green-card/green-card-processes-and-procedures/consular-processing",
   title: "Consular Processing",
   chunks: ["A person outside the United States may use consular processing after an immigrant petition and visa process."]
@@ -496,6 +504,27 @@ test("recognizes broad relocation planning and rewrites retrieval around plausib
   assert.ok(titles.includes("Consular Processing"));
   assert.ok(titles.includes("Green Card Through the Diversity Immigrant Visa Program"));
   assert.equal(titles.some((title) => /Cuban|Adoption|Biography/i.test(title)), false);
+});
+
+test("retrieves self-petition evidence when permanent planning explicitly has no employer", () => {
+  const question =
+    "I want to move permanently. I have no U.S. family or job offer, but I have a bachelor's degree and six years of marketing experience. Which route should I investigate first?";
+  const facts = "Citizenship: Italy. Current residence: Portugal.";
+  const results = retrieveLocalResults(
+    planningIndex,
+    question,
+    "",
+    8,
+    true,
+    facts,
+    "en"
+  );
+  const titles = results.map(({ title }) => title);
+
+  assert.ok(titles.includes("Employment-Based Immigration: First Preference EB-1"));
+  assert.ok(titles.includes("Employment-Based Immigration: Second Preference EB-2"));
+  assert.equal(titles.includes("Green Card for Employment-Based Immigrants"), false);
+  assert.ok(titles.includes("Consular Processing"));
 });
 
 test("recognizes the natural Italy-Portugal-USA planning scenario in every supported language", () => {

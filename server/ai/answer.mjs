@@ -2264,6 +2264,16 @@ const PLANNING_LOCAL_ROUTES = {
     matches: (url) => /\/green-card\/green-card-eligibility\/green-card-for-employment-based-immigrants/i.test(url),
     take: 1
   },
+  eb1ExtraordinaryAbility: {
+    query: "EB-1 extraordinary ability self petition evidence criteria",
+    matches: (url) => /\/working-in-the-united-states\/permanent-workers\/employment-based-immigration-first-preference-eb-1\/?$/i.test(url),
+    take: 1
+  },
+  eb2NationalInterestWaiver: {
+    query: "EB-2 national interest waiver advanced degree exceptional ability self petition",
+    matches: (url) => /\/working-in-the-united-states\/permanent-workers\/employment-based-immigration-second-preference-eb-2\/?$/i.test(url),
+    take: 1
+  },
   consular: {
     query: "consular processing immigrant visa from outside the United States",
     matches: (url) => /\/green-card\/green-card-processes-and-procedures\/consular-processing\/?$/i.test(url),
@@ -2855,9 +2865,18 @@ function planningRoutesForProfile(profile) {
   }
 
   const hasSpecificPositiveBasis = profile.family === true || profile.employment === true;
+  const shouldReviewSelfPetitionRoutes =
+    profile.permanent === true &&
+    profile.employment === false;
   return [
     ...temporaryRoutes,
     PLANNING_LOCAL_ROUTES.eligibility,
+    ...(shouldReviewSelfPetitionRoutes
+      ? [
+        PLANNING_LOCAL_ROUTES.eb1ExtraordinaryAbility,
+        PLANNING_LOCAL_ROUTES.eb2NationalInterestWaiver
+      ]
+      : []),
     ...(!hasSpecificPositiveBasis && profile.family !== false || profile.family === true
       ? [PLANNING_LOCAL_ROUTES.family]
       : []),
@@ -2892,7 +2911,11 @@ function planningResearchDirective(profile) {
     );
   }
   if (profile.family === false) directives.push("Treat qualifying U.S. family as explicitly unavailable.");
-  if (profile.employment === false) directives.push("Treat a U.S. job offer or employer basis as explicitly unavailable.");
+  if (profile.employment === false) {
+    directives.push(
+      "Treat a U.S. job offer or employer-sponsored basis as explicitly unavailable. If the user's goal is permanent residence, use the retrieved USCIS criteria to assess EB-1A and EB-2 national-interest-waiver self-petition routes conditionally. Clearly distinguish the EB-2 threshold classification from the separate NIW analysis, explain that ordinary education or experience alone is insufficient, and never imply likely eligibility without supporting facts."
+    );
+  }
   return directives.length
     ? directives.join(" ")
     : "Research the plausible conditional routes using the latest user facts and the appropriate official agencies.";
