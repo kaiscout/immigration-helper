@@ -2880,6 +2880,15 @@ test("an unknown upstream error code is reduced to an allowlisted diagnostic", a
   assert.doesNotMatch(JSON.stringify(result.body),/private_provider_detail|private-upstream-error/);
 });
 
+test("an unstructured upstream quota message maps to a safe diagnostic", async () => {
+  const answer=createAnswerService({corpusIndex:index,apiKey:"test-key",fetchImpl:async()=>
+    new Response(JSON.stringify({error:{message:"Your credit balance is too low.",code:null,type:"unknown"}}),{status:429})
+  });
+  const result=await answer({question:"Can I reschedule biometrics?",language:"en"});
+  assert.equal(result.body.upstream_error_code,"insufficient_quota");
+  assert.doesNotMatch(JSON.stringify(result.body),/credit balance/i);
+});
+
 test("degrades a model answer whose official citation is topically unrelated", async () => {
   const scamIndex = createCorpusIndex([{
     url: "https://www.uscis.gov/avoid-scams",

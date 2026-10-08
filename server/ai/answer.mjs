@@ -3010,7 +3010,14 @@ function safeUpstreamResponseCode(data) {
     "billing_hard_limit_reached",
     "tokens_exceeded",
     "requests_exceeded"
-  ]).has(value) ? value : "upstream_rejected";
+  ]).has(value) ? value : (() => {
+    const message = String(data?.error?.message || "").toLowerCase();
+    if (/quota|billing|credit balance|spend limit/u.test(message)) return "insufficient_quota";
+    if (/rate limit|too many requests|tokens per min|requests per min/u.test(message)) {
+      return "rate_limit_exceeded";
+    }
+    return "upstream_rejected";
+  })();
 }
 
 export function createAnswerService({
