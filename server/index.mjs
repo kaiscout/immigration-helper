@@ -197,6 +197,7 @@ const server = http.createServer(async (request, response) => {
     testTracer.record({ headers: request.headers, payload: authorizedPayload, result });
     sendJson(request, response, result.status, {
       ...result.body,
+      server_version: SERVER_VERSION,
       ...(countQuestion ? { access: authorization.access } : {})
     });
   } catch (error) {

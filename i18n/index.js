@@ -32,6 +32,7 @@ import sk from "./sk.json";
 import sl from "./sl.json";
 import sv from "./sv.json";
 import { PROFILE_TRANSLATIONS } from "./profileTranslations";
+import casePilotReportTranslations from "./casePilotReport.json";
 
 const resources = {
   en: { translation: en },
@@ -68,6 +69,10 @@ const resources = {
 
 Object.entries(PROFILE_TRANSLATIONS).forEach(([code, profile]) => {
   if (resources[code]?.translation) resources[code].translation.profile = profile;
+});
+
+Object.entries(casePilotReportTranslations).forEach(([code, casePilotReport]) => {
+  if (resources[code]?.translation) resources[code].translation.casePilotReport = casePilotReport;
 });
 
 const i18n = createInstance();

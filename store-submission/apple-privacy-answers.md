@@ -19,6 +19,7 @@ What this includes:
 - Recent messages from the current AI conversation.
 - Optional Case Profile details saved by the user, including preferred name, citizenship, country of residence, immigration situation, and immigration goal.
 - Saved checklist dates and completed steps only when the user enables optional checklist sharing.
+- A selected CasePilot response excerpt, report category, and optional note only when the user reviews and sends a response report through their email app.
 - An anonymous RevenueCat app user identifier and a random request identifier used for entitlement checks, monthly quota enforcement, and duplicate-request prevention.
 
 Purpose:
@@ -54,6 +55,7 @@ Other technical data:
 
 - Render and OpenAI may process IP address, timestamps, and security or diagnostic metadata as service providers.
 - The backend temporarily stores pseudonymous hashes, quota and rate-limit counters, request-deduplication records, and short-lived entitlement-verification results; it does not intentionally store question or answer text in an application database.
+- CasePilot response reports are user-initiated email messages. The app shows the exact report first and does not silently attach the user's prompt, earlier conversation, Case Profile, checklists, or File Vault. The user's email app or email provider processes the draft and contact details. Developer-received reports are normally retained no longer than 12 months unless security, legal, or recordkeeping needs require longer.
 - RevenueCat may process purchase history, product and transaction identifiers, subscription and entitlement status, timestamps, an anonymous app-user identifier, and device/app information to operate Immigration Helper Plus, prevent fraud, restore purchases, and provide subscription analytics.
 - Re-check these answers against RevenueCat's current Apple App Privacy guidance whenever the SDK configuration or data integrations change.
 

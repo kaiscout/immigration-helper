@@ -16,8 +16,9 @@ Suggested review path:
 8. Open Reminders and send a test notification.
 9. Open Privacy & Safety to review disclosures.
 10. Open CasePilot. The first-use screen discloses Render and OpenAI processing and offers optional checklist sharing, which is off by default.
-11. Open Immigration Helper Plus from Home or Privacy & Safety to review the subscription paywall.
-12. With Plus active, open Plus Workspace and File Vault. Choose a category, import a PDF or image, change its status, add a private note, and open the system share sheet.
+11. Submit a CasePilot question, then tap **Report response** beneath the completed answer. Select a category, optionally add a short note, and review the exact report before opening the device's email composer. The report is not sent until the reviewer sends it in the email app.
+12. Open Immigration Helper Plus from Home or Privacy & Safety to review the subscription paywall.
+13. With Plus active, open Plus Workspace and File Vault. Choose a category, import a PDF or image, change its status, add a private note, and open the system share sheet.
 
 ## Safety Positioning
 
@@ -34,6 +35,10 @@ Online answers use a developer-operated HTTPS backend hosted by Render, which ca
 Before any online AI content is sent, the app asks the user to agree to a disclosure explaining that submitted questions and recent chat are processed by Render and OpenAI. Optional checklist sharing is off by default. Users can change that setting or withdraw online AI permission in Privacy & Safety.
 
 No login is required. AI requests are not attached to an account, advertising identifier, or user profile.
+
+CasePilot is a private, one-to-one assistant. It does not publish user content or enable users to view, message, follow, or block one another. The backend applies input safety checks, rate limits, subscription and quota verification, official-source retrieval, and output validation. Every completed online answer has a localized **Report response** action. The user selects a reason, reviews the exact response excerpt and optional note, and then confirms delivery in the device email app. The app does not silently attach the user's prompt, earlier chat, Case Profile, checklists, or File Vault. Reports go to the developer's support mailbox for human review.
+
+Because there are no public posts, shared chat rooms, or user-to-user accounts, the requirement to block abusive users is not applicable to this private assistant. The filtering and reporting controls above address the applicable chatbot and user-generated-content safety requirements.
 
 ## Subscription Notes
 

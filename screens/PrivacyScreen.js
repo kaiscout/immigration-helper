@@ -104,6 +104,16 @@ export default function PrivacyScreen({ navigation }) {
         </View>
       </View>
 
+      <View style={styles.card}>
+        <View style={styles.iconBox}>
+          <Ionicons name="flag-outline" size={22} color={COLORS.primary} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.cardTitle}>{t("casePilotReport.title")}</Text>
+          <Text style={styles.cardBody}>{t("casePilotReport.privacyNote")}</Text>
+        </View>
+      </View>
+
       <View style={styles.plusCard}>
         <View style={styles.iconBox}>
           <Ionicons name="sparkles-outline" size={22} color={COLORS.primary} />

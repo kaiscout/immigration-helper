@@ -71,21 +71,25 @@ EXPO_PUBLIC_FREE_AI_QUESTION_LIMIT=10
 
 The RevenueCat SDK keys are public app configuration values, not private secrets. The private OpenAI key stays server-side only.
 
-## Render Access-Control Variables
+## Render Access-Control Configuration
 
-Before deploying the hardened backend, create a persistent Render Key Value
-instance and set these server-side values:
+The production service uses its mounted Render persistent disk for quota and
+request-deduplication state. Keep the disk at `/var/data` and set these
+server-side values:
 
 ```text
 REQUIRE_AI_ACCESS_CONTROL=true
-REDIS_URL=<Render internal Key Value URL>
+CASEPILOT_ACCESS_STORE_PATH=/var/data/casepilot-access.json
 REVENUECAT_API_KEY=<secret RevenueCat backend API key>
 PLUS_ENTITLEMENT_ID=immigration_helper_plus
 FREE_AI_QUESTION_LIMIT=10
 ```
 
-The server will refuse to start in production if the persistent quota store or
-RevenueCat verification secret is missing.
+Also keep `REQUIRE_CLIENT_TOKEN=true` and set `AI_PROXY_CLIENT_TOKEN` to the
+same public client token embedded by the EAS production environment. The server
+will refuse to start in production if client authentication, the persistent
+quota path, or the RevenueCat verification secret is missing. Never expose
+`REVENUECAT_API_KEY` or the OpenAI key through an `EXPO_PUBLIC_` variable.
 
 ## Build And Test
 

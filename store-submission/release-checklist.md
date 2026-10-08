@@ -14,6 +14,7 @@
 - [x] App includes Immigration Helper Plus paywall and restore purchases.
 - [ ] Verify the new server-authoritative free AI quota and Plus entitlement gate against the production backend.
 - [x] Plus paywall links directly to the privacy policy and Apple standard Terms of Use.
+- [x] CasePilot answers expose a localized, accessible report action in all 30 languages with an exact pre-send preview and device-email confirmation.
 
 ## Before Apple Submission
 
@@ -29,10 +30,10 @@
 - [ ] Capture a real final-build paywall screenshot showing the eligibility-aware monthly trial copy and yearly option; do not use a marketing mockup.
 - [x] Add age rating.
 - [x] Add review notes from `store-submission/review-notes.md`.
-- [ ] Create App Store Connect auto-renewable subscription products matching `store-submission/subscription-setup.md`.
-- [ ] Add RevenueCat public SDK keys to the EAS production environment before the next store build.
+- [x] Create App Store Connect auto-renewable subscription products matching `store-submission/subscription-setup.md` (verified October 5, 2026; final status recheck remains below).
+- [x] Add RevenueCat public SDK keys and exact entitlement/product identifiers to the EAS production environment (verified October 8, 2026 without recording credential values).
 - [ ] Build a fresh production iOS binary containing the Plus subscription changes with `eas build --platform ios --profile production`.
-- [ ] Select and submit that fresh build through App Store Connect.
+- [ ] Upload the fresh build to TestFlight. Do not select it for App Review until Deniz gives final approval.
 
 ## Before Google Play Submission
 
@@ -59,3 +60,20 @@
 - [x] Update public and in-app privacy disclosures.
 - [x] Confirm App Store Connect privacy answers match the production build.
 - [ ] Confirm Google Play Console privacy answers match the production build.
+
+## Release Candidate Evidence — October 8, 2026
+
+Status terms in this section are deliberate: **implemented** means present in Dell source, **deployed** means verified on the production service, and **device-tested** means exercised in the final native TestFlight build on an iPhone.
+
+| Area | Current result | Evidence | Remaining dependency |
+| --- | --- | --- | --- |
+| Source baseline | Reconciled | Dell `main` baseline `c1bc4e7`; latest TestFlight was Build 25 from `fbe9a9f`; Build 25 reproduced a 401 with its embedded production URL and public client token. | Build 26 has not been created yet. |
+| CasePilot authentication | Implemented configuration identified; not yet deployed | EAS production and the Build 25 binary agree on the endpoint and public client-token fingerprint; Render currently rejects that token. Authentication, quota enforcement, and subscription verification remain enabled in source. | Reconcile Render's `AI_PROXY_CLIENT_TOKEN`, deploy, then obtain a real tailored answer with the release configuration. |
+| CasePilot backend | Implemented, not yet deployed | Source version `2026-10-08.1`; successful responses include `server_version` for report triage. Production still reported `2026-10-03.2` at the start of this run. | Deploy and verify `/health`, a real answer, continuity/correction, and the fresh 30-language live matrix. |
+| Report response | Implemented, not device-tested | All 30 locales have exact key and placeholder parity; the user reviews a single clipped response excerpt, category, optional note, and non-personal operational metadata before the device mail composer opens. Prompt/history/profile/checklists/File Vault are not silently attached. | Exercise send, cancel, saved-draft, unavailable-mail, and sensitive-identifier handling in Build 26. |
+| Dependencies | Implemented and locally verified | Expo patch versions match SDK 57; Expo Doctor 21/21; clean install; 409 tests; lint; TypeScript; production iOS export all passed. Patched audit roots: `brace-expansion`, `http-cache-semantics`, and `shell-quote`. | `braces@3.0.3` and `node-forge@1.4.0` remain upstream build-tool advisories with no patched npm release; neither appears in the production iOS bundle. |
+| Production iOS bundle | Implemented, not uploaded/device-tested | Fresh local iOS export succeeded (1,567 modules). It contains the release endpoint, public token, exact entitlement/product IDs, and report UI; it does not contain the dev Plus override, server OpenAI key, or unresolved advisory packages. | Produce EAS Build 26, inspect the IPA, upload to TestFlight, then install on iPhone. |
+| Subscriptions | Source/EAS implemented; store recheck and device test pending | Source uses entitlement `immigration_helper_plus`, products `immigration_helper_plus_monthly` and `immigration_helper_plus_yearly`, store-provided prices, eligibility-aware monthly trial copy, yearly purchase, and Restore Purchases. | Recheck App Store Connect/RevenueCat/agreement status, then purchase, relaunch-persistence, and restore-test Build 26 on iPhone. |
+| Store assets and metadata | Updated source documents; not reconciled in App Store Connect | Privacy policy effective October 8, review notes, chatbot/report explanation, and privacy-answer worksheet now match the implementation. | Publish the updated policy source, reconcile App Store Connect, and replace screenshots/review image with actual Build 26 captures. |
+
+Apple App Review has **not** been submitted and remains blocked on the unchecked production, TestFlight, device, and screenshot items above.

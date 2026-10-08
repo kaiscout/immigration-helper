@@ -33,6 +33,26 @@ test("public privacy policy names AI recipients and retention", async () => {
   assert.match(policy, /not used for advertising or cross-app tracking/i);
 });
 
+test("privacy disclosures describe the user-controlled CasePilot report and its limited contents", async () => {
+  const policies = await Promise.all([
+    readProjectFile("docs/privacy-policy.html"),
+    readProjectFile("store-submission/privacy-policy.html"),
+    readProjectFile("store-submission/privacy-policy.md")
+  ]);
+  for (const policy of policies) {
+    assert.match(policy, /report a CasePilot response/i);
+    assert.match(policy, /selected response excerpt/i);
+    assert.match(policy, /does not silently attach/i);
+    assert.match(policy, /email app or email provider/i);
+  }
+  const privacyScreen = await readProjectFile("screens/PrivacyScreen.js");
+  assert.match(privacyScreen, /casePilotReport\.title/);
+  assert.match(privacyScreen, /casePilotReport\.privacyNote/);
+  const support = await readProjectFile("docs/support.html");
+  assert.match(support, /Report A CasePilot Response/i);
+  assert.match(support, /does not silently attach/i);
+});
+
 test("public privacy policy explains File Vault storage, sharing, and deletion", async () => {
   const policy = await readProjectFile("docs/privacy-policy.html");
 

@@ -1,6 +1,6 @@
 # Immigration Helper Privacy Policy
 
-Effective date: October 2, 2026
+Effective date: October 8, 2026
 
 Immigration Helper is an independent checklist, reminder, and official-resource app. It is not affiliated with USCIS, DHS, or any government agency. It provides general information only and does not provide legal advice.
 
@@ -38,6 +38,12 @@ Do not enter an A-Number, USCIS receipt number, passport number, Social Security
 
 AI responses are for general information only. They are not legal advice and do not determine eligibility or predict an immigration outcome.
 
+## Reporting A CasePilot Response
+
+You can choose to report a CasePilot response. Before anything is sent, the app shows the exact report and opens a draft in your device's email app. The report contains the selected response excerpt, the category you chose, an optional note, app language and version, the CasePilot service version, and a random report identifier. The app does not silently attach your prompt, earlier conversation, Case Profile, checklists, or File Vault.
+
+Your email app or email provider processes the draft and any contact information you choose to send. A report is not sent until you send it from the email app. Reports received by Immigration Helper are used to review safety and answer quality, respond when needed, and protect the service. Do not add case numbers or other sensitive identifiers.
+
 ## Information Processed For Online AI
 
 When you choose to use online AI, the following information is processed for app functionality:
@@ -65,7 +71,7 @@ RevenueCat processes subscription-related information to operate Immigration Hel
 
 The app does not include advertising SDKs, behavioral analytics SDKs, tracking SDKs, or third-party sign-in. RevenueCat analytics are limited to subscription and purchase information. The developer does not sell user data or use it for cross-app tracking or advertising.
 
-If you contact the developer for support by email or another external method, you may choose to provide contact information and support details. That information is used only to respond to your request.
+If you contact the developer for support or report a CasePilot response by email, you may choose to provide contact information and support details. That information is used only to review the report, protect and improve the service, and respond to your request.
 
 ## Data Retention, Controls, And Deletion
 
@@ -73,7 +79,7 @@ Checklist, Case Profile, consent, reminder, and File Vault data stored locally r
 
 The Immigration Helper backend is designed to process AI request content without intentionally storing the question or answer in an application database. It temporarily stores pseudonymous hashes, quota and rate-limit counters, request-deduplication records, and short-lived subscription-verification results to control access and protect the service. Render and OpenAI may process technical logs and content under their own security and retention practices, including OpenAI's retention described above.
 
-You can turn off checklist sharing or withdraw AI permission in the app's Privacy & Safety screen. You may contact admin@immigrationhelper.org with a privacy question or deletion request relating to support communications or data controlled by the developer. Data already processed by a service provider may remain for the provider's applicable retention period.
+Support messages and CasePilot reports received by the developer are retained only as long as reasonably needed to review and respond, normally no longer than 12 months, unless a longer period is required for security, legal, or recordkeeping needs. You can turn off checklist sharing or withdraw AI permission in the app's Privacy & Safety screen. You may contact admin@immigrationhelper.org with a privacy question or deletion request relating to support communications or data controlled by the developer. Data already processed by a service provider may remain for the provider's applicable retention period.
 
 ## Security
 

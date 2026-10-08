@@ -93,6 +93,29 @@ test("Every translation preserves the English interpolation placeholders", () =>
   }
 });
 
+test("CasePilot response reporting is complete and localized in all 30 languages", () => {
+  const reportCopy = readJson("../i18n/casePilotReport.json");
+  const english = flattenValues(reportCopy.en);
+
+  assert.deepEqual(Object.keys(reportCopy).sort(), [...supportedLanguages].sort());
+  for (const language of supportedLanguages) {
+    const translated = flattenValues(reportCopy[language]);
+    assert.deepEqual(Object.keys(translated).sort(), Object.keys(english).sort());
+    for (const [key, value] of Object.entries(english)) {
+      assert.deepEqual(
+        placeholders(translated[key]),
+        placeholders(value),
+        `${language}.casePilotReport.${key} must preserve placeholders`
+      );
+    }
+    if (language !== "en") {
+      assert.notEqual(translated.action, english.action);
+      assert.notEqual(translated.title, english.title);
+      assert.notEqual(translated["categories.inaccurate"], english["categories.inaccurate"]);
+    }
+  }
+});
+
 test("Every Plus paywall string is localized instead of using the English fallback", () => {
   const englishPlus = readJson("../i18n/en.json").plus;
   const brandedKeys = new Set(["shortTitle", "title"]);

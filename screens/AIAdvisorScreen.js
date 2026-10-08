@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
+import CasePilotReportModal from "../components/CasePilotReportModal";
 import { COLORS, RADII, SHADOW, SPACING } from "../constants/theme";
 import { OFFICIAL_LINKS } from "../constants/officialLinks";
 import { loadAiConsent, saveAiConsent } from "../data/aiConsent";
@@ -603,6 +604,7 @@ export default function AIAdvisorScreen({ navigation }) {
   const [subscription, setSubscription] = useState({ isPlus: false });
   const [aiUsage, setAiUsage] = useState({ count: 0 });
   const [caseProfile, setCaseProfile] = useState(null);
+  const [reportTarget, setReportTarget] = useState(null);
   const [messages, setMessages] = useState([
     {
       role: "assistant",
@@ -683,7 +685,13 @@ export default function AIAdvisorScreen({ navigation }) {
     setMessages((current) => [...current, { role: "assistant", text, sources, sections, followups }]);
   };
 
-  const appendAssistantProgressively = async (text, sources = [], sections = [], followups = []) => {
+  const appendAssistantProgressively = async (
+    text,
+    sources = [],
+    sections = [],
+    followups = [],
+    backendVersion = ""
+  ) => {
     // This runs after a user sends a message; each response needs a fresh ID.
     // eslint-disable-next-line react-hooks/purity
     const id = `assistant-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -691,7 +699,17 @@ export default function AIAdvisorScreen({ navigation }) {
 
     setMessages((current) => [
       ...current,
-      { id, role: "assistant", text: "", sources: [], sections: [], followups: [], streaming: true }
+      {
+        id,
+        role: "assistant",
+        text: "",
+        sources: [],
+        sections: [],
+        followups: [],
+        backendVersion,
+        reportable: true,
+        streaming: true
+      }
     ]);
 
     for (let index = 0; index < chunks.length; index += 1) {
@@ -895,7 +913,13 @@ export default function AIAdvisorScreen({ navigation }) {
         setAiUsage(await saveCasePilotUsageSafely(saveServerAiUsage, data.access, aiUsage));
       }
 
-      await appendAssistantProgressively(answer, sources, sections, followups);
+      await appendAssistantProgressively(
+        answer,
+        sources,
+        sections,
+        followups,
+        data?.server_version
+      );
     } catch (e) {
       const message = e?.name === "AbortError" || e instanceof SyntaxError
         ? t("ai.requestFailed")
@@ -1196,6 +1220,22 @@ export default function AIAdvisorScreen({ navigation }) {
                 ))}
               </View>
             ) : null}
+            {msg.role === "assistant" && msg.reportable && !msg.streaming ? (
+              <TouchableOpacity
+                style={[styles.reportResponseButton, isRtl && styles.rtlRow]}
+                onPress={() => setReportTarget({
+                  responseText: msg.text,
+                  backendVersion: msg.backendVersion
+                })}
+                accessibilityRole="button"
+                accessibilityLabel={t("casePilotReport.action")}
+              >
+                <Ionicons name="flag-outline" size={14} color={COLORS.subtext} />
+                <Text style={[styles.reportResponseText, isRtl && styles.rtlSourceText]}>
+                  {t("casePilotReport.action")}
+                </Text>
+              </TouchableOpacity>
+            ) : null}
           </View>
         ))}
 
@@ -1254,6 +1294,15 @@ export default function AIAdvisorScreen({ navigation }) {
           <Ionicons name="send" size={18} color={COLORS.primaryTextOn} />
         </TouchableOpacity>
       </View>
+      {reportTarget ? (
+        <CasePilotReportModal
+          visible
+          responseText={reportTarget.responseText}
+          backendVersion={reportTarget.backendVersion}
+          language={i18n.language}
+          onClose={() => setReportTarget(null)}
+        />
+      ) : null}
     </KeyboardAvoidingView>
   );
 }
@@ -1508,6 +1557,20 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     fontSize: 12,
     lineHeight: 16
+  },
+  reportResponseButton: {
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginTop: SPACING.sm,
+    paddingVertical: 8,
+    paddingHorizontal: 4
+  },
+  reportResponseText: {
+    color: COLORS.subtext,
+    fontWeight: "800",
+    fontSize: 12
   },
   loadingBubbleRow: {
     flexDirection: "row",
