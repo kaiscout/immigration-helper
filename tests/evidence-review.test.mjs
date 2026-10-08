@@ -436,6 +436,31 @@ test("honest full verification inability is explicitly unavailable, not answered
   assert.equal(result.sections[0].evidence.status,"non_factual");
 });
 
+test("evidence review retries one completed but incoherent verdict without refetching sources", async () => {
+  let apiCalls=0;
+  let sourceCalls=0;
+  const result=await reviewOfficialEvidence({
+    apiKey:"test",model:"test",question:"What are visa categories?",language:"en",
+    sections,timeoutMs:30_000,
+    sourceFetchImpl:async()=>{
+      sourceCalls+=1;
+      return new Response("<p>Immigrant and nonimmigrant visas serve different purposes.</p>",{
+        headers:{"Content-Type":"text/html"}
+      });
+    },
+    fetchImpl:async()=>{
+      apiCalls+=1;
+      const responseFixture=apiCalls===1
+        ? fixture({approved:false})
+        : {...fixture(),output:fixture().output.slice(1)};
+      return new Response(JSON.stringify(responseFixture),{status:200});
+    }
+  });
+  assert.equal(apiCalls,2);
+  assert.equal(sourceCalls,1);
+  assert.equal(result.sections[0].evidence.status,"supported");
+});
+
 test("evidence review fails closed on unavailable service or insufficient request time", async () => {
   let calls=0;
   const fetchImpl=async()=>{calls++;return new Response("{}",{status:503});};

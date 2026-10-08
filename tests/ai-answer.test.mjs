@@ -2972,7 +2972,7 @@ test("a failed review of an unsafe draft falls back without ever serving that dr
     }]}),{status:200});
   }});
   const result=await answer({question:"How do I check my case status?",language:"en"});
-  assert.equal(calls,2);
+  assert.equal(calls,3);
   assert.equal(result.body.degraded,true);
   assert.equal(result.body.degraded_reason,"citation_gate");
   assert.equal(Object.hasOwn(result.body,"safety_failures"),false);
@@ -3097,7 +3097,7 @@ test("topically plausible citations cannot bypass independent factual verificati
     }]}),{status:200});
   }});
   const result=await answer({question:"What is the I-765 fee?",language:"en"});
-  assert.equal(calls,2);
+  assert.equal(calls,3);
   assert.equal(result.body.degraded,true);
   assert.doesNotMatch(result.body.output_text,/\$42/);
 });
@@ -3292,7 +3292,7 @@ test("allows exact public agency contacts found in the trusted official corpus",
   });
 
   assert.equal(result.status, 200);
-  assert.equal(calls, 2); // Generation and independent citation review both pass privacy.
+  assert.equal(calls, 3); // Generation plus one bounded retry of the rejected citation review.
 });
 
 test("privacy labels cannot bind values from a different payload field", async () => {
@@ -3315,7 +3315,7 @@ test("privacy labels cannot bind values from a different payload field", async (
   });
 
   assert.equal(result.status, 200);
-  assert.equal(calls, 2); // Generation and independent citation review both pass privacy.
+  assert.equal(calls, 3); // Generation plus one bounded retry of the rejected citation review.
 });
 
 test("rejects explicit identifier disclosures completed in a later user turn", async () => {
