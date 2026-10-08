@@ -40,6 +40,7 @@ console.log(JSON.stringify({
   answer: body.output_text,
   sources: body.sources,
   degradedReason: body.degraded_reason,
+  upstreamErrorCode: body.upstream_error_code,
   safetyFailures: body.safety_failures,
   upstreamStatus: body.upstream_status
 }, null, 2));

@@ -3003,6 +3003,7 @@ function safeUpstreamFailureReason(error) {
 
 function safeUpstreamResponseCode(data) {
   const value = String(data?.error?.code || data?.error?.type || "").trim();
+  if (["tokens", "requests"].includes(value)) return "rate_limit_exceeded";
   return new Set([
     "rate_limit_exceeded",
     "insufficient_quota",
@@ -3246,7 +3247,7 @@ export function createAnswerService({
       let reviewedOutcome;
       if (openAIResponse.ok && outputText && !incompleteResponse) {
         const reviewed = await reviewOfficialEvidence({
-          apiKey, model: generationModel, question, userFacts: suppliedUserFacts, conversation, language: language.code, corpusIndex,
+          apiKey, model: reviewModel || generationModel, question, userFacts: suppliedUserFacts, conversation, language: language.code, corpusIndex,
           referenceResults: localResults,
           researchUrls: officialReviewUrls,
           candidateWebSources,
@@ -3280,7 +3281,7 @@ export function createAnswerService({
             ].includes(code));
           if (retryableReviewedSafetyFailure) {
             const repaired = await reviewOfficialEvidence({
-              apiKey, model: generationModel, question, userFacts: suppliedUserFacts, conversation, language: language.code, corpusIndex,
+              apiKey, model: reviewModel || generationModel, question, userFacts: suppliedUserFacts, conversation, language: language.code, corpusIndex,
               referenceResults: localResults,
               researchUrls: officialReviewUrls,
               candidateWebSources,

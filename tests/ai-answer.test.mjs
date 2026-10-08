@@ -1418,7 +1418,7 @@ test("configures the exact Italian and Portugal scenario for researched personal
   assert.match(requestBody.instructions, /Detailed follow-ups may be longer/);
   assert.match(requestBody.instructions, /leave room for another basis or none of those circumstances/);
   assert.equal(requestBody.model, "gpt-5.4-mini");
-  assert.equal(reviewRequestBody.model, "gpt-5.4-mini");
+  assert.equal(reviewRequestBody.model, "gpt-5.6-luna");
   assert.deepEqual(requestBody.reasoning, { effort: "low" });
   assert.deepEqual(requestBody.text, { verbosity: "low" });
   assert.equal(requestBody.max_output_tokens, 3_200);
@@ -2862,11 +2862,11 @@ test("a timeout while reading the upstream body is classified without revealing 
 
 test("an upstream HTTP failure is not mislabeled as a citation failure", async () => {
   const answer=createAnswerService({corpusIndex:index,apiKey:"test-key",fetchImpl:async()=>
-    new Response(JSON.stringify({error:{message:"private-upstream-error",code:"rate_limit_exceeded"}}),{status:401})
+    new Response(JSON.stringify({error:{message:"private-upstream-error",type:"tokens",code:null}}),{status:429})
   });
   const result=await answer({question:"Can I reschedule biometrics?",language:"en"});
   assert.equal(result.body.degraded_reason,"upstream_error");
-  assert.equal(result.body.upstream_status,401);
+  assert.equal(result.body.upstream_status,429);
   assert.equal(result.body.upstream_error_code,"rate_limit_exceeded");
   assert.doesNotMatch(JSON.stringify(result.body),/private-upstream-error/);
 });
