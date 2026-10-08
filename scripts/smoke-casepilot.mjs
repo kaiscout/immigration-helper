@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { resolveAcceptanceConfig, buildCasePilotAcceptanceRequest } from "./evaluate-casepilot.mjs";
 import { CASEPILOT_RELEASE_LANGUAGE_CASES, evaluateCasePilotReleaseAnswer } from "../data/casePilotReleaseGate.mjs";
 
@@ -13,7 +15,11 @@ const response = await fetch(config.endpoint, {
   signal: AbortSignal.timeout(config.timeoutMs),
   headers: {
     "Content-Type": "application/json",
-    "X-Immigration-Helper-Token": config.clientToken
+    "X-Immigration-Helper-Token": config.clientToken,
+    ...(config.appUserIdPrefix ? {
+      "X-CasePilot-App-User-Id": `${config.appUserIdPrefix}:${scenario.code}`,
+      "X-CasePilot-Request-Id": randomUUID()
+    } : {})
   },
   body: JSON.stringify(buildCasePilotAcceptanceRequest(scenario))
 });

@@ -81,6 +81,7 @@ test("resolves explicit acceptance settings before app defaults and applies safe
   const config = resolveAcceptanceConfig({
     CASEPILOT_ENDPOINT: "https://acceptance.example.test",
     CASEPILOT_CLIENT_TOKEN: "acceptance-token",
+    CASEPILOT_APP_USER_ID_PREFIX: "release-check",
     CASEPILOT_TIMEOUT_MS: "999999",
     CASEPILOT_CONCURRENCY: "99",
     EXPO_PUBLIC_AI_PROXY_URL: "https://app.example.test/api/ai",
@@ -89,6 +90,7 @@ test("resolves explicit acceptance settings before app defaults and applies safe
 
   assert.equal(config.endpoint, "https://acceptance.example.test/api/ai");
   assert.equal(config.clientToken, "acceptance-token");
+  assert.equal(config.appUserIdPrefix, "release-check");
   assert.equal(config.timeoutMs, 300_000);
   assert.equal(config.concurrency, 4);
 });
@@ -139,7 +141,12 @@ test("runs every release language once, honors concurrency, and does not log sec
     active += 1;
     maximumActive = Math.max(maximumActive, active);
     const payload = JSON.parse(options.body);
-    requests.push({ payload, token: options.headers["X-Immigration-Helper-Token"] });
+    requests.push({
+      payload,
+      token: options.headers["X-Immigration-Helper-Token"],
+      appUserId: options.headers["X-CasePilot-App-User-Id"],
+      requestId: options.headers["X-CasePilot-Request-Id"]
+    });
     await new Promise((resolve) => setImmediate(resolve));
     active -= 1;
     const chainedTurn = CASEPILOT_CHAINED_ACCEPTANCE_SCENARIO.turns
@@ -155,6 +162,7 @@ test("runs every release language once, honors concurrency, and does not log sec
     config: {
       endpoint: "https://example.test/api/ai",
       clientToken: token,
+      appUserIdPrefix: "release-check",
       timeoutMs: 5_000,
       concurrency: 3
     },
@@ -168,8 +176,10 @@ test("runs every release language once, honors concurrency, and does not log sec
   assert.ok(maximumActive <= 3);
   assert.deepEqual(new Set(requests.map(({ payload }) => payload.language)),
     new Set(CASEPILOT_RELEASE_LANGUAGE_CASES.map(({ code }) => code)));
-  for (const { payload, token: sentToken } of requests) {
+  for (const { payload, token: sentToken, appUserId, requestId } of requests) {
     assert.equal(sentToken, token);
+    assert.equal(appUserId, `release-check:${payload.language}`);
+    assert.match(requestId, /^[0-9a-f-]{36}$/i);
     assert.ok(payload.userContext.includes(payload.question));
   }
   assert.doesNotMatch(logs.join("\n"), new RegExp(token));

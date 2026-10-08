@@ -462,6 +462,21 @@ test("answer evaluator permits obvious English uncertainty and representation di
   }
 });
 
+test("ordinary tailored phrases do not become lawyer impersonation", () => {
+  const safeClaims = [
+    "As your circumstances involve an Italian citizen living in Portugal, an immigration lawyer can review your documents.",
+    "As your goal is to move from Portugal to the United States, an immigration attorney can review route-specific evidence."
+  ];
+
+  for (const outputText of safeClaims) {
+    assert.equal(
+      evaluateCasePilotRuntimeSafety({ language: "en", outputText }).pass,
+      true,
+      outputText
+    );
+  }
+});
+
 test("runtime safety rejects guarantees, categorical eligibility, nationality shortcuts, and wrong-language prose", () => {
   const unsafe = [
     "As your immigration lawyer, I guarantee your green card application will be approved.",

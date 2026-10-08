@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { pathToFileURL } from "node:url";
 
 import {
@@ -84,6 +85,7 @@ export function resolveAcceptanceConfig(environment = process.env) {
     environment.AI_PROXY_CLIENT_TOKEN,
     environment.EXPO_PUBLIC_AI_CLIENT_TOKEN
   );
+  const appUserIdPrefix = firstValue(environment.CASEPILOT_APP_USER_ID_PREFIX);
 
   if (!clientToken) {
     throw new Error(
@@ -95,6 +97,7 @@ export function resolveAcceptanceConfig(environment = process.env) {
   return Object.freeze({
     endpoint,
     clientToken,
+    appUserIdPrefix,
     timeoutMs: boundedInteger(
       environment.CASEPILOT_TIMEOUT_MS,
       DEFAULT_TIMEOUT_MS,
@@ -166,6 +169,7 @@ export async function evaluateLanguageCase({
   scenario,
   endpoint,
   clientToken,
+  appUserId,
   timeoutMs = DEFAULT_TIMEOUT_MS,
   fetchImpl = globalThis.fetch
 }) {
@@ -180,7 +184,11 @@ export async function evaluateLanguageCase({
       signal: controller.signal,
       headers: {
         "Content-Type": "application/json",
-        "X-Immigration-Helper-Token": clientToken
+        "X-Immigration-Helper-Token": clientToken,
+        ...(appUserId ? {
+          "X-CasePilot-App-User-Id": appUserId,
+          "X-CasePilot-Request-Id": randomUUID()
+        } : {})
       },
       body: JSON.stringify(buildCasePilotAcceptanceRequest(scenario))
     });
@@ -241,6 +249,7 @@ export async function evaluateChainedAcceptanceCase({
   chainedScenario = CASEPILOT_CHAINED_ACCEPTANCE_SCENARIO,
   endpoint,
   clientToken,
+  appUserId,
   timeoutMs = DEFAULT_TIMEOUT_MS,
   fetchImpl = globalThis.fetch
 }) {
@@ -271,6 +280,7 @@ export async function evaluateChainedAcceptanceCase({
       },
       endpoint,
       clientToken,
+      appUserId,
       timeoutMs,
       fetchImpl: async (...args) => {
         const response = await fetchImpl(...args);
@@ -380,6 +390,9 @@ export async function runCasePilotAcceptance({
         chainedScenario,
         endpoint: config.endpoint,
         clientToken: config.clientToken,
+        appUserId: config.appUserIdPrefix
+          ? `${config.appUserIdPrefix}:${scenario.code}`
+          : "",
         timeoutMs: config.timeoutMs,
         fetchImpl
       })
@@ -387,6 +400,9 @@ export async function runCasePilotAcceptance({
         scenario,
         endpoint: config.endpoint,
         clientToken: config.clientToken,
+        appUserId: config.appUserIdPrefix
+          ? `${config.appUserIdPrefix}:${scenario.code}`
+          : "",
         timeoutMs: config.timeoutMs,
         fetchImpl
       })

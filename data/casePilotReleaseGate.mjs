@@ -705,7 +705,10 @@ const hasLocalizedProfessionalOverclaim = (language, answer) => {
       rules.self,
       rules.role,
       rules.negative,
-      100,
+      // The self-reference must bind directly to the professional role. A
+      // wider window incorrectly treated ordinary tailoring such as "As your
+      // goal is ... an immigration lawyer can review ..." as impersonation.
+      28,
       allowsTrailingRoleNegation
     ) ||
     containsUnnegatedPair(clause, rules.certainty, rules.outcome, negativeTerms, 180) ||
