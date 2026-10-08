@@ -2862,12 +2862,22 @@ test("a timeout while reading the upstream body is classified without revealing 
 
 test("an upstream HTTP failure is not mislabeled as a citation failure", async () => {
   const answer=createAnswerService({corpusIndex:index,apiKey:"test-key",fetchImpl:async()=>
-    new Response(JSON.stringify({error:{message:"private-upstream-error"}}),{status:401})
+    new Response(JSON.stringify({error:{message:"private-upstream-error",code:"rate_limit_exceeded"}}),{status:401})
   });
   const result=await answer({question:"Can I reschedule biometrics?",language:"en"});
   assert.equal(result.body.degraded_reason,"upstream_error");
   assert.equal(result.body.upstream_status,401);
+  assert.equal(result.body.upstream_error_code,"rate_limit_exceeded");
   assert.doesNotMatch(JSON.stringify(result.body),/private-upstream-error/);
+});
+
+test("an unknown upstream error code is reduced to an allowlisted diagnostic", async () => {
+  const answer=createAnswerService({corpusIndex:index,apiKey:"test-key",fetchImpl:async()=>
+    new Response(JSON.stringify({error:{message:"private-upstream-error",code:"private_provider_detail"}}),{status:429})
+  });
+  const result=await answer({question:"Can I reschedule biometrics?",language:"en"});
+  assert.equal(result.body.upstream_error_code,"upstream_rejected");
+  assert.doesNotMatch(JSON.stringify(result.body),/private_provider_detail|private-upstream-error/);
 });
 
 test("degrades a model answer whose official citation is topically unrelated", async () => {

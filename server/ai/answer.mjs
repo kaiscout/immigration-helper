@@ -3001,6 +3001,17 @@ function safeUpstreamFailureReason(error) {
   return "upstream_error";
 }
 
+function safeUpstreamResponseCode(data) {
+  const value = String(data?.error?.code || data?.error?.type || "").trim();
+  return new Set([
+    "rate_limit_exceeded",
+    "insufficient_quota",
+    "billing_hard_limit_reached",
+    "tokens_exceeded",
+    "requests_exceeded"
+  ]).has(value) ? value : "upstream_rejected";
+}
+
 export function createAnswerService({
   corpusIndex,
   apiKey = "",
@@ -3309,6 +3320,7 @@ export function createAnswerService({
         const body = withAssistantMetadata({
           ...localFallback,
           upstream_status: openAIResponse.status,
+          ...(!openAIResponse.ok ? {upstream_error_code: safeUpstreamResponseCode(data)} : {}),
           degraded_reason: degradedReason,
           ...(degradedReason === "runtime_safety_gate" ? {
             safety_failures: [...new Set(runtimeSafety.failures)]
