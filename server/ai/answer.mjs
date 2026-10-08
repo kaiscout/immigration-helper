@@ -3021,7 +3021,10 @@ export function createAnswerService({
 
   const fetchOpenAI = async (body, { planningAttempt = false, deadline } = {}) => {
     let lastResponse;
-    const maxAttempts = planningAttempt ? 1 : 2;
+    // Planning answers are the most valuable user path and production can
+    // briefly return 429 under a small burst. Retry only transient 429/5xx
+    // responses once; successful generations are never duplicated.
+    const maxAttempts = 2;
 
     for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
       const remainingMs = deadline - Date.now();

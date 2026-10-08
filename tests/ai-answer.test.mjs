@@ -2720,7 +2720,7 @@ test("does not require citations on Markdown headings", () => {
   ), true);
 });
 
-test("uses only one upstream attempt within the planning request deadline", async () => {
+test("retries one transient planning upstream failure within the request deadline", async () => {
   let calls = 0;
   const answer = createAnswerService({
     corpusIndex: planningIndex,
@@ -2729,7 +2729,7 @@ test("uses only one upstream attempt within the planning request deadline", asyn
       calls += 1;
       return new Response(JSON.stringify({ error: { message: "Try again." } }), {
         status: 500,
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json", "Retry-After": "0.001" }
       });
     }
   });
@@ -2739,7 +2739,7 @@ test("uses only one upstream attempt within the planning request deadline", asyn
     userContext: "Citizenship: Italy. Current residence: Portugal. Goal: move to the United States."
   });
 
-  assert.equal(calls, 1);
+  assert.equal(calls, 2);
   assert.equal(result.body.degraded, true);
 });
 
