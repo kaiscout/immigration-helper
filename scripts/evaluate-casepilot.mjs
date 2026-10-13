@@ -143,6 +143,21 @@ export function buildCasePilotAcceptanceRequest(scenario) {
   });
 }
 
+export function selectAcceptanceScenarios(environment = process.env) {
+  const excludedCodes = new Set(String(environment.CASEPILOT_EXCLUDE_LANGUAGES || "")
+    .split(/[\s,]+/u)
+    .map((code) => code.trim().toLowerCase())
+    .filter(Boolean));
+  const knownCodes = new Set(CASEPILOT_RELEASE_LANGUAGE_CASES.map(({ code }) => code));
+  const unknownCodes = [...excludedCodes].filter((code) => !knownCodes.has(code));
+  if (unknownCodes.length) {
+    throw new Error(`Unknown excluded CasePilot language code(s): ${unknownCodes.join(", ")}.`);
+  }
+  const scenarios = CASEPILOT_RELEASE_LANGUAGE_CASES.filter(({ code }) => !excludedCodes.has(code));
+  if (!scenarios.length) throw new Error("The CasePilot acceptance run cannot exclude every language.");
+  return scenarios;
+}
+
 function transportFailure(scenario, startedAt, failure) {
   return Object.freeze({
     language: scenario.code,
@@ -436,7 +451,13 @@ export async function runCasePilotAcceptance({
 }
 
 export async function main() {
-  const result = await runCasePilotAcceptance();
+  const scenarios = selectAcceptanceScenarios();
+  const result = await runCasePilotAcceptance({
+    scenarios,
+    chainedScenario: scenarios.some(({ code }) => code === CASEPILOT_CHAINED_ACCEPTANCE_SCENARIO.code)
+      ? CASEPILOT_CHAINED_ACCEPTANCE_SCENARIO
+      : null
+  });
   if (!result.pass) process.exitCode = 1;
 }
 

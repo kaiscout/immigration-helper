@@ -11,6 +11,7 @@ import {
   evaluateChainedAcceptanceCase,
   evaluateLanguageCase,
   resolveAcceptanceConfig,
+  selectAcceptanceScenarios,
   runCasePilotAcceptance
 } from "../scripts/evaluate-casepilot.mjs";
 
@@ -123,6 +124,22 @@ test("rejects missing credentials and embedded URL credentials", () => {
     CASEPILOT_ENDPOINT: "https://user:password@example.test/api/ai",
     CASEPILOT_CLIENT_TOKEN: "token"
   }), /embedded credentials/i);
+});
+
+test("can resume a funded live matrix without repeating already-passed languages", () => {
+  const remaining = selectAcceptanceScenarios({ CASEPILOT_EXCLUDE_LANGUAGES: "en, es" });
+  assert.equal(remaining.length, 28);
+  assert.ok(!remaining.some(({ code }) => ["en", "es"].includes(code)));
+  assert.throws(
+    () => selectAcceptanceScenarios({ CASEPILOT_EXCLUDE_LANGUAGES: "xx" }),
+    /unknown excluded/i
+  );
+  assert.throws(
+    () => selectAcceptanceScenarios({
+      CASEPILOT_EXCLUDE_LANGUAGES: CASEPILOT_RELEASE_LANGUAGE_CASES.map(({ code }) => code).join(",")
+    }),
+    /cannot exclude every language/i
+  );
 });
 
 test("builds the same request context shape as CasePilot and preserves language", () => {
