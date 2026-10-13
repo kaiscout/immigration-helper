@@ -19,6 +19,9 @@ const response = await fetch(config.endpoint, {
     ...(config.appUserIdPrefix ? {
       "X-CasePilot-App-User-Id": `${config.appUserIdPrefix}:${scenario.code}`,
       "X-CasePilot-Request-Id": randomUUID()
+    } : {}),
+    ...(config.testTraceSession ? {
+      "X-CasePilot-Test-Session": config.testTraceSession
     } : {})
   },
   body: JSON.stringify(buildCasePilotAcceptanceRequest(scenario))
@@ -33,15 +36,18 @@ const evaluation = evaluateCasePilotReleaseAnswer({
   degraded: body.degraded === true || body.answer_profile?.degraded === true,
   expectedFacts: scenario.facts
 });
-console.log(JSON.stringify({
+const summary = {
   status: response.status,
   durationMs: Date.now() - started,
   evaluation,
-  answer: body.output_text,
-  sources: body.sources,
   degradedReason: body.degraded_reason,
   upstreamErrorCode: body.upstream_error_code,
   safetyFailures: body.safety_failures,
   upstreamStatus: body.upstream_status
-}, null, 2));
+};
+if (process.env.CASEPILOT_SMOKE_SUMMARY_ONLY !== "true") {
+  summary.answer = body.output_text;
+  summary.sources = body.sources;
+}
+console.log(JSON.stringify(summary, null, 2));
 if (!response.ok || !evaluation.pass) process.exitCode = 1;

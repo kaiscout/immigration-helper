@@ -373,7 +373,7 @@ Case-planning contract for this request:
 - Research current official sources before making nationality-, residence-, program-, deadline-, or process-specific claims. Diversity Visa chargeability generally depends on country of birth, so do not infer it from citizenship or residence.
 - Use the supplied citizenship and residence in live research when they could affect treaty classifications or consular processing. Verify those implications on current State Department pages before mentioning them, and keep them conditional on the missing qualifying facts.
 - Do not let an unrelated saved checklist replace or distract from the user's current planning question.
-- End with a section containing exactly three concrete next actions, prioritized for this person.
+- End with a section containing exactly three concrete next actions, prioritized for this person. Put each action on its own line and prefix the lines with the literal ASCII markers "1. ", "2. ", and "3. " in that order, even when the answer is in another language. Do not use bullets, spelled-out ordinals, or localized numerals for this final action list.
 - Then ask exactly one high-value follow-up question that most efficiently narrows the plausible route.
 - Keep the result sophisticated but human and concise: explain the reasoning and tradeoffs in plain language, not as a legal memo.
 - For an initial broad question, aim for 150-250 words and at most three relevant branches, three brief next actions, and one focused question. Use equivalent natural length and detail in every requested language, not an English word count imposed on another writing system. Detailed follow-ups may be longer when needed to answer the actual question accurately. Do not front-load detailed category rules, numeric thresholds, form lists, or filing procedures before the person's basis is known. An intake question is a conversation starter, not a survey of every category.
@@ -3254,7 +3254,7 @@ export function createAnswerService({
       let reviewedOutcome;
       if (openAIResponse.ok && outputText && !incompleteResponse) {
         const reviewed = await reviewOfficialEvidence({
-          apiKey, model: reviewModel || generationModel, question, userFacts: suppliedUserFacts, conversation, language: language.code, corpusIndex,
+          apiKey, model: reviewModel || generationModel, fallbackModel: generationModel, question, userFacts: suppliedUserFacts, conversation, language: language.code, corpusIndex,
           referenceResults: localResults,
           researchUrls: officialReviewUrls,
           candidateWebSources,
@@ -3294,7 +3294,7 @@ export function createAnswerService({
               ].includes(code));
             if (!retryableReviewedSafetyFailure) break;
             const repaired = await reviewOfficialEvidence({
-              apiKey, model: reviewModel || generationModel, question, userFacts: suppliedUserFacts, conversation, language: language.code, corpusIndex,
+              apiKey, model: reviewModel || generationModel, fallbackModel: generationModel, question, userFacts: suppliedUserFacts, conversation, language: language.code, corpusIndex,
               referenceResults: localResults,
               researchUrls: officialReviewUrls,
               candidateWebSources,

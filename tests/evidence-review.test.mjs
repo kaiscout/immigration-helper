@@ -439,8 +439,9 @@ test("honest full verification inability is explicitly unavailable, not answered
 test("evidence review retries one completed but incoherent verdict without refetching sources", async () => {
   let apiCalls=0;
   let sourceCalls=0;
+  const requestedModels=[];
   const result=await reviewOfficialEvidence({
-    apiKey:"test",model:"test",question:"What are visa categories?",language:"en",
+    apiKey:"test",model:"test-review",fallbackModel:"test-generation",question:"What are visa categories?",language:"en",
     sections,timeoutMs:30_000,
     sourceFetchImpl:async()=>{
       sourceCalls+=1;
@@ -448,8 +449,9 @@ test("evidence review retries one completed but incoherent verdict without refet
         headers:{"Content-Type":"text/html"}
       });
     },
-    fetchImpl:async()=>{
+    fetchImpl:async(_target,options)=>{
       apiCalls+=1;
+      requestedModels.push(JSON.parse(options.body).model);
       const responseFixture=apiCalls===1
         ? fixture({approved:false})
         : {...fixture(),output:fixture().output.slice(1)};
@@ -458,6 +460,7 @@ test("evidence review retries one completed but incoherent verdict without refet
   });
   assert.equal(apiCalls,2);
   assert.equal(sourceCalls,1);
+  assert.deepEqual(requestedModels,["test-review","test-generation"]);
   assert.equal(result.sections[0].evidence.status,"supported");
 });
 

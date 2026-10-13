@@ -86,6 +86,10 @@ export function resolveAcceptanceConfig(environment = process.env) {
     environment.AI_PROXY_CLIENT_TOKEN
   );
   const appUserIdPrefix = firstValue(environment.CASEPILOT_APP_USER_ID_PREFIX);
+  const testTraceSession = firstValue(
+    environment.CASEPILOT_TEST_TRACE_SESSION,
+    environment.EXPO_PUBLIC_CASEPILOT_TEST_TRACE_SESSION
+  );
 
   if (!clientToken) {
     throw new Error(
@@ -98,6 +102,7 @@ export function resolveAcceptanceConfig(environment = process.env) {
     endpoint,
     clientToken,
     appUserIdPrefix,
+    testTraceSession,
     timeoutMs: boundedInteger(
       environment.CASEPILOT_TIMEOUT_MS,
       DEFAULT_TIMEOUT_MS,
@@ -170,6 +175,7 @@ export async function evaluateLanguageCase({
   endpoint,
   clientToken,
   appUserId,
+  testTraceSession,
   timeoutMs = DEFAULT_TIMEOUT_MS,
   fetchImpl = globalThis.fetch
 }) {
@@ -188,7 +194,8 @@ export async function evaluateLanguageCase({
         ...(appUserId ? {
           "X-CasePilot-App-User-Id": appUserId,
           "X-CasePilot-Request-Id": randomUUID()
-        } : {})
+        } : {}),
+        ...(testTraceSession ? { "X-CasePilot-Test-Session": testTraceSession } : {})
       },
       body: JSON.stringify(buildCasePilotAcceptanceRequest(scenario))
     });
@@ -250,6 +257,7 @@ export async function evaluateChainedAcceptanceCase({
   endpoint,
   clientToken,
   appUserId,
+  testTraceSession,
   timeoutMs = DEFAULT_TIMEOUT_MS,
   fetchImpl = globalThis.fetch
 }) {
@@ -281,6 +289,7 @@ export async function evaluateChainedAcceptanceCase({
       endpoint,
       clientToken,
       appUserId,
+      testTraceSession,
       timeoutMs,
       fetchImpl: async (...args) => {
         const response = await fetchImpl(...args);
@@ -393,6 +402,7 @@ export async function runCasePilotAcceptance({
         appUserId: config.appUserIdPrefix
           ? `${config.appUserIdPrefix}:${scenario.code}`
           : "",
+        testTraceSession: config.testTraceSession,
         timeoutMs: config.timeoutMs,
         fetchImpl
       })
@@ -403,6 +413,7 @@ export async function runCasePilotAcceptance({
         appUserId: config.appUserIdPrefix
           ? `${config.appUserIdPrefix}:${scenario.code}`
           : "",
+        testTraceSession: config.testTraceSession,
         timeoutMs: config.timeoutMs,
         fetchImpl
       })
