@@ -1214,6 +1214,23 @@ test("planning runtime gate rejects a safe but incomplete localized route reply"
   assert.ok(rejected.failures.includes("planning_missing_next_actions"));
 });
 
+test("planning runtime gate accepts a complete Greek plan ending with the Greek question mark", () => {
+  const complete = [
+    "Για έναν Ιταλό που ζει στην Πορτογαλία, η προσωρινή παραμονή και η μόνιμη διαμονή είναι διαφορετικοί δρόμοι.",
+    "Τα επόμενα τρία βήματα",
+    "1. Καθορίστε αν θέλετε προσωρινή ή μόνιμη μετακίνηση.\n" +
+      "2. Εντοπίστε πιθανή βάση εργασίας, οικογένειας, σπουδών ή επένδυσης.\n" +
+      "3. Ελέγξτε την κατάλληλη κατηγορία στις επίσημες πηγές.",
+    "Ποια βάση ταιριάζει καλύτερα στην περίπτωσή σας;"
+  ].join("\n\n");
+  assert.equal(evaluateCasePilotRuntimeSafety({
+    language: "el",
+    outputText: complete,
+    question: "Θέλω να μετακομίσω στις Ηνωμένες Πολιτείες.",
+    requirePlanningActions: true
+  }).pass, true);
+});
+
 test("echo safety covers short questions and repeated low-diversity filler", () => {
   const englishScenario = CASEPILOT_RELEASE_LANGUAGE_CASES.find(({ code }) => code === "en");
   const englishEcho = `${englishScenario.planning} ${Array(10).fill("visa").join(" ")}.`;

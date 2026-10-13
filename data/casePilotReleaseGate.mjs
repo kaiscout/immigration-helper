@@ -1241,8 +1241,8 @@ export const CASEPILOT_ROUTE_ANALYSIS_TERMS_BY_LANGUAGE = Object.freeze({
   et: Object.freeze(["tee", "teed", "võimalus", "viisa", "roheline kaart", "avaldus", "sobivus", "kategooria", "sponsor"]),
   fi: Object.freeze(["reitti", "reitit", "vaihtoehto", "viisumi", "green card", "vetoomus", "kelpoisuus", "luokka", "sponsori"]),
   de: Object.freeze(["weg", "wege", "einwanderungsoption", "visum", "green card", "antrag", "berechtigung", "kategorie", "sponsor"]),
-  el: Object.freeze(["διαδρομή", "διαδρομές", "οδό", "μετανάστευσης", "επιλογή", "βίζα", "πράσινη κάρτα", "αίτηση", "επιλεξιμότητα", "κατηγορία", "κατηγορίες", "χορηγός"]),
-  hu: Object.freeze(["útvonal", "útvonalak", "lehetőség", "vízum", "zöldkártya", "petíció", "jogosultság", "kategória", "szponzor"]),
+  el: Object.freeze(["διαδρομή", "διαδρομές", "οδό", "δρόμος", "δρόμοι", "κατεύθυνση", "εναλλακτική", "μετανάστευσης", "παραμονή", "διαμονή", "επιλογή", "βίζα", "πράσινη κάρτα", "αίτηση", "επιλεξιμότητα", "κατηγορία", "κατηγορίες", "χορηγός"]),
+  hu: Object.freeze(["út", "utak", "útvonal", "útvonalak", "irány", "irányok", "bevándorlási", "letelepedés", "tartózkodás", "lehetőség", "vízum", "zöldkártya", "petíció", "jogosultság", "kategória", "szponzor"]),
   ga: Object.freeze(["bealach", "bealaí", "rogha", "víosa", "cárta glas", "achainí", "incháilitheacht", "catagóir", "urraitheoir"]),
   lv: Object.freeze(["ceļš", "ceļi", "iespēja", "vīza", "zaļā karte", "petīcija", "atbilstība", "kategorija", "sponsors"]),
   lt: Object.freeze(["kelias", "keliai", "galimybė", "viza", "žalioji korta", "peticija", "tinkamumas", "kategorija", "rėmėjas"]),
@@ -1320,13 +1320,20 @@ const planningActionMarker = (line) => {
 };
 
 const hasCompletePlanningStructure = (language, answer) => {
+  const code = String(language || "en").toLowerCase().split(/[-_]/)[0];
   const markers = new Set(String(answer || "")
     .split(/\r?\n/u)
     .map(planningActionMarker)
     .filter(Boolean));
+  // Modern Greek uses a semicolon-shaped question mark. Treat it as a
+  // question ending only for Greek; in every other locale a trailing semicolon
+  // remains an incomplete statement.
+  const hasClosingQuestion = code === "el"
+    ? /[?？؟;]\s*$/u.test(String(answer || "").trim())
+    : /[?？؟]\s*$/u.test(String(answer || "").trim());
   return markers.size === 3 &&
     hasRouteAnalysisSignal(language, answer) &&
-    /[?？؟]\s*$/u.test(String(answer || "").trim());
+    hasClosingQuestion;
 };
 
 const requiresCitation = (section) => {
