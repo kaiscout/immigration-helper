@@ -3278,15 +3278,21 @@ export function createAnswerService({
           }
           citationFailure = false;
 
-          const retryableReviewedSafetyFailure =
-            (visitorResearchRequired || planningQuestion) &&
-            runtimeSafety.failures.length > 0 &&
-            runtimeSafety.failures.every(code => [
-              "lawyer_impersonation_or_guarantee",
-              "localized_lawyer_impersonation_or_guarantee",
-              "planning_missing_next_actions"
-            ].includes(code));
-          if (retryableReviewedSafetyFailure) {
+          // A reviewer can occasionally preserve a safe but incomplete plan or
+          // rephrase an overclaim into another flagged form. Permit two bounded
+          // repair passes on the already-generated, already-sourced answer. This
+          // spends no second full generation call and only runs after a failed
+          // planning/visitor safety gate.
+          for (let safetyRepairAttempt = 0; safetyRepairAttempt < 2; safetyRepairAttempt += 1) {
+            const retryableReviewedSafetyFailure =
+              (visitorResearchRequired || planningQuestion) &&
+              runtimeSafety.failures.length > 0 &&
+              runtimeSafety.failures.every(code => [
+                "lawyer_impersonation_or_guarantee",
+                "localized_lawyer_impersonation_or_guarantee",
+                "planning_missing_next_actions"
+              ].includes(code));
+            if (!retryableReviewedSafetyFailure) break;
             const repaired = await reviewOfficialEvidence({
               apiKey, model: reviewModel || generationModel, question, userFacts: suppliedUserFacts, conversation, language: language.code, corpusIndex,
               referenceResults: localResults,
@@ -3297,20 +3303,19 @@ export function createAnswerService({
               sections: answerSections, timeoutMs: 118_000 - (Date.now() - requestStartedAt), fetchImpl, sourceFetchImpl,
               officialPageCache
             });
-            if (repaired) {
-              reviewedOutcome = repaired.outcome;
-              answerSections = repaired.sections.map(section => ({
-                ...section,
-                text: extractOutputText({output_text: section.text})
-              }));
-              outputText = answerSections.map(section => section.text).join("\n\n");
-              runtimeSafety = evaluateCasePilotRuntimeSafety({
-                language: language.code, outputText, question,
-                requirePlanningActions: planningQuestion
-              });
-              if (containsSensitiveIdentifier(privacyScanText(outputText, publicAgencyEmails))) {
-                runtimeSafety = {pass: false, failures: [...runtimeSafety.failures, "sensitive_identifier_in_output"]};
-              }
+            if (!repaired) break;
+            reviewedOutcome = repaired.outcome;
+            answerSections = repaired.sections.map(section => ({
+              ...section,
+              text: extractOutputText({output_text: section.text})
+            }));
+            outputText = answerSections.map(section => section.text).join("\n\n");
+            runtimeSafety = evaluateCasePilotRuntimeSafety({
+              language: language.code, outputText, question,
+              requirePlanningActions: planningQuestion
+            });
+            if (containsSensitiveIdentifier(privacyScanText(outputText, publicAgencyEmails))) {
+              runtimeSafety = {pass: false, failures: [...runtimeSafety.failures, "sensitive_identifier_in_output"]};
             }
           }
         }

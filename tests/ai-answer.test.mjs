@@ -1384,7 +1384,12 @@ test("configures the exact Italian and Portugal scenario for researched personal
       if (body.text?.format?.name === "official_evidence_review") reviewRequestBody = body;
       else requestBody ||= body;
       return new Response(JSON.stringify(withVerifiedFixtureReview(completedCitedResponse(
-        "Your Italian citizenship and residence in Portugal are important facts, but the best route depends on your goal and immigration basis."
+        "Your Italian citizenship and residence in Portugal are important facts, but the best temporary or permanent route depends on your goal and immigration basis.\n\n" +
+        "Your next three actions\n\n" +
+        "1. Decide whether the move should be temporary or permanent.\n" +
+        "2. Identify a possible family, work, study, business, or achievement basis.\n" +
+        "3. Gather the facts needed to compare the plausible routes.\n\n" +
+        "Which basis best fits you—employment, family, study, business, or something else?"
       ),options)), { status: 200, headers: { "Content-Type": "application/json" } });
     }
   });

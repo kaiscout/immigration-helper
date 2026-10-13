@@ -149,7 +149,7 @@ export async function reviewOfficialEvidence({apiKey, model, question, userFacts
         ? "Rewrite minimally so the answer cannot read as lawyer impersonation, a promise, or a categorical prediction of this user's personal approval or eligibility. A verified class-wide government restriction may still be stated plainly and precisely. Do not weaken, omit, or reverse that verified rule."
         : "",
       safetyRepairFailures.includes("planning_missing_next_actions")
-        ? "The planning answer has an empty or orphaned next-actions heading. Repair that section so it contains exactly three concise, concrete actions supported by the checked evidence or limited to safe organizational steps, followed by the single focused question. Never leave a heading without its promised actions."
+        ? "The planning answer is incomplete. Repair it so it includes a concise comparison of the plausible temporary and permanent route types supported by the user's facts, then exactly three numbered, concrete actions supported by the checked evidence or limited to safe organizational steps, followed by exactly one focused question. Never leave a heading without its promised actions."
         : ""
     ].filter(Boolean).join(" ");
     const deadline = Date.now() + timeoutMs;

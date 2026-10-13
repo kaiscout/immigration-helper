@@ -82,8 +82,8 @@ export function resolveAcceptanceConfig(environment = process.env) {
   ));
   const clientToken = firstValue(
     environment.CASEPILOT_CLIENT_TOKEN,
-    environment.AI_PROXY_CLIENT_TOKEN,
-    environment.EXPO_PUBLIC_AI_CLIENT_TOKEN
+    environment.EXPO_PUBLIC_AI_CLIENT_TOKEN,
+    environment.AI_PROXY_CLIENT_TOKEN
   );
   const appUserIdPrefix = firstValue(environment.CASEPILOT_APP_USER_ID_PREFIX);
 

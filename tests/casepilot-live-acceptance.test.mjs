@@ -95,16 +95,26 @@ test("resolves explicit acceptance settings before app defaults and applies safe
   assert.equal(config.concurrency, 4);
 });
 
-test("uses the existing app endpoint and server token environment variables", () => {
+test("uses the release app token before a server-only token", () => {
+  const config = resolveAcceptanceConfig({
+    EXPO_PUBLIC_AI_PROXY_URL: "https://app.example.test/api/ai",
+    EXPO_PUBLIC_AI_CLIENT_TOKEN: "release-token",
+    AI_PROXY_CLIENT_TOKEN: "server-token"
+  });
+
+  assert.equal(config.endpoint, "https://app.example.test/api/ai");
+  assert.equal(config.clientToken, "release-token");
+  assert.equal(config.concurrency, 2);
+  assert.equal(config.timeoutMs, 135_000);
+});
+
+test("falls back to the server token when no release app token is configured", () => {
   const config = resolveAcceptanceConfig({
     EXPO_PUBLIC_AI_PROXY_URL: "https://app.example.test/api/ai",
     AI_PROXY_CLIENT_TOKEN: "server-token"
   });
 
-  assert.equal(config.endpoint, "https://app.example.test/api/ai");
   assert.equal(config.clientToken, "server-token");
-  assert.equal(config.concurrency, 2);
-  assert.equal(config.timeoutMs, 135_000);
 });
 
 test("rejects missing credentials and embedded URL credentials", () => {

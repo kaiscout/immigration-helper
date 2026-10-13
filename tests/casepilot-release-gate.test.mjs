@@ -1200,6 +1200,20 @@ test("planning runtime gate rejects an orphaned next-actions heading", () => {
   }).pass, true);
 });
 
+test("planning runtime gate rejects a safe but incomplete localized route reply", () => {
+  const incomplete =
+    "أنت مواطن إيطالي تقيم في البرتغال وتريد الانتقال إلى الولايات المتحدة. " +
+    "ابدأ بتحديد ما إذا كان هدفك إقامة دائمة أم دخول مؤقت. " +
+    "ما الأساس الأقرب لوضعك: قريب مؤهل، فرصة عمل، دراسة، مشروع أو استثمار؟";
+  const rejected = evaluateCasePilotRuntimeSafety({
+    language: "ar",
+    outputText: incomplete,
+    question: "أنا مواطن إيطالي أعيش في البرتغال وأريد الانتقال إلى الولايات المتحدة.",
+    requirePlanningActions: true
+  });
+  assert.ok(rejected.failures.includes("planning_missing_next_actions"));
+});
+
 test("echo safety covers short questions and repeated low-diversity filler", () => {
   const englishScenario = CASEPILOT_RELEASE_LANGUAGE_CASES.find(({ code }) => code === "en");
   const englishEcho = `${englishScenario.planning} ${Array(10).fill("visa").join(" ")}.`;

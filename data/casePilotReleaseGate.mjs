@@ -1307,6 +1307,28 @@ const hasOrphanPlanningActionHeading = (answer) => {
   });
 };
 
+const planningActionMarker = (line) => {
+  const cleaned = String(line || "")
+    .trim()
+    .replace(/^(?:[-*#]\s*)+/u, "")
+    .replace(/^(?:\*\*|__)/u, "");
+  const match = cleaned.match(/^\(?([123١٢٣۱۲۳१२३১২৩一二三])\)?\s*[.)、．:：-]/u);
+  if (!match) return 0;
+  if (/[1١۱१১一]/u.test(match[1])) return 1;
+  if (/[2٢۲२২二]/u.test(match[1])) return 2;
+  return 3;
+};
+
+const hasCompletePlanningStructure = (language, answer) => {
+  const markers = new Set(String(answer || "")
+    .split(/\r?\n/u)
+    .map(planningActionMarker)
+    .filter(Boolean));
+  return markers.size === 3 &&
+    hasRouteAnalysisSignal(language, answer) &&
+    /[?？؟]\s*$/u.test(String(answer || "").trim());
+};
+
 const requiresCitation = (section) => {
   const text = String(section?.text || "").trim();
   return Boolean(text) && !isStructurallyHeading(section) && !isPureQuestionSection(section) &&
@@ -1362,7 +1384,8 @@ export function evaluateCasePilotRuntimeSafety({
   if (isLowDiversityNonAnswer(answer)) {
     failures.push("low_diversity_non_answer");
   }
-  if (requirePlanningActions && hasOrphanPlanningActionHeading(answer)) {
+  if (requirePlanningActions &&
+    (hasOrphanPlanningActionHeading(answer) || !hasCompletePlanningStructure(language, answer))) {
     failures.push("planning_missing_next_actions");
   }
 
