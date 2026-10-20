@@ -1,5 +1,7 @@
 # Production AI Deployment
 
+This guide describes the existing service configuration. Run commands from the repository root; consult the [release checklist](../../store-submission/release-checklist.md) before a separate deployment. Return to the [project overview](../../README.md).
+
 The production mobile app calls a Render-hosted Node service. The OpenAI API key
 must exist only in Render and must never use an `EXPO_PUBLIC_` prefix.
 

@@ -1,4 +1,7 @@
-Immigration Helper project notes
+Immigration Helper historical project notes
+
+Preserved as development history. Use ../../README.md for current setup and
+../development/ai-service.md for the maintained AI-service guide.
 
 Install and run:
 npm install

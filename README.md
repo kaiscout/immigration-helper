@@ -1,10 +1,22 @@
-# CasePilot AI for Immigration Helper
+# Immigration Helper · CasePilot AI
 
 A privacy-first, multilingual React Native product that helps people organize common U.S. immigration workflows and ask general questions grounded in official sources.
 
 CasePilot is the in-app AI experience inside **Immigration Helper**. The product combines guided checklists, local reminders, a private on-device file vault, and official USCIS resources in one mobile-first workspace. It is built by [Deniz Izci](https://denizci.dev).
 
 [Portfolio](https://denizci.dev) · [Support](https://kaiscout.github.io/immigration-helper/support.html) · [Privacy policy](https://kaiscout.github.io/immigration-helper/privacy-policy.html)
+
+## Review the project
+
+Start with the screenshots below, then follow a complete request through [the mobile advisor](screens/AIAdvisorScreen.js), [the answer service](server/ai/answer.mjs), and [the evidence reviewer](server/ai/evidence-review.mjs). [Automated checks](https://github.com/kaiscout/immigration-helper/actions/workflows/ci.yml) exercise the application without production credentials or paid AI requests.
+
+| Engineering focus | Source to inspect |
+| --- | --- |
+| Application composition and navigation | [App.js](App.js), [screens/](screens/) |
+| Grounded answers and evidence validation | [server/ai/](server/ai/), [server/uscis/](server/uscis/) |
+| Consent, identifier filtering, and private files | [data/aiConsent.js](data/aiConsent.js), [data/sensitiveIdentifiers.js](data/sensitiveIdentifiers.js), [data/fileVaultModel.mjs](data/fileVaultModel.mjs) |
+| Localization and subscription decisions | [i18n/](i18n/), [data/subscriptionCore.mjs](data/subscriptionCore.mjs) |
+| Behavioral verification | [tests/](tests/) |
 
 ## Product tour
 
@@ -65,19 +77,20 @@ The OpenAI API key stays on the server. The client sends online AI requests only
 
 ## Testing
 
-The project includes **108 automated tests across 12 files**. Coverage focuses on AI grounding and citation behavior, multilingual intent routing, sensitive-data rejection, privacy consent, File Vault validation, subscription state, localized content parity, and USCIS service configuration.
+Coverage focuses on AI grounding and citation behavior, multilingual intent routing, sensitive-data rejection, privacy consent, File Vault validation, subscription state, localized content parity, and USCIS service configuration. The test runner and CI report the current counts, rather than a separately maintained number in this document.
 
 Run the main checks before a build:
 
 ```bash
-npm test
-npm run lint
-npx expo-doctor
+npm run verify
+npm run build:check
 ```
 
 ## Run locally
 
-1. Install dependencies.
+Use Node.js 24 and npm. The mobile application targets Expo SDK 57 and React Native 0.86; exact versions are recorded in [package.json](package.json) and the lockfile.
+
+1. Install the locked dependencies.
 
    ```bash
    npm ci
@@ -91,7 +104,24 @@ npx expo-doctor
    npm run web
    ```
 
-For native development, run `npm start` and open the project with an Expo SDK 54-compatible client. Production build and store-submission notes live in [`store-submission/`](store-submission/), while backend configuration is documented in [`USCIS_AI_SETUP.md`](USCIS_AI_SETUP.md) and [`PRODUCTION_AI_DEPLOYMENT.md`](PRODUCTION_AI_DEPLOYMENT.md).
+For native development, run `npm start` with a compatible SDK 57 development client. Native purchase, restore, notification, and device-permission behavior requires a real device and the appropriate development or store build. The checked-in [release checklist](store-submission/release-checklist.md) distinguishes source verification from remaining store and device checks.
+
+`build:check` produces an unsigned iOS JavaScript/assets export in an ignored local directory. It verifies bundling; it does not sign an app, submit a store build, or exercise live billing or AI providers.
+
+## Repository guide
+
+The active entry point is `index.js` → `App.js` → `screens/`. Navigation uses React Navigation. The Expo Router starter screens are not part of this application.
+
+- `components/` — shared mobile controls.
+- `data/` — workflow definitions, client services, privacy rules, and testable domain logic.
+- `server/` — HTTP boundary, AI/evidence services, official-source retrieval, and isolated production runtime dependencies.
+- `i18n/` — interface resources for all supported languages.
+- `scripts/` — development, corpus maintenance, and explicitly invoked evaluation tools.
+- `docs/` — technical guides, release history, and the GitHub Pages support/privacy documents.
+- `store-submission/` — native release checklist, review materials, and product screenshots.
+- `tests/` — deterministic unit and integration checks using synthetic inputs and mocked providers.
+
+See the [documentation index](docs/README.md) for development, deployment, and release references. Local environment files, generated exports, and personal working output stay outside version control.
 
 ## Privacy and scope
 

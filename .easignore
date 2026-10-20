@@ -5,6 +5,9 @@ node_modules/
 .expo/
 dist/
 web-build/
+/.release-export-*/
+/.codex-web-dist/
+/output/
 expo-env.d.ts
 
 # Native
@@ -56,6 +59,3 @@ app-example
 /Dockerfile
 /.dockerignore
 /render.yaml
-/USCIS_AI_SETUP.md
-/PRODUCTION_AI_DEPLOYMENT.md
-/README_UPGRADE.txt

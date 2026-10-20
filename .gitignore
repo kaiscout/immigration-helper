@@ -9,6 +9,8 @@ dist/
 web-build/
 expo-env.d.ts
 /.release-export-*/
+/.codex-web-dist/
+/output/
 
 # Native
 .kotlin/

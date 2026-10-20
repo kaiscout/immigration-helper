@@ -1,5 +1,7 @@
 # USCIS AI Knowledge Service
 
+Run the commands in this guide from the repository root. Return to the [project overview](../../README.md).
+
 The app now supports a server-side USCIS information assistant with two official-source layers:
 
 1. Live OpenAI web search restricted to official U.S. immigration agencies.
